@@ -1,0 +1,2 @@
+# AMO client RPC specification
+
