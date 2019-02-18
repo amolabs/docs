@@ -9,7 +9,7 @@ JSONRPC doesn't support number expression. e.g. 300 → "300"
 
 Data in tags are encoded by base64.
 
-## transfer
+### transfer
 
 1. Message Type
 
@@ -56,7 +56,7 @@ Data in tags are encoded by base64.
     }
 ```
 
-## purchase
+### purchase
 
 1. Message Type
 
