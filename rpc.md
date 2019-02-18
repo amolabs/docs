@@ -144,7 +144,7 @@ Data in tags are encoded by base64.
 
 ```JSON
         params : {
-          "address": "aH2JdDUP5NoFmeEQEqDREZnkmCh8V7co7y"  
+          "address": "aH2JdDUP5NoFmeEQEqDREZnkmCh8V7co7y", 
           "dataID": "F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F"
         }
 ```
