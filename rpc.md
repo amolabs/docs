@@ -11,7 +11,7 @@ Data in tags are encoded by base64.
 
 ## Blockchain State
 
-### getBalance
+### get_balance
 
 1. Parameters
 
@@ -29,7 +29,7 @@ Data in tags are encoded by base64.
 
 ```Shell
     // Request
-    curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"getBalance","params":{"address":"aH2JdDUP5NoFmeEQEqDREZnkmCh8V7co7y"}}' localhost:26657
+    curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"get_balance","params":{"address":"aH2JdDUP5NoFmeEQEqDREZnkmCh8V7co7y"}}' localhost:26657
     
     // Result
     {
@@ -49,7 +49,7 @@ Data in tags are encoded by base64.
     }
 ```
 
-### uploadData
+### upload_data
 
 1. Parameters
 
@@ -70,7 +70,7 @@ Data in tags are encoded by base64.
 
 ```Shell
     // Request
-    curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"uploadData","params":{"dataID":"F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F","info":"Total mileage of all taxis in Newyork by 2018."}}' localhost:26657
+    curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"upload_data","params":{"dataID":"F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F","info":"Total mileage of all taxis in Newyork by 2018."}}' localhost:26657
     
     // Result
     {
@@ -92,7 +92,7 @@ Data in tags are encoded by base64.
     }
 ```
 
-### showDataInfoById
+### show_data_info_by_id
 
 1. Parameters
 
@@ -112,7 +112,7 @@ Data in tags are encoded by base64.
 
 ```Shell
     // Request
-    curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"getDataInfoById","params":{"dataID":"F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F"}}' localhost:26657
+    curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"show_data_info_by_id","params":{"dataID":"F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F"}}' localhost:26657
     
     // Result
     {
@@ -138,7 +138,7 @@ Data in tags are encoded by base64.
     }
 ```
 
-### requestDataPurchaseById
+### request_data_purchase_by_id
 
 1. Parameters
 
@@ -157,7 +157,7 @@ Data in tags are encoded by base64.
 
 ```Shell
     // Request
-    curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"requestDataPurchaseById","params":{"address": "aH2JdDUP5NoFmeEQEqDREZnkmCh8V7co7y","dataID":"F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F"}}' localhost:26657
+    curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"request_data_purchase_by_id","params":{"address": "aH2JdDUP5NoFmeEQEqDREZnkmCh8V7co7y","dataID":"F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F"}}' localhost:26657
     
     // Result
     {
@@ -185,10 +185,10 @@ Data in tags are encoded by base64.
 ```
 
 `To-do`
-### revertDataPurchaseById
-### grantDataPurchaseById
-### grantDataPurchaseByAddress
-### showDataUsageById
+### revert_data_purchase_by_id
+### grant_data_purchase_by_id
+### grant_data_purchase_by_address
+### show_data_usage_by_id
 
 
 ## Blockchain Operations
