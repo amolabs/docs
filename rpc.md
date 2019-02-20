@@ -54,19 +54,19 @@ Data in tags are encoded by base64.
 1. Parameters
 
 ```JSON
-        params : {
+        params: {
           "dataID": "F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F",
           "ownerID": "aH2JdDUP5NoFmeEQEqDREZnkmCh8V7co7y",
           "key": "",
-          "info": [
-            "description":"Total mileage of all taxis in Newyork by 2018.",
+          "info":{
+            "description": "Total mileage of all taxis in Newyork by 2018.",
             "price":"3000",
-            "expCondition": [
-              "due_date":"2020-12-31 23:59",
-              "due_count":"10",
-              "current_count":"0"
-            ]
-          ]
+            "expCondition":{
+              "due_date": "2020-12-31 23:59",
+              "due_count": "10",
+              "current_count": "0"
+            }
+          }
         }
 ```
 
@@ -132,19 +132,19 @@ Data in tags are encoded by base64.
           "tags": [
             {
               "key": "F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F=", # aaaaa
-              "value": [
+              "value": {
                 "ownerID": "aH2JdDUP5NoFmeEQEqDREZnkmCh8V7co7y",
                 "key": "",
-                "info": [
+                "info": {
                   "description":"Total mileage of all taxis in Newyork by 2018.",
                   "price":"3000",
-                  "expCondition": [
+                  "expCondition": {
                     "due_date":"2020-12-31 23:59",
                     "due_count":"10",
                     "current_count":"2"
-                  ]
-                ]
-              ]
+                  }
+                }
+              }
             }
           ]
         },
@@ -184,10 +184,10 @@ Data in tags are encoded by base64.
         "deliver_tx": {
           "tags": [
             {
-              "key": [
+              "key": {
                 "address": "aH2JdDUP5NoFmeEQEqDREZnkmCh8V7co7y",
                 "dataID": "F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F=", # aaaaa
-              ],
+              },
               "value": "holding"
             }
           ]
@@ -200,13 +200,15 @@ Data in tags are encoded by base64.
 
 ### discard_parcel_by_id
 
+Verification key is needed which can prove that the user who trying discard is owner.
+
 1. Parameters
 
 ```JSON
         params : {
           "address": "aZJ5UP5NdDeEQEq54Eoh8V7coFmZnkmC7z", 
-          "dataID": "F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F"
-          "key": "52B10F0D25AE3BBB7E668CBE261D4F5F"  // Verification key which can prove that the user who trying discard is owner. 
+          "dataID": "F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F",
+          "key": "52B10F0D25AE3BBB7E668CBE261D4F5F"  
         }
 ```
 
@@ -229,10 +231,10 @@ Data in tags are encoded by base64.
         "deliver_tx": {
           "tags": [
             {
-              "key": [
+              "key": {
                 "address": "aZJ5UP5NdDeEQEq54Eoh8V7coFmZnkmC7z",
                 "dataID": "F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F=", # aaaaa
-              ],
+              },
               "value": "200" # http response code
             }
           ]
@@ -275,23 +277,23 @@ Data in tags are encoded by base64.
         "deliver_tx": {
           "tags": [
             {
-              "key": [
+              "key": {
                 "address": "aZJ5UP5NdDeEQEq54Eoh8V7coFmZnkmC7z",
                 "dataID": "F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F=", # aaaaa
-              ],
-              "value": [
+              },
+              "value": {
                 "ownerID": "aH2JdDUP5NoFmeEQEqDREZnkmCh8V7co7y",
                 "key": "",
-                "info": [
+                "info": {
                   "description":"Total mileage of all taxis in Newyork by 2018.",
                   "price":"3000",
-                  "expCondition": [
+                  "expCondition": {
                     "due_date":"2020-12-31 23:59",
                     "due_count":"10",
                     "current_count":"2"
-                  ]
-                ]
-              ]
+                  }
+                }
+              }
             }
           ]
         },
@@ -314,9 +316,9 @@ Data in tags are encoded by base64.
 
 ```JSON
         params : {
-        	from: "aaaaa",
-        	to: "bbbbb",
-        	amount: 300
+          from: "aaaaa",
+          to: "bbbbb",
+          amount: 300
         }
 ```
 
