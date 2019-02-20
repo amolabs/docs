@@ -56,9 +56,17 @@ Data in tags are encoded by base64.
 ```JSON
         params : {
           "dataID": "F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F",
-          "price": "3000",
+          "ownerID": "aH2JdDUP5NoFmeEQEqDREZnkmCh8V7co7y",
           "key": "",
-          "info": "Total mileage of all taxis in Newyork by 2018."
+          "info": [
+            "description":"Total mileage of all taxis in Newyork by 2018.",
+            "price":"3000",
+            "expCondition": [
+              "due_date":"2020-12-31 23:59",
+              "due_count":"10",
+              "current_count":"0"
+            ]
+          ]
         }
 ```
 
@@ -70,7 +78,7 @@ Data in tags are encoded by base64.
 
 ```Shell
     // Request
-    curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"upload_data","params":{"dataID":"F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F","info":"Total mileage of all taxis in Newyork by 2018."}}' localhost:26657
+    curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"upload_data","params":{"dataID":"F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F","ownerID": "aH2JdDUP5NoFmeEQEqDREZnkmCh8V7co7y",          "key": "","info": ["description":"Total mileage of all taxis in Newyork by 2018.","price":"3000","expCondition":["due_date":"2020-12-31 23:59","due_count":"10","current_count":"0"]]}}}' localhost:26657
     
     // Result
     {
@@ -92,7 +100,7 @@ Data in tags are encoded by base64.
     }
 ```
 
-### show_data_info_by_id
+### show_parcel_info_by_id
 
 1. Parameters
 
@@ -112,7 +120,7 @@ Data in tags are encoded by base64.
 
 ```Shell
     // Request
-    curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"show_data_info_by_id","params":{"dataID":"F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F"}}' localhost:26657
+    curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"show_parcel_info_by_id","params":{"dataID":"F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F"}}' localhost:26657
     
     // Result
     {
@@ -125,10 +133,18 @@ Data in tags are encoded by base64.
             {
               "key": "F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F=", # aaaaa
               "value": [
-                "address": "aH2JdDUP5NoFmeEQEqDREZnkmCh8V7co7y",  # owner address
-                "price": "3000",
+                "ownerID": "aH2JdDUP5NoFmeEQEqDREZnkmCh8V7co7y",
                 "key": "",
-                "info": "Total mileage of all taxis in Newyork by 2018."
+                "info": [
+                  "description":"Total mileage of all taxis in Newyork by 2018.",
+                  "price":"3000",
+                  "expCondition": [
+                    "due_date":"2020-12-31 23:59",
+                    "due_count":"10",
+                    "current_count":"2"
+                  ]
+                ]
+              ]
             }
           ]
         },
@@ -138,26 +154,26 @@ Data in tags are encoded by base64.
     }
 ```
 
-### request_data_purchase_by_id
+### request_parcel_purchase_by_id
 
 1. Parameters
 
 ```JSON
         params : {
-          "address": "aH2JdDUP5NoFmeEQEqDREZnkmCh8V7co7y", 
+          "address": "aZJ5UP5NdDeEQEq54Eoh8V7coFmZnkmC7z",
           "dataID": "F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F"
         }
 ```
 
 2. Returns
 
-`state`: request grant state.
+`state`: request grant state. holding, granted ...
 
 3. Example
 
 ```Shell
     // Request
-    curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"request_data_purchase_by_id","params":{"address": "aH2JdDUP5NoFmeEQEqDREZnkmCh8V7co7y","dataID":"F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F"}}' localhost:26657
+    curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"request_parcel_purchase_by_id","params":{"address": "aZJ5UP5NdDeEQEq54Eoh8V7coFmZnkmC7z","dataID":"F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F"}}' localhost:26657
     
     // Result
     {
@@ -172,9 +188,7 @@ Data in tags are encoded by base64.
                 "address": "aH2JdDUP5NoFmeEQEqDREZnkmCh8V7co7y",
                 "dataID": "F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F=", # aaaaa
               ],
-              "value": [
-                "state": "granted"
-              ]
+              "value": "holding"
             }
           ]
         },
@@ -184,12 +198,108 @@ Data in tags are encoded by base64.
     }
 ```
 
-`To-do`
-### revert_data_purchase_by_id
-### grant_data_purchase_by_id
-### grant_data_purchase_by_address
-### show_data_usage_by_id
+### discard_parcel_by_id
 
+1. Parameters
+
+```JSON
+        params : {
+          "address": "aZJ5UP5NdDeEQEq54Eoh8V7coFmZnkmC7z", 
+          "dataID": "F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F"
+          "key": "52B10F0D25AE3BBB7E668CBE261D4F5F"  // Verification key which can prove that the user who trying discard is owner. 
+        }
+```
+
+2. Returns
+
+`uint8` http response code
+
+3. Example
+
+```Shell
+    // Request
+    curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"discard_parcel_by_id","params":{"address": "aH2JdDUP5NoFmeEQEqDREZnkmCh8V7co7y","dataID":"F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F","key":"52B10F0D25AE3BBB7E668CBE261D4F5F"}}' localhost:26657
+    
+    // Result
+    {
+      "jsonrpc": "2.0",
+      "id": "0",
+      "result": {
+        "check_tx": {},
+        "deliver_tx": {
+          "tags": [
+            {
+              "key": [
+                "address": "aZJ5UP5NdDeEQEq54Eoh8V7coFmZnkmC7z",
+                "dataID": "F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F=", # aaaaa
+              ],
+              "value": "200" # http response code
+            }
+          ]
+        },
+        "hash": "905998809DCBB5EA078A1A488DA448554A5B8F9E2CC97C68D295BCA852E65A47",
+        "height": "3"
+      }
+    }
+```
+
+### show_usage
+
+1. Parameters
+
+```JSON
+        params : {
+          "address": "aZJ5UP5NdDeEQEq54Eoh8V7coFmZnkmC7z",
+          "dataID": "F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F"
+        }
+```
+
+2. Returns
+
+`address`   owner address.
+`key`       key custody needed.
+`string`    extra info.
+
+3. Example
+
+```Shell
+    // Request
+    curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"show_usage","params":{"address": "aZJ5UP5NdDeEQEq54Eoh8V7coFmZnkmC7z","dataID":"F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F"}}' localhost:26657
+    
+    // Result
+    {
+      "jsonrpc": "2.0",
+      "id": "0",
+      "result": {
+        "check_tx": {},
+        "deliver_tx": {
+          "tags": [
+            {
+              "key": [
+                "address": "aZJ5UP5NdDeEQEq54Eoh8V7coFmZnkmC7z",
+                "dataID": "F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F=", # aaaaa
+              ],
+              "value": [
+                "ownerID": "aH2JdDUP5NoFmeEQEqDREZnkmCh8V7co7y",
+                "key": "",
+                "info": [
+                  "description":"Total mileage of all taxis in Newyork by 2018.",
+                  "price":"3000",
+                  "expCondition": [
+                    "due_date":"2020-12-31 23:59",
+                    "due_count":"10",
+                    "current_count":"2"
+                  ]
+                ]
+              ]
+            }
+          ]
+        },
+        "hash": "905998809DCBB5EA078A1A488DA448554A5B8F9E2CC97C68D295BCA852E65A47",
+        "height": "3"
+      }
+    }
+```
 
 ## Blockchain Operations
 `To-do`
