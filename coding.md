@@ -13,11 +13,30 @@
     - **Be careful when you use Windows PC**
 
 ## Go
-### Editing style
+### Naming style
 - See `go fmt`
+- Use camelCase and CamelCase for Go
 
 ### Misc.
 - Use `go fmt` before commit. This will enforce:
     - Indentation with tabs
     - Alignment with blanks (= spaces)
     - Order of imported packages
+
+## JavaScript
+### Naming style
+- Use camelCase for Javascript
+
+## JSON
+### Naming style
+- Use snake_case for JSON
+    - This also applies to field tags for members of a Go `struct`.
+    ```go
+    type MyStruct struct {
+        MemberName string `json:"member_name"`
+    }
+    ```
+
+## RPC spec
+### Naming style
+- Use snake_case for RPC keywords
