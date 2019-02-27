@@ -15,7 +15,7 @@ While AMO blockchain uses Tendermint as its base, Tendermint uses another non-st
 
 ## Algorithms
 CMVP-approved algorithms and related standards:
-- SHA3-256, SHA3-512
+- SHA256, SHA3-256, SHA3-512
     - Secure Hash Standard
 - AES128-CTR
     - Advanced Encryption Standard
