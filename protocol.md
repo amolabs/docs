@@ -1,9 +1,5 @@
 # AMO blockchain protocol specification
 
-## Protocol
-### Structure
-![protocol_structure](./images/protocol_struct.png)
-
 ## Data Format
 ### Key
 AMO blockchain uses ECDSA key pair to sign and verify various transactions and messages. AMO blockchain uses NIST P256 curve as its default ECDSA domain parameter.
@@ -21,7 +17,10 @@ An account address is derived from the public key of an account. First, take 32 
 **NOTE:** In Bitcoin, they use `addr_bin = RIPEMD160(SHA256(PK))`, but we cannot use RIPEMD160. See [Notes on Cryptography](crypto.md) for more details and reasons.
 
 ### Transaction
+![protocol_structure](./images/protocol_struct.png)
+
 payload to Tendermint `DeliverTx` and `CheckTx` methods
+
 
 ### Encoding
 
