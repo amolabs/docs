@@ -1,7 +1,7 @@
 # Notes on Cryptography
 
 ## General
-AMO blockchain uses industry-standard cryptographic algorithms instead of non-standard ones such as secp256k1 or Keccak. This is because the typical target environment of AMO is embedded devices and rather conservative environments such as cars. This decision has pros and cons:
+AMO-compliant blockchain clients use industry-standard cryptographic algorithms instead of non-standard ones such as secp256k1 or Keccak. This is because the typical target environment of AMO is rather conservative environments such as cars or embedded devices. This decision has pros and cons:
 
 ##### Pros
 - Can use CMVP-certified cryptographic modules
