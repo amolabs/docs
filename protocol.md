@@ -1,5 +1,9 @@
 # AMO blockchain protocol specification
 
+## Protocol
+### Structure
+![protocol_structure](./images/protocol_struct.png)
+
 ## Data Format
 ### Key
 AMO blockchain uses ECDSA key pair to sign and verify various transactions and messages. AMO blockchain uses NIST P256 curve as its default ECDSA domain parameter.
