@@ -19,7 +19,9 @@ An account address is derived from the public key of an account. First, take 32 
 ### Transaction
 ![protocol_structure](./images/protocol_struct.png)
 
-payload to Tendermint `DeliverTx` and `CheckTx` methods
+Tendermint core sends the requests **Message**, and the ABCI application sends the response **Result**.
+A payload to ABCI application can be made by **Transaction** (`DeliverTx` ,`Query` and `CheckTx` methods).
+Basically, All methods provided based on Tendermint core are also usable in AMO blockchain. Other ABCI application methods are implemented for [RPC](https://github.com/amolabs/docs/blob/master/rpc.md), and [CLI](https://github.com/amolabs/amoabci/tree/master/cmd/amocli).
 
 
 ### Encoding
