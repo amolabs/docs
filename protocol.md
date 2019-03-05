@@ -7,7 +7,7 @@ AMO blockchain uses ECDSA key pair to sign and verify various transactions and m
 A key pair in AMO blockchain is a pair of a private key and a public key. A private key is a sequence 32 bytes, and a public key is a sequence of 33 bytes(compressed form. TODO: give a reference). These byte sequences are represented by base64 encoding when transmitted over a communication channel or stored as a marshaled form, while they reside *as is* in a program's internal memory space.
 
 ### Key custody
-A key custody is a special form of key transfer medium. It is a public-key encryption of a data encryption key: `PKEnc(PK, DEK)`, where `PKEnc` is a sort of a hybrid encryption (combination of public key encryption and symmetric key encryption). For `PKEnc`, we use a combination of ECDH ephemeral mode and AES. For ECDH ephemeral key generation, we use ECDSA key generation algorithm.`PK` is a public key of a recipient and `DEK` is a data encryption key of an encrypted *data parcel*. 
+A key custody is a special form of key transfer medium. It is a public-key encryption of a data encryption key: `PKEnc(PK, DEK)`, where `PKEnc` is a sort of a hybrid encryption (combination of public key encryption and symmetric key encryption). For `PKEnc`, we use a combination of ECDH ephemeral mode and AES. For ECDH ephemeral key generation, we use ECDSA key generation algorithm.`PK` is a public key of a recipient and `DEK` is a data encryption key of an encrypted *data parcel*.
 
 ### Account address
 An address is a human-readable character string which is a hex-encoding of a byte sequence with the length of 20 bytes (=160-bit). Hence, the opaque form of an address is a 40-byte character string which consists of `[0-9]` and `[a-f]` only.
@@ -17,7 +17,7 @@ An account address is derived from the public key of an account. First, take 32 
 **NOTE:** In Bitcoin, they use `addr_bin = RIPEMD160(SHA256(PK))`, but we cannot use RIPEMD160. See [Notes on Cryptography](crypto.md) for more details and reasons.
 
 ### Transaction
-![protocol_structure](./images/protocol_struct.png)
+![protocol_transaction](./images/protocol_transaction.svg)
 
 Tendermint core sends the requests **Message**, and the ABCI application sends the response **Result**.
 A payload to ABCI application can be made by **Transaction** (`DeliverTx` ,`Query` and `CheckTx` methods).
