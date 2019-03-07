@@ -93,8 +93,15 @@ Full `message` body of `transfer`:
 }
 ```
 
+## Operations
 
 ### Transfer coin
+Transfer AMO coin the amount of `amount` to the address `to`. This command causes a chage in the state of the `balance` store.
+
+```json
+{ "to" : "_address_", "amount" : "_amount_" }
+```
+
 ### Upload Data (PDB operation)
 ### Register Data
 ### Request Data
