@@ -43,3 +43,21 @@ Any byte sequence other than `account address` is represented by a base64 encodi
 ### Grant permission
 * "grant `read` permission on a data parcel `A` to an AMO user `B`"
 * "revoke `read` permission on a data parcel `A` from an AMO user `B`"
+
+## Genesis App State
+Initial state of the app (_genesis app state_) is defined by genesis document (genesis.json file in tendermint config directory, typically $HOME/.tendermint/config/genesis.json). Initial app state is described in `app_state` field in a genesis document. For example:
+```json
+"app_state": {
+    "balances": [
+        {
+            "owner": "7CECB223B976F27D77B0E03E95602DABCC28D876",
+            "amount": "100"
+        }
+    ]
+}
+```
+**NOTE:** In order to reset and apply new genesis state, run the following command in command line:
+```bash
+tendermint unsafe_reset_all
+```
+An AMO-compliant blockchain node should have some mechanisms to modify internal database for this operation.
