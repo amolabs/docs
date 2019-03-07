@@ -75,6 +75,24 @@ Full rpc request body of `broadcast_tx_commit`:
     }
 }
 ```
+`tx` is a serialized `message` which is byte code for `abci` command execution.
+The `message` is also JSON style and an example of body is shown below.
+
+Full `message` body of `transfer`:
+```json
+{
+    "command":"transfer_coin",
+    "signer":"_address_sender_",
+    "signing_pub_key":"_pubkey_sender_",
+    "signature":"_signature_",
+    "payload":{
+        "to":"_address_receiver",
+        "amount":"_amount_"
+    },
+    "nonce":"_nonce_"
+}
+```
+
 
 ### Transfer coin
 ### Upload Data (PDB operation)
