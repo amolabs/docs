@@ -50,6 +50,7 @@ in tendermint rpc request
 
 ### Query data format
 #### balance
+#### parcel
 #### request
 #### usage
 
