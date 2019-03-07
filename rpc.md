@@ -16,6 +16,48 @@ NOTES:
 - Binary data such as byte-strings should be encoded by base64.
 - Account address is already a hex-encoded string, so it shall be transmitted as is.
 
+## ABCI Query parameters
+- ignore `height` and `prove` for now
+- describe `path` format and meaning
+- describe `data` format
+
+example
+```json
+{
+    "query": "balance",
+    "params" : {
+        "address": "E5DB787809EC89BBF972B0E6193D552A7D973AD7"
+    }
+}
+```
+in tendermint rpc request
+```json
+{
+    "jsonrpc":"2.0",
+    "id":"",
+    "method":"abci_query",
+    "params": {
+        "path": "AMO specific path",
+        "data": {
+            "query": "balance",
+            "params" : {
+                "address": "E5DB787809EC89BBF972B0E6193D552A7D973AD7"
+            }
+        }
+    }
+}
+```
+
+### Query data format
+#### balance
+#### request
+#### usage
+
+## Broadcast tx parameters
+- describe `tx` format
+
+## Rewrite or delete followings
+
 ## Blockchain State
 
 ### get_balance
