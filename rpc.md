@@ -14,45 +14,48 @@ This document defines various parameters to `abci_query` and `broadcast_tx_*` me
 NOTES:
 - JSONRPC doesn't support number expression(e.g. 300), so a number should be represented as double-quoted string like "300".
 - Binary data such as byte-strings should be encoded by base64.
-- Account address is already a hex-encoded string, so it shall be transmitted as is.
 
 ## ABCI Query parameters
-- ignore `height` and `prove` for now
-- describe `path` format and meaning
-- describe `data` format
+Ignore `height` and `prove` for now.
 
-example
-```json
-{
-    "query": "balance",
-    "params" : {
-        "address": "E5DB787809EC89BBF972B0E6193D552A7D973AD7"
-    }
-}
-```
-in tendermint rpc request
+`path` decides which data store the app should look for:
+- `/balance`: list of account AMO coin balances
+- `/parcel`: list of data parcel registrations
+- `/request`: list of data parcel requests
+- `/usage`: list of granted data parcel usages
+
+`data` specifies the key to find a match in the data store. `data` must be a `base64` conversion of a proper JSON object.
+
+In full RPC request body:
 ```json
 {
     "jsonrpc":"2.0",
     "id":"",
     "method":"abci_query",
     "params": {
-        "path": "AMO specific path",
-        "data": {
-            "query": "balance",
-            "params" : {
-                "address": "E5DB787809EC89BBF972B0E6193D552A7D973AD7"
-            }
-        }
+        "path": "/balance",
+        "data": "base64 conversion of \"12FF....\""
     }
 }
 ```
 
-### Query data format
-#### balance
-#### parcel
-#### request
-#### usage
+### Balance query
+When querying an account's _balance_, `data` is a `base64` conversion of the double-quoted _address_ of the account.
+
+### Parcel query
+When querying a _parcel_, `data` is a `base64` conversion of the double-quoted _data parcel ID_.
+
+### Request query
+When querying a _request_ for specific _parcel_, `data` is a `base64` conversion of a JSON representation of (`buyer address`, `data parcel ID`), where this JSON representation is as the following example:
+```json
+{ "buyer" : "_address_", "parcel" : "_parcel_ID_" }
+```
+
+### Usage query
+When querying a _usage_ for specific _parcel_, `data` is a `base64` conversion of a JSON representation of (`buyer address`, `data parcel ID`), where this JSON representqtion is as the following example:
+```json
+{ "buyer" : "_address_", "parcel" : "_parcel_ID_" }
+```
 
 ## Broadcast tx parameters
 - describe `tx` format
