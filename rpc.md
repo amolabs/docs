@@ -1,13 +1,20 @@
 # AMO client RPC specification
-You can check rpc endpoints via http://localhost:26657
+Tendermint provides various RPC methods to interact with Tendermint base and ABCI app through it. See https://tendermint.com/rpc/ for details. Since AMO is a blockchain application (ABCI app) built upon Tendermint, it provides all the RPC methods which are provided by Tendermint itself. Among these methods, `broadcast_tx_*` and `abci_query` are used to interact with AMO ABCI app: sending transactions and querying app state.
 
-[https://github.com/tendermint/tendermint/wiki/RPC](https://github.com/tendermint/tendermint/wiki/RPC)
+Tendermint RPC operates over three possible communication channels: URI/HTTP, JSONRPC/HTTP, JSONRPC/websocket. This document assumes JSONRPC/HTTP, but descriptions in this document can be applied to other communication channels also.
 
-Arguments which expect strings or byte arrays may be passed as quoted strings, like "abc" or as 0x-prefixed strings, like 0x616263.
+(Since we assume JSONRPC/HTTP)
+RPC request data will be transmitted as HTTP POST request body with content-type as `application/json`. The default RPC endpoint is http://localhost:26657, but this may change according to the server configuration. Request body is in JSON format and consists of RPC preamble(e.g. `"jsonrpc":"2.0","id":""`), rpc method, and rpc parameters. For example:
+```json
+{"jsonrpc":"2.0","id":"","method":"abci_query","params":{"path":"AMO specific path","data":"AMO specific data","height":"0","prove":"false"}}
+{"jsonrpc":"2.0","id":"","method":"broadcast_tx_sync","params":{"tx":"AMO specific transaction"}}
+```
+This document defines various parameters to `abci_query` and `broadcast_tx_*` methods.
 
-JSONRPC doesn't support number expression. e.g. 300 → "300"
-
-Data in tags are encoded by base64.
+NOTES:
+- JSONRPC doesn't support number expression(e.g. 300), so a number should be represented as double-quoted string like "300".
+- Binary data such as byte-strings should be encoded by base64.
+- Account address is already a hex-encoded string, so it shall be transmitted as is.
 
 ## Blockchain State
 
