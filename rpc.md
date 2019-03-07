@@ -58,7 +58,24 @@ When querying a _usage_ for specific _parcel_, `data` is a `base64` conversion o
 ```
 
 ## Broadcast tx parameters
-- describe `tx` format
+Broadcast the transaction. There are three options exist in `broadcast_tx_*`.
+- `broadcast_tx_async` returns right away, with no reponse.
+- `broadcast_tx_sync` waits for `CheckTx` response and returns it.
+- `broadcast_tx_commit` does `CheckTx` && `DeliverTx` to `abci`.
+This method returns an error only if _mempool.CheckTx()_ errs or timeout for waiting `tx` commit. When `CheckTx` || `DeliverTx` failed, it returns result containing _non-OK_ `abci` code.
+
+Full rpc request body of `broadcast_tx_commit`:
+```json
+{
+    "jsonrpc":"2.0",
+    "id":"",
+    "method":"broadcast_tx_commit",
+    "params": {
+        "tx": "0x_the_hex_string_byte_code_for_abci_code"
+    }
+}
+```
+
 
 ## Rewrite or delete followings
 
@@ -83,7 +100,7 @@ When querying a _usage_ for specific _parcel_, `data` is a `base64` conversion o
 ```Shell
     // Request
     curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"get_balance","params":{"address":"aH2JdDUP5NoFmeEQEqDREZnkmCh8V7co7y"}}' localhost:26657
-    
+
     // Result
     {
       "jsonrpc": "2.0",
@@ -132,7 +149,7 @@ When querying a _usage_ for specific _parcel_, `data` is a `base64` conversion o
 ```Shell
     // Request
     curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"upload_data","params":{"dataID":"F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F","ownerID": "aH2JdDUP5NoFmeEQEqDREZnkmCh8V7co7y",          "key": "","info": ["description":"Total mileage of all taxis in Newyork by 2018.","price":"3000","expCondition":["due_date":"2020-12-31 23:59","due_count":"10","current_count":"0"]]}}}' localhost:26657
-    
+
     // Result
     {
       "jsonrpc": "2.0",
@@ -174,7 +191,7 @@ When querying a _usage_ for specific _parcel_, `data` is a `base64` conversion o
 ```Shell
     // Request
     curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"show_parcel_info_by_id","params":{"dataID":"F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F"}}' localhost:26657
-    
+
     // Result
     {
       "jsonrpc": "2.0",
@@ -227,7 +244,7 @@ When querying a _usage_ for specific _parcel_, `data` is a `base64` conversion o
 ```Shell
     // Request
     curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"request_parcel_purchase_by_id","params":{"address": "aZJ5UP5NdDeEQEq54Eoh8V7coFmZnkmC7z","dataID":"F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F"}}' localhost:26657
-    
+
     // Result
     {
       "jsonrpc": "2.0",
@@ -259,7 +276,7 @@ Verification key is needed which can prove that the user who trying discard is o
 
 ```JSON
         params : {
-          "address": "aZJ5UP5NdDeEQEq54Eoh8V7coFmZnkmC7z", 
+          "address": "aZJ5UP5NdDeEQEq54Eoh8V7coFmZnkmC7z",
           "dataID": "F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F",
           "key": "52B10F0D25AE3BBB7E668CBE261D4F5F"  
         }
@@ -274,7 +291,7 @@ Verification key is needed which can prove that the user who trying discard is o
 ```Shell
     // Request
     curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"discard_parcel_by_id","params":{"address": "aH2JdDUP5NoFmeEQEqDREZnkmCh8V7co7y","dataID":"F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F","key":"52B10F0D25AE3BBB7E668CBE261D4F5F"}}' localhost:26657
-    
+
     // Result
     {
       "jsonrpc": "2.0",
@@ -320,7 +337,7 @@ Verification key is needed which can prove that the user who trying discard is o
 ```Shell
     // Request
     curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"show_usage","params":{"address": "aZJ5UP5NdDeEQEq54Eoh8V7coFmZnkmC7z","dataID":"F7CB0A457DC12C4DBE51B0F158E22CBD52B10F0D25AE3BBB7E668CBE261D4F5F"}}' localhost:26657
-    
+
     // Result
     {
       "jsonrpc": "2.0",
@@ -381,7 +398,7 @@ Verification key is needed which can prove that the user who trying discard is o
 ```Shell
     // Request
     curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"transfer","params":{"from":"aaaaa","to":"bbbbb","amount":"500"}}' localhost:26657
-    
+
     // Result
     {
       "jsonrpc": "2.0",
@@ -427,7 +444,7 @@ Verification key is needed which can prove that the user who trying discard is o
 ```Shell
     // Request
     curl -X POST --data '{"jsonrpc":"2.0","id":"dontcare","method":"purchase","params":{"from":"aaaaa","file_hash":"b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"}}' localhost:26657
-    
+
     // Result
     {
       "jsonrpc": "2.0",
