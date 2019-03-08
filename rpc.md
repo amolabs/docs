@@ -6,8 +6,8 @@ Tendermint RPC operates over three possible communication channels: URI/HTTP, JS
 (Since we assume JSONRPC/HTTP)
 RPC request data will be transmitted as HTTP POST request body with content-type as `application/json`. The default RPC endpoint is http://localhost:26657, but this may change according to the server configuration. Request body is in JSON format and consists of RPC preamble(e.g. `"jsonrpc":"2.0","id":""`), rpc method, and rpc parameters. For example:
 ```json
-{"jsonrpc":"2.0","id":"","method":"abci_query","params":{"path":"AMO specific path","data":"AMO specific data","height":"0","prove":"false"}}
-{"jsonrpc":"2.0","id":"","method":"broadcast_tx_sync","params":{"tx":"AMO specific transaction"}}
+{"jsonrpc":"2.0","id":"non-empty","method":"abci_query","params":{"path":"AMO specific path","data":"AMO specific data","height":"0","prove":"false"}}
+{"jsonrpc":"2.0","id":"non-empty","method":"broadcast_tx_sync","params":{"tx":"AMO specific transaction"}}
 ```
 This document defines various parameters to `abci_query` and `broadcast_tx_*` methods.
 
