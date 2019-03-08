@@ -24,7 +24,7 @@ Ignore `height` and `prove` for now.
 - `/request`: list of data parcel requests
 - `/usage`: list of granted data parcel usages
 
-`data` specifies the key to find a match in the data store. `data` must be a `base64` conversion of a proper JSON object.
+`data` specifies the key to find a match in the data store. `data` must be a `hex` conversion of a proper JSON object.
 
 In full RPC request body:
 ```json
@@ -34,25 +34,25 @@ In full RPC request body:
     "method":"abci_query",
     "params": {
         "path": "/balance",
-        "data": "base64 conversion of \"12FF....\""
+        "data": "hex conversion of \"12FF....\""
     }
 }
 ```
 
 ### Balance query
-When querying an account's _balance_, `data` is a `base64` conversion of the double-quoted _address_ of the account.
+When querying an account's _balance_, `data` is a `hex` conversion of the double-quoted _address_ of the account.
 
 ### Parcel query
-When querying a _parcel_, `data` is a `base64` conversion of the double-quoted _data parcel ID_.
+When querying a _parcel_, `data` is a `hex` conversion of the double-quoted _data parcel ID_.
 
 ### Request query
-When querying a _request_ for specific _parcel_, `data` is a `base64` conversion of a JSON representation of (`buyer address`, `data parcel ID`), where this JSON representation is as the following example:
+When querying a _request_ for specific _parcel_, `data` is a `hex` conversion of a JSON representation of (`buyer address`, `data parcel ID`), where this JSON representation is as the following example:
 ```json
 { "buyer" : "_address_", "parcel" : "_parcel_ID_" }
 ```
 
 ### Usage query
-When querying a _usage_ for specific _parcel_, `data` is a `base64` conversion of a JSON representation of (`buyer address`, `data parcel ID`), where this JSON representqtion is as the following example:
+When querying a _usage_ for specific _parcel_, `data` is a `hex` conversion of a JSON representation of (`buyer address`, `data parcel ID`), where this JSON representqtion is as the following example:
 ```json
 { "buyer" : "_address_", "parcel" : "_parcel_ID_" }
 ```
