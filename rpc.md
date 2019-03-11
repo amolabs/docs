@@ -30,7 +30,7 @@ In full RPC request body:
 ```json
 {
     "jsonrpc":"2.0",
-    "id":"",
+    "id":"non-empty",
     "method":"abci_query",
     "params": {
         "path": "/balance",
@@ -68,7 +68,7 @@ Full rpc request body of `broadcast_tx_commit`:
 ```json
 {
     "jsonrpc":"2.0",
-    "id":"",
+    "id":"non-empty",
     "method":"broadcast_tx_commit",
     "params": {
         "tx": "0x_the_hex_string_byte_code_for_abci_code"
