@@ -4,7 +4,7 @@ Tendermint provides various RPC methods to interact with Tendermint base and ABC
 Tendermint RPC operates over three possible communication channels: URI/HTTP, JSONRPC/HTTP, JSONRPC/websocket. This document assumes JSONRPC/HTTP, but descriptions in this document can be applied to other communication channels also.
 
 (Since we assume JSONRPC/HTTP)
-RPC request data will be transmitted as HTTP POST request body with content-type as `application/json`. The default RPC endpoint is http://localhost:26657, but this may change according to the server configuration. Request body is in JSON format and consists of RPC preamble(e.g. `"jsonrpc":"2.0","id":""`), rpc method, and rpc parameters. For example:
+RPC request data will be transmitted as HTTP POST request body with content-type as `application/json`. The default RPC endpoint is http://localhost:26657, but this may change according to the server configuration. Request body is in JSON format and consists of RPC preamble(e.g. `"jsonrpc":"2.0","id":"non-empty"`), rpc method, and rpc parameters. For example:
 ```json
 {"jsonrpc":"2.0","id":"non-empty","method":"abci_query","params":{"path":"AMO specific path","data":"AMO specific data","height":"0","prove":"false"}}
 {"jsonrpc":"2.0","id":"non-empty","method":"broadcast_tx_sync","params":{"tx":"AMO specific transaction"}}
