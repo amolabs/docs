@@ -118,7 +118,15 @@ Request `parcel` to purchase with `payment` as offer amount and `extra_info` ( e
 ```json
 { "from" : "_address_", "target" : "_parcel_id_", "extra_info" : "_any_of_additional_info_may_comes_here_" }
 ``` 
+
 ### Cancel Request
+
+Cancel the request of `parcel` in `store/request`. It deletes the previous `request_data` in `store/request` and releases the amount of `payment` which was locked.
+
+```json
+{ "target" : "_parcel_id_" }
+```
+
 ### Grant Data Usage
 ### Revoke Data Usage
 ### Discard Data
