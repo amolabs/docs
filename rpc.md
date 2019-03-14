@@ -96,7 +96,7 @@ Full `message` body of `transfer`:
 ## Operations
 
 ### Transfer coin
-Transfer AMO coin the amount of `amount` to the address `to`. This command causes a chage in the state of the `balance` store.
+Transfer AMO coin the amount of `amount` to the address `to`. This command causes a chage in the state of the `store/balance`.
 
 ```json
 { "to" : "_address_", "amount" : "_amount_" }
@@ -105,18 +105,18 @@ Transfer AMO coin the amount of `amount` to the address `to`. This command cause
 ### Upload Data (PDB operation)
 ### Register Data
 
-Register `parcel` with `extra_info`( price, description, expired_date, etc... ). This command causes a chage in the state of the `Parcel` store.
+Register `parcel` with `extra_info`( price, description, expired_date, etc... ). This command causes a chage in the state of the `store/parcel`.
 
 ```json
-{ "from" : "_address_", "key_custody" : "_parcel_encryption_key_", "extra_info" : "_any_of_additional_info_may_comes_here_" }
+{ "key_custody" : "_parcel_encryption_key_", "extra_info" : "_any_of_additional_info_may_comes_here_" }
 ```
 
 ### Request Data
 
-Request `parcel` to purchase with `payment` as offer amount and `extra_info` ( expired_data, etc...). This is not the end of purchase process but the amount of `payment` will be *locked*. The transaction will be stored in `request` store and waits to be granted by seller. 
+Request `parcel` to purchase with `payment` as offer amount and `extra_info` ( expired_data, etc...). This is not the end of purchase process but the amount of `payment` will be *locked*. The transaction will be stored in `store/request` and waits to be granted by seller. 
 
 ```json
-{ "from" : "_address_", "target" : "_parcel_id_", "extra_info" : "_any_of_additional_info_may_comes_here_" }
+{ "target" : "_parcel_id_", "extra_info" : "_any_of_additional_info_may_comes_here_" }
 ``` 
 
 ### Cancel Request
