@@ -104,6 +104,13 @@ Transfer AMO coin the amount of `amount` to the address `to`. This command cause
 
 ### Upload Data (PDB operation)
 ### Register Data
+
+Register `parcel` with `extra_info`( price, description, expired_date, etc... ). This command causes a chage in the state of the `Parcel` store.
+
+```json
+{ "from" : "_address_", "key_custody" : "_parcel_encryption_key_", "extra_info" : "_any_of_additional_info_may_comes_here_" }
+```
+
 ### Request Data
 ### Cancel Request
 ### Grant Data Usage
