@@ -49,7 +49,7 @@ A transaction is represented by a JSON document which has the following format:
 - `"cancel"`
 - `"revoke"`
 
-`_sender_address_` identifies the sender or originator of this transaction. `"params"` is a HEX-encoded JSON object, which is different for each transaction type.
+`_sender_address_` identifies the sender or originator of this transaction. `"nonce"` is a ***random*** byte sequence with the length of 20 bytes represented by HEX-encoding(See [Replay Attack](#replay-attack)). `"params"` is a HEX-encoded JSON object, which is different for each transaction type.
 
 - transfer body:
 ```json
@@ -141,8 +141,14 @@ Initial state of the app (_genesis app state_) is defined by genesis document (g
     ]
 }
 ```
-**NOTE:** In order to reset and apply new genesis state, run the following command in command line:
+**TM:** In order to reset and apply new genesis state, run the following command in command line:
 ```bash
 tendermint unsafe_reset_all
 ```
 An AMO-compliant blockchain node should have some mechanisms to modify internal database for this operation.
+
+## Further Notes
+### Replay Attack
+In order to prevent [replay attack](https://en.wikipedia.org/wiki/Replay_attack) (in some sense, double-spending), every AMO transaction includes a `nonce` byte-sequence. Basic idea is that when a blockchain node sees a transaction that is already included in the blockchain, it immediately discards the transaction. Here, every transaction has a `tx hash` in Tendermint context. This `tx hash` is a hash of whole byte sequence representing the transaction. Since we incorporated ECDSA signature to authenticate the sender's identity, this gives randomness already, and it can prevent replay attacks. However, AMO blockchain protocol itself is independent of Tendermint. Moreover a future version AMO blockchain may not use Tendermint as a base platform. So, in order to provide some generic countermeasure against replay attacks, we introduced this `nonce` bytes.
+
+However, if every transaction has different meaning and context from other transactions, users may choose `nonce` to be a fixed bytes. But, if a user wants to send the same amount of coin to the same recipient again, then the user must choose a different `nonce` than the previous transaction. This nonce need not be cryptographically random. The only requirement is that it must be ***different*** if the transaction context is the same as a previously processed one. An AMO-compliant client may introduce any method to do this.
