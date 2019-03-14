@@ -145,10 +145,10 @@ Cancel the request of `parcel` in `store/request`. It deletes the previous `requ
 
 ### Grant Data Usage
 
-Grant the request of `parcel` in `store/request` by *data owner*. Specify `grantee` to avoid confusion with other purchasers of the same `parcel`.
+Grant the `request` of `parcel` in `store/request` by *data owner*. Specify `grantee` to avoid confusion with other purchasers of the same `parcel`. After `grant` is recorded in AMO blockchain, *locked* AMO coin will be added in owner's balance. The `request` in `store/request` will be deleted and added in `store/usage` as (`buyer_address`, `parcel_id`, `key_custody`, `exp_condition`).
 
 - command : `grant`
-- affected store : `request`
+- affected store : `request`, `balance`, `usage`.
 - `owner_address`  *(implicit)*
 
 ```json
