@@ -77,63 +77,66 @@ Full rpc request body of `broadcast_tx_commit`:
 ```
 `tx` is a serialized `message` which is byte code for `abci` command execution.
 The `message` is also JSON style and an example of body is shown below.
+An indication of *(implicit*) means that it can be considered as a `_sender_address_`.
 
 Full `message` body of `transfer`:
+
 ```json
 {
-    "command":"transfer_coin",
-    "signer":"_address_sender_",
-    "signing_pub_key":"_pubkey_sender_",
-    "signature":"_signature_",
-    "payload":{
-        "to":"_address_receiver",
-        "amount":"_amount_"
-    },
-    "nonce":"_nonce_"
+    "type": "_tx_type_",
+    "sender": "_sender_address_",
+    "nonce": "_HEX-encoded_nonce_bytes_",
+    "params": {
+		"to": "_recipient_address_",
+		"amount": "_currency_"
+	},
+    "signature": {
+        "pubkey": "_HEX-encoded_public_key_bytes_",
+        "sig_bytes": "_HEX-encoded_signature_bytes_"
+    }
 }
 ```
-
 ## Operations
 
 ### Transfer coin
-Transfer AMO coin the amount of `amount` to the address `recipient`. This command causes a chage in the state of the `store/balance`.
+Transfer AMO coin the amount of `amount` to the address `to`. This command causes a chage in the state of the `store/balance`.
 
 - command : `transfer`
 - affected store : `balance`
 - `owner_address`  *(implicit)*
 
 ```json
-{ "recipient" : "_recipient_address_", "amount" : "_amount_" }
+{ "to" : "_recipient_address_", "amount" : "_currency_" }
 ```
 
 ### Upload Data (PDB operation)
 ### Register Data
 
-Register `parcel` with `extra_info`( price, description, expired_date, etc... ). This command causes a chage in the state of the `store/parcel`.
+Register `parcel` with `extra`( price, description, expired_date, etc... ). This command causes a chage in the state of the `store/parcel`.
 
 - command : `register`
 - affected store : `parcel`
 - `owner_address`  *(implicit)*
 
 ```json
-{ "key_custody" : "_parcel_encryption_key_", "extra_info" : "_any_of_additional_info_may_comes_here_" }
+{ "target" : "_parcel_id_", "key_custody" : "_owner_custody_", "extra" : "_extra_info_" }
 ```
 
 ### Request Data
 
-Request `parcel` to purchase with `payment` as offer amount and `extra_info` ( expired_data, etc...). This is not the end of purchase process but the amount of `payment` will be *locked*. The transaction will be stored in `store/request` and waits to be granted by seller. 
+Request `parcel` to purchase with `payment` as offer amount and `extra` ( expired_data, etc...). This is not the end of purchasing process, but the amount of `payment` will be *locked*. The transaction will be stored in `store/request` and waits to be granted by *owner*. 
 
 - command : `request`
 - affected store : `request`
 - `buyer_address`  *(implicit)*
 
 ```json
-{ "target" : "_parcel_id_", "extra_info" : "_any_of_additional_info_may_comes_here_" }
+{ "target" : "_parcel_id_", "payment" : "_currency_", "extra" : "_extra_info_" }
 ``` 
 
 ### Cancel Request
 
-Cancel the request of `parcel` in `store/request`. It deletes the previous `request_data` of `myself_address` in `store/request` and releases the amount of `payment` which was locked. Since 
+Cancel the `request` of `parcel` in `store/request`. It deletes the previous `request_data` of `myself_address` in `store/request` and releases the amount of `payment` which was *locked*.
 
 - command : `cancel`
 - affected store : `request`
@@ -152,7 +155,7 @@ Grant the `request` of `parcel` in `store/request` by *data owner*. Specify `gra
 - `owner_address`  *(implicit)*
 
 ```json
-{ "target" : "_parcel_id_", "grantee" : "_buyer_address_", "key_custody" : "_parcel_encryption_key_" }
+{ "target" : "_parcel_id_", "grantee" : "_buyer_address_", "key_custody" : "_buyer_custody_" }
 ```
 ### Revoke Data Usage
 
