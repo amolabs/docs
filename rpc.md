@@ -96,16 +96,24 @@ Full `message` body of `transfer`:
 ## Operations
 
 ### Transfer coin
-Transfer AMO coin the amount of `amount` to the address `to`. This command causes a chage in the state of the `store/balance`.
+Transfer AMO coin the amount of `amount` to the address `recipient`. This command causes a chage in the state of the `store/balance`.
+
+- command : `transfer`
+- affected store : `balance`
+- `owner_address`  *(implicit)*
 
 ```json
-{ "to" : "_address_", "amount" : "_amount_" }
+{ "recipient" : "_recipient_address_", "amount" : "_amount_" }
 ```
 
 ### Upload Data (PDB operation)
 ### Register Data
 
 Register `parcel` with `extra_info`( price, description, expired_date, etc... ). This command causes a chage in the state of the `store/parcel`.
+
+- command : `register`
+- affected store : `parcel`
+- `owner_address`  *(implicit)*
 
 ```json
 { "key_custody" : "_parcel_encryption_key_", "extra_info" : "_any_of_additional_info_may_comes_here_" }
@@ -115,13 +123,21 @@ Register `parcel` with `extra_info`( price, description, expired_date, etc... ).
 
 Request `parcel` to purchase with `payment` as offer amount and `extra_info` ( expired_data, etc...). This is not the end of purchase process but the amount of `payment` will be *locked*. The transaction will be stored in `store/request` and waits to be granted by seller. 
 
+- command : `request`
+- affected store : `request`
+- `buyer_address`  *(implicit)*
+
 ```json
 { "target" : "_parcel_id_", "extra_info" : "_any_of_additional_info_may_comes_here_" }
 ``` 
 
 ### Cancel Request
 
-Cancel the request of `parcel` in `store/request`. It deletes the previous `request_data` in `store/request` and releases the amount of `payment` which was locked.
+Cancel the request of `parcel` in `store/request`. It deletes the previous `request_data` of `myself_address` in `store/request` and releases the amount of `payment` which was locked. Since 
+
+- command : `cancel`
+- affected store : `request`
+- `myself_address`  *(implicit)*
 
 ```json
 { "target" : "_parcel_id_" }
@@ -130,6 +146,11 @@ Cancel the request of `parcel` in `store/request`. It deletes the previous `requ
 ### Grant Data Usage
 
 Grant the request of `parcel` in `store/request` by *data owner*. Specify `grantee` to avoid confusion with other purchasers of the same `parcel`.
+
+- command : `grant`
+- affected store : `request`
+- `owner_address`  *(implicit)*
+
 
 ```json
 { "target" : "_parcel_id_", "grantee" : "_buyer_address_", "key_custody" : "_parcel_encryption_key_" }
