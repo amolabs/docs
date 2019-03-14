@@ -128,6 +128,12 @@ Cancel the request of `parcel` in `store/request`. It deletes the previous `requ
 ```
 
 ### Grant Data Usage
+
+Grant the request of `parcel` in `store/request` by *data owner*. Specify `grantee` to avoid confusion with other purchasers of the same `parcel`.
+
+```json
+{ "target" : "_parcel_id_", "grantee" : "_buyer_address_", "key_custody" : "_parcel_encryption_key_" }
+```
 ### Revoke Data Usage
 ### Discard Data
 ### Retrieve Data (PDB operation)
