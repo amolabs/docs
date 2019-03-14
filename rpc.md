@@ -112,6 +112,12 @@ Register `parcel` with `extra_info`( price, description, expired_date, etc... ).
 ```
 
 ### Request Data
+
+Request `parcel` to purchase with `payment` as offer amount and `extra_info` ( expired_data, etc...). This is not the end of purchase process. The transaction will be stored in `request` store and waits to be granted by seller. 
+
+```json
+{ "from" : "_address_", "target" : "_parcel_id_", "extra_info" : "_any_of_additional_info_may_comes_here_" }
+``` 
 ### Cancel Request
 ### Grant Data Usage
 ### Revoke Data Usage
