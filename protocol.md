@@ -1,13 +1,17 @@
 # AMO blockchain protocol specification
 
+**TODO:** staking and validator update
+
 ## Introduction
-Although the current implementation of AMO blockchain depends ***heavily*** on Tendermint, AMO blockchain protocol itself is independent of Tendermint. It is described by several protocol messages and corresponding state transition in abstract internal database of each blockchain node. While the protocol messages are concretely defined(meaning and format), abstract internal database of a blockchain node is implementation-specific. But, note that every AMO blockchain node **MUST** incorporate a kind of database storing all kinds of data items described in [Internal Data](#internal-data) section. (TODO: use anchor)
+Although the current implementation of AMO blockchain depends ***heavily*** on Tendermint, AMO blockchain protocol itself is independent of Tendermint. It is described by several protocol messages and corresponding state transition in abstract internal database of each blockchain node. While the protocol messages are concretely defined(meaning and format), abstract internal database of a blockchain node is implementation-specific. But, note that every AMO blockchain node **MUST** incorporate a kind of database storing all kinds of data items described in [Internal Data](#internal-data) section.
+
+Some notes related to Tendermint will be tagged with **TM**.
 
 ## Data Format
 ### Key
 AMO blockchain uses ECDSA key pair to sign and verify various transactions and messages. AMO blockchain uses NIST P256 curve as its default ECDSA domain parameter.
 
-A key pair in AMO blockchain is a pair of a private key and a public key. A private key is a sequence 32 bytes, and a public key is a sequence of 33 bytes(compressed form. TODO: give a reference). These byte sequences are represented by base64 encoding when transmitted over a communication channel or stored as a marshaled form, while they reside *as is* in a program's internal memory space.
+A key pair in AMO blockchain is a pair of a private key and a public key. A private key is a sequence 32 bytes, and a public key is a sequence of 33 bytes(compressed form. TODO: give a reference). These byte sequences are represented by HEX encoding when transmitted over a communication channel or stored as a marshaled form, while they reside *as is* in a program's internal memory space.
 
 ### Key custody
 A key custody is a special form of key transfer medium. It is a public-key encryption of a data encryption key: `PKEnc(PK, DEK)`, where `PKEnc` is a sort of a hybrid encryption (combination of public key encryption and symmetric key encryption). For `PKEnc`, we use a combination of ECDH ephemeral mode and AES. For ECDH ephemeral key generation, we use ECDSA key generation algorithm.`PK` is a public key of a recipient and `DEK` is a data encryption key of an encrypted *data parcel*.
@@ -19,17 +23,95 @@ An account address is derived from the public key of an account. First, take 32 
 
 **NOTE:** In Bitcoin, they use `addr_bin = RIPEMD160(SHA256(PK))`, but we cannot use RIPEMD160. See [Notes on Cryptography](crypto.md) for more details and reasons.
 
+## Message Format
 ### Transaction
+A transaction is a description of the state change in a blockchain node's internal database(i.e. blockchain state). In other words, sending a transaction to a blockchain node is the only way to change blockchain state. When a transaction is received by a node and eventually included in a _block_, a blockchain node shall modify the internal database according to each transaction type.
+
+A transaction is represented by a JSON document which has the following format:
+```json
+{
+    "type": "_tx_type_",
+    "sender": "_sender_address_",
+    "nonce": "_HEX-encoded_nonce_bytes_",
+    "params": "_HEX-encoded_JSON_object_",
+    "signature": {
+        "pubkey": "_HEX-encoded_public_key_bytes_",
+        "sig_bytes": "_HEX-encoded_signature_bytes_"
+    }
+}
+```
+`"_tx_type_"` is one of :
+- `"transfer"`
+- `"register"`
+- `"request"`
+- `"grant"`
+- `"discard"`
+- `"cancel"`
+- `"revoke"`
+
+`_sender_address_` identifies the sender or originator of this transaction. `"params"` is a HEX-encoded JSON object, which is different for each transaction type.
+
+- transfer body:
+```json
+{
+    "to": "_recipient_address_",
+    "amount": "_currency_"
+}
+```
+- register body:
+```json
+{
+    "target": "_parcel_id_",
+    "key_custody": "_owner_custody_",
+    "extra": "_extra_info_"
+}
+```
+- request body:
+```json
+{
+    "target": "_parcel_id_",
+    "payment": "_currency_",
+    "extra": "_extra_info_"
+}
+```
+- cancel body
+```json
+{
+    "target": "_parcel_id_"
+}
+```
+- grant body
+```json
+{
+    "target": "_parcel_id_",
+    "grantee": "_buyer_address_",
+    "key_custody": "_buyer_custody_"
+}
+```
+- revoke body
+```json
+{
+    "target": "_parcel_id_",
+    "grantee": "_buyer_address_"
+}
+```
+- discard body
+```json
+{
+    "target": "_parcel_id_"
+}
+```
+
+`"pubkey"` is of type P256, neither of ed25519 or secp256k1. It is a HEX-encoding of a compressed elliptic curve point with the length of 33 bytes.
+
+`"sig_bytes"` is HEX-encoded ECDSA signature, which is a concatenation of `r` and `s`. This is `(r, s) = ECDSA(privkey, sb)`, where `privkey` is the corresponding private key, and `sb` is a concatenation of values of `"type"`, `"sender"`, `"nonce"` and `"params"`.
+
+### Transaction Result
+**TM:** TBA
+
 ![protocol_transaction](./images/protocol_transaction.svg)
 
-Tendermint core sends the requests **Message**, and the ABCI application sends the response **Result**.
-A payload to ABCI application can be made by **Transaction** (`DeliverTx` ,`Query` and `CheckTx` methods).
-Basically, All methods provided based on Tendermint core are also usable in AMO blockchain. Other ABCI application methods are implemented for [RPC](https://github.com/amolabs/docs/blob/master/rpc.md), and [CLI](https://github.com/amolabs/amoabci/tree/master/cmd/amocli).
-
-
-### Encoding
-
-Any byte sequence other than `account address` is represented by a base64 encoding.
+**TM:** Tendermint core sends a **Transaction** to AMO app, and the app replies with the response **ResponseDeliverTx**. This **ResponseDeliverTx** is defined in Tendermint, but is not part of AMO blockchain protocol. However, this is an important reply to the users indicating whether the transmitted transaction was successfully processed or not. This reply is described in [RPC](rpc.md) document. Moreover, [CLI](https://github.com/amolabs/amoabci/tree/master/cmd/amocli) may process this reply and prompt the user with a more human-friendly output.
 
 ## Internal Data
 
