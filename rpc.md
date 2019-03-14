@@ -151,11 +151,21 @@ Grant the request of `parcel` in `store/request` by *data owner*. Specify `grant
 - affected store : `request`
 - `owner_address`  *(implicit)*
 
-
 ```json
 { "target" : "_parcel_id_", "grantee" : "_buyer_address_", "key_custody" : "_parcel_encryption_key_" }
 ```
 ### Revoke Data Usage
 ### Discard Data
+
+Discard the registered data in `store/parcel`. After `discard` is recorded in AMO blockchain, delete `parcel` corresponding (`parcel_id`, `owner_address`, `key_custody`, `extra_info`). 
+
+- command : `discard`
+- affected store : `parcel`
+- `owner_address`  *(implicit)*
+
+```json
+{ "target" : "_parcel_id_" }
+```
+
 ### Retrieve Data (PDB operation)
 ### Delete Data (PDB operation)
