@@ -42,6 +42,10 @@ A transaction is represented by a JSON document which has the following format:
 ```
 `"_tx_type_"` is one of :
 - `"transfer"`
+- `"stake"`
+- `"withdraw"`
+- `"delegate"`
+- `"retract"`
 - `"register"`
 - `"request"`
 - `"grant"`
@@ -55,6 +59,32 @@ A transaction is represented by a JSON document which has the following format:
 ```json
 {
     "to": "_recipient_address_",
+    "amount": "_currency_"
+}
+```
+- stake body:
+```json
+{
+    "amount": "_currency_"
+}
+```
+- withdraw body:
+```json
+{
+    "amount": "_currency_"
+}
+```
+- delegate body:
+```json
+{
+    "to": "_delegator_address_",
+    "amount": "_currency_"
+}
+```
+- retract body:
+```json
+{
+    "from": "_delegator_address_",
     "amount": "_currency_"
 }
 ```
@@ -114,20 +144,106 @@ A transaction is represented by a JSON document which has the following format:
 **TM:** Tendermint core sends a **Transaction** to AMO app, and the app replies with the response **ResponseDeliverTx**. This **ResponseDeliverTx** is defined in Tendermint, but is not part of AMO blockchain protocol. However, this is an important reply to the users indicating whether the transmitted transaction was successfully processed or not. This reply is described in [RPC](rpc.md) document. Moreover, [CLI](https://github.com/amolabs/amoabci/tree/master/cmd/amocli) may process this reply and prompt the user with a more human-friendly output.
 
 ## Internal Data
+* balance store:
+    * key: address
+    * value: balance
+* stake store:
+    * key: address
+    * value: stake
+* delegate store:
+    * key: address \*
+    * value: {delegator address, stake}
+* parcel store:
+    * key: parcel id
+    * value: {owner address, key custody, extra info}
+* request store:
+    * key: {buyer address, parcel id}
+    * value: {payment, exp cond}
+* usage store:
+    * key: {buyer address, parcel id}
+    * value: {key custody, exp cond}
 
-* internal persistent database of (address, balance)
-* internal persistent database of (parcel id, owner address, key custody, extra info)
+**NOTE:** In `delegate` store, a key to the database is just `address`, not `{holder address, delegator address}`. This means that a user cannot delegate his/her stakes to **multiple** delegators. While an AMO-compliant node can freely choose the actual database implementation, this constraint must be enforced in any way. An implementor may choose to keep this `address` as a unique key, or use more generous database implementation with an application code or a wrapper layer to keep this constraint on top of it.
 
 ## Operations
-### AMO coin transfer
-1. AMO user creates a signed transaction and sends to one of AMO nodes.
-1. AMO node processes the transaction.
+**There shall be no other state change than described in this section.**
 
-### Register data parcel
+**TM:** These operations are implemented by `DeliverTx` method in the ABCI application.
 
-### Grant permission
-* "grant `read` permission on a data parcel `A` to an AMO user `B`"
-* "revoke `read` permission on a data parcel `A` from an AMO user `B`"
+### Transferring coin
+Upon receiving a `transfer` transaction from a sender, an AMO blockchain node performs a validity check and transfers coins from sender's balance to recipient's balance when the transaction is valid.
+
+**Validity check:** `sender_balance` &ge; `amount`.
+
+**State change:**
+1. `sender_balance` &larr; `sender_balance` - `amount`
+1. `recipient_balance` &larr; `recipient_balance` + `amount`
+
+### Staking coin
+Upon receiving a `stake` transaction from an account, an AMO blockchain node performs a validity check and locks requested coins to `stake` store and decreases the account's balance when the transaction is valid.
+
+**Validity check:**
+1. `balance` &ge; `amount`
+
+**State change:**
+1. `balance` &larr; `balance` - `amount`
+1. `stake` &larr; `stake` + `amount`
+
+Upon receiving a `withdraw` transaction from an account, an AMO blockchain node performs a validity check and relieves requested coins from `stake` store and increases the account's balance when the transaction is valid.
+
+**Validity check:**
+1. `stake` &ge; `amount`
+1. `stake` &gt; `amount` if this account is a delegator for any of delegated stakes
+
+**TODO:** minimum required stake to be a delegator
+
+**State change:**
+1. `balance` &larr; `balance` + `amount`
+1. `stake` &larr; `stake` - `amount`
+
+**TODO:** need rounding? or currency to stake ratio?
+
+### Delegating stake
+There may be users who have the intention to participate in the block production but don't have enough stake value or computing power to competent in the validator selection race. In this case, a user can delegate his/her stake to a more competent validator.
+
+Upon receiving a `delegate` transaction from an account, an AMO blockchain node performs a validity check and locks requested coins to `delegate` store and decreases the account's balance when the transaction is valid.
+
+**Validity check:**
+1. `balance` &ge; `amount`
+1. `to` address already has a positive stake in `stake` store
+1. the account has no previous delegator or `to` is the same as the previous delegator
+
+**State change:**
+1. `balance` &larr; `balance` - `amount`
+1. `delegated_stake` &larr; `delegated_stake` + `amount`
+
+Upon receiving a `retract` transaction from an account, an AMO blockchain node performs a validity check and relieves requested coins from `delegate` store and increases the account's balance when the transaction is valid.
+
+**Validity check:**
+1. `delegated_stake` &ge; `amount`
+
+**State change:**
+1. `balance` &larr; `balance` + `amount`
+1. `delegated_stake` &larr; `delegated_stake` - `amount`
+
+**NOTE:** `delegated_stake` is a `stake` value in the `delegate` store where the `address` is the sender account.
+
+### Updating validator set
+If there is at least one of `stake`, `withdraw`, `delegate` or `retract` transaction in the last block, the top `n_val` accounts with the highest *effective stake* value shall be selected again. These accounts shall be new validators for the upcoming blocks.
+
+**NOTE:** Effective stake value is the sum of his/her own stake in the `stake` store and all items in the `delegate` store having the same `delegator` field as the account address in question
+
+**NOTE:** `n_val` is a global parameter fixed across nodes and blocks (and so the time). So, it shall be set at the genesis time.
+
+**TM:** New list of validators shall be transferred to the Tendermint daemon via `EndBlock` response. Each validator has the voting power in proportion to the effective stake value.
+
+**TODO:** more accurate validator update time. consider non-tendermint implementations.
+
+### Registering data
+
+### Requesting data
+
+### Granting data
 
 ## Genesis App State
 Initial state of the app (_genesis app state_) is defined by genesis document (genesis.json file in tendermint config directory, typically $HOME/.tendermint/config/genesis.json). Initial app state is described in `app_state` field in a genesis document. For example:
