@@ -19,7 +19,9 @@ NOTES:
 Ignore `height` and `prove` for now.
 
 `path` decides which data store the app should look for:
-- `/balance`: list of account AMO coin balances
+- `/balance`: list of accounts' AMO coin balances
+- `/stake`: list of accounts' stake values
+- `/delegate`: list of accounts' delegated stake values
 - `/parcel`: list of data parcel registrations
 - `/request`: list of data parcel requests
 - `/usage`: list of granted data parcel usages
@@ -41,9 +43,27 @@ In full RPC request body:
 
 ### Balance query
 When querying an account's _balance_, `data` is a `hex` conversion of the double-quoted _address_ of the account.
+```json
+"_address_"
+```
+
+### Stake query
+When querying an account's _stake_, `data` is a `hex` conversion of the double-quoted _address_ of the account.
+```json
+"_address_"
+```
+
+### Delegate query
+When querying an account's _delegate_ for specific _delegator_, `data` is a `hex` conversion of a JSON representation of (`holder address`, `delegator address`), where this JSON representation is as the following example:
+```json
+{ "holder" : "_address_", "delegator": "_delegator_address_" }
+```
 
 ### Parcel query
 When querying a _parcel_, `data` is a `hex` conversion of the double-quoted _data parcel ID_.
+```json
+"_parcel_ID_"
+```
 
 ### Request query
 When querying a _request_ for specific _parcel_, `data` is a `hex` conversion of a JSON representation of (`buyer address`, `data parcel ID`), where this JSON representation is as the following example:
@@ -101,7 +121,7 @@ Full `message` body of `transfer`:
 ### Transfer coin
 Transfer AMO coin the amount of `amount` to the address `to`. This command causes a chage in the state of the `store/balance`.
 
-- command : `transfer`
+- tx type : `transfer`
 - affected store : `balance`
 - `owner_address`  *(implicit)*
 
@@ -109,12 +129,48 @@ Transfer AMO coin the amount of `amount` to the address `to`. This command cause
 { "to" : "_recipient_address_", "amount" : "_currency_" }
 ```
 
+### Stake coin
+Lock AMO coin as a `stake` of the coin holder, or lock additional coin and increase `stake` value.
+
+- tx type: `stake`
+
+```json
+{ "amount": "_currency_" }
+```
+
+### Withdraw coin
+Withdraw all or part of the AMO coin locked as a `stake`.
+
+- tx type: `withdraw`
+
+```json
+{ "amount": "_currency_" }
+```
+
+### Delegate stake
+Lock sender's AMO coin as a **delegated** `stake` of the delegator, or lock additional coin and increase delegated `stake` value.
+
+- tx type: `delegate`
+
+```json
+{ "to": "_delegator_address_", "amount": "_currency_" }
+```
+
+### Retract stake
+Retract all or part of the AMO coin locked as a delegated stake.
+
+- tx type: `retract`
+
+```json
+{ "from": "_delegator_address_", "amount": "_currency_" }
+```
+
 ### Upload Data (PDB operation)
 ### Register Data
 
 Register `parcel` with `extra`( price, description, expired_date, etc... ). This command causes a chage in the state of the `store/parcel`.
 
-- command : `register`
+- tx type : `register`
 - affected store : `parcel`
 - `owner_address`  *(implicit)*
 
@@ -126,7 +182,7 @@ Register `parcel` with `extra`( price, description, expired_date, etc... ). This
 
 Request `parcel` to purchase with `payment` as offer amount and `extra` ( expired_data, etc...). This is not the end of purchasing process, but the amount of `payment` will be *locked*. The transaction will be stored in `store/request` and waits to be granted by *owner*. 
 
-- command : `request`
+- tx type : `request`
 - affected store : `request`
 - `buyer_address`  *(implicit)*
 
@@ -138,7 +194,7 @@ Request `parcel` to purchase with `payment` as offer amount and `extra` ( expire
 
 Cancel the `request` of `parcel` in `store/request`. It deletes the previous `request_data` of `myself_address` in `store/request` and releases the amount of `payment` which was *locked*.
 
-- command : `cancel`
+- tx type : `cancel`
 - affected store : `request`
 - `myself_address`  *(implicit)*
 
@@ -150,7 +206,7 @@ Cancel the `request` of `parcel` in `store/request`. It deletes the previous `re
 
 Grant the `request` of `parcel` in `store/request` by *data owner*. Specify `grantee` to avoid confusion with other purchasers of the same `parcel`. After `grant` is recorded in AMO blockchain, *locked* AMO coin will be added in owner's balance. The `request` in `store/request` will be deleted and added in `store/usage` as (`buyer_address`, `parcel_id`, `key_custody`, `exp_condition`).
 
-- command : `grant`
+- tx type : `grant`
 - affected store : `request`, `balance`, `usage`.
 - `owner_address`  *(implicit)*
 
@@ -161,7 +217,7 @@ Grant the `request` of `parcel` in `store/request` by *data owner*. Specify `gra
 
 Delete the `usage` of `parcel` in `store/usage`.
 
-- command : `revoke`
+- tx type : `revoke`
 - affected store : `usage`
 - `owner_address`  *(implicit)*
 
@@ -173,7 +229,7 @@ Delete the `usage` of `parcel` in `store/usage`.
 
 Discard the registered data in `store/parcel`. After `discard` is recorded in AMO blockchain, delete `parcel` corresponding (`parcel_id`, `owner_address`, `key_custody`, `extra_info`). 
 
-- command : `discard`
+- tx type : `discard`
 - affected store : `parcel`
 - `owner_address`  *(implicit)*
 
