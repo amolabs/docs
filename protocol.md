@@ -1,7 +1,5 @@
 # AMO blockchain protocol specification
 
-**TODO:** staking and validator update
-
 ## Introduction
 Although the current implementation of AMO blockchain depends ***heavily*** on Tendermint, AMO blockchain protocol itself is independent of Tendermint. It is described by several protocol messages and corresponding state transition in abstract internal database of each blockchain node. While the protocol messages are concretely defined(meaning and format), abstract internal database of a blockchain node is implementation-specific. But, note that every AMO blockchain node **MUST** incorporate a kind of database storing all kinds of data items described in [Internal Data](#internal-data) section.
 
@@ -41,17 +39,19 @@ A transaction is represented by a JSON document which has the following format:
 }
 ```
 `"_tx_type_"` is one of :
-- `"transfer"`
-- `"stake"`
-- `"withdraw"`
-- `"delegate"`
-- `"retract"`
-- `"register"`
-- `"request"`
-- `"grant"`
-- `"discard"`
-- `"cancel"`
-- `"revoke"`
+- coins and stakes
+	- `"transfer"`
+	- `"stake"`
+	- `"withdraw"`
+	- `"delegate"`
+	- `"retract"`
+- parcels
+	- `"register"`
+	- `"request"`
+	- `"grant"`
+	- `"discard"`
+	- `"cancel"`
+	- `"revoke"`
 
 `_sender_address_` identifies the sender or originator of this transaction. `"nonce"` is a ***random*** byte sequence with the length of 20 bytes represented by HEX-encoding(See [Replay Attack](#replay-attack)). `"params"` is a HEX-encoded JSON object, which is different for each transaction type.
 
@@ -144,24 +144,26 @@ A transaction is represented by a JSON document which has the following format:
 **TM:** Tendermint core sends a **Transaction** to AMO app, and the app replies with the response **ResponseDeliverTx**. This **ResponseDeliverTx** is defined in Tendermint, but is not part of AMO blockchain protocol. However, this is an important reply to the users indicating whether the transmitted transaction was successfully processed or not. This reply is described in [RPC](rpc.md) document. Moreover, [CLI](https://github.com/amolabs/amoabci/tree/master/cmd/amocli) may process this reply and prompt the user with a more human-friendly output.
 
 ## Internal Data
-* balance store:
-    * key: address
-    * value: balance
-* stake store:
-    * key: address
-    * value: stake
-* delegate store:
-    * key: address \*
-    * value: {delegator address, stake}
-* parcel store:
-    * key: parcel id
-    * value: {owner address, key custody, extra info}
-* request store:
-    * key: {buyer address, parcel id}
-    * value: {payment, exp cond}
-* usage store:
-    * key: {buyer address, parcel id}
-    * value: {key custody, exp cond}
+- coins and stakes
+    - balance store:
+        - key: address
+        - value: balance
+    - stake store:
+        - key: address
+        - value: stake
+    - delegate store:
+        - key: address \*
+        - value: {delegator address, stake}
+- parcels
+    - parcel store:
+        - key: parcel id
+        - value: {owner address, key custody, extra info}
+    - request store:
+        - key: {buyer address, parcel id}
+        - value: {payment, exp cond}
+    - usage store:
+        - key: {buyer address, parcel id}
+        - value: {key custody, exp cond}
 
 **NOTE:** In `delegate` store, a key to the database is just `address`, not `{holder address, delegator address}`. This means that a user cannot delegate his/her stakes to **multiple** delegators. While an AMO-compliant node can freely choose the actual database implementation, this constraint must be enforced in any way. An implementor may choose to keep this `address` as a unique key, or use more generous database implementation with an application code or a wrapper layer to keep this constraint on top of it.
 
@@ -173,7 +175,8 @@ A transaction is represented by a JSON document which has the following format:
 ### Transferring coin
 Upon receiving a `transfer` transaction from a sender, an AMO blockchain node performs a validity check and transfers coins from sender's balance to recipient's balance when the transaction is valid.
 
-**Validity check:** `sender_balance` &ge; `amount`.
+**Validity check:**
+1. `sender_balance` &ge; `amount`.
 
 **State change:**
 1. `sender_balance` &larr; `sender_balance` - `amount`
