@@ -242,6 +242,21 @@ If there is at least one of `stake`, `withdraw`, `delegate` or `retract` transac
 
 **TODO:** more accurate validator update time. consider non-tendermint implementations.
 
+#### Voting power calculation
+**TM:** In tendermint, a **voting power** has a similar role as a stake in PoS or DPoS consensus mechanism. One limitation is that sum of voting powers of all validators must not exceed the value `MaxTotalVotingPower`, which is 2^63 - 1.
+When we use one-to-one relation between stake value and voting power, exceeding this max limit is not very likely, but possible anyway. So, the validator set update mechanism must adjust voting power of each validator, so that total sum of voting power does not exceed `MaxTotalVotingPower`:
+1. For each validator `Val_i`, set voting power `vp_i` to be `stake` of `Val_i`.
+1. Calculate `TotalVotingPower`, which is the sum of `vp_i`s of all validators in the new validator set.
+1. If `TotalVotingPower` > `MaxTotalVotingPower`
+    1. Calculate `adjFactor`, which is `TotalVotingPower` / `MaxTotalVotingPower`.
+    1. For each validator `Val_i`, calculate `vp_i` as follows:<br/>
+    `vp_i` = `stake` * `adjFactor` (type-casted to integer)
+    1. For each validator `Val_i`, set new voting power as `vp_i`.
+
+**NOTE:** When `vp_i` reaches to zero, then `Val_i` shall be removed from the new validator set.
+
+**TODO:** Use more efficient method using shift operation(division by 2): left-shift all `vp_i` until `TotalVotingPower` &le; `MaxTotalVotingPower`.
+
 ### Registering data
 
 ### Requesting data
