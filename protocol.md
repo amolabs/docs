@@ -255,7 +255,7 @@ When we use one-to-one relation between stake value and voting power, exceeding 
 
 **NOTE:** When `vp_i` reaches to zero, then `Val_i` shall be removed from the new validator set.
 
-**TODO:** Use more efficient method using shift operation(division by 2): left-shift all `vp_i` until `TotalVotingPower` &le; `MaxTotalVotingPower`.
+**TODO:** Use more efficient method using shift operation(division by 2): right-shift all `vp_i` until `TotalVotingPower` &le; `MaxTotalVotingPower`.
 
 ### Registering data
 
