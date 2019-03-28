@@ -135,7 +135,7 @@ Lock AMO coin as a `stake` of the coin holder, or lock additional coin and incre
 - tx type: `stake`
 
 ```json
-{ "amount": "_currency_" }
+{ "validator": "_validator_pubkey_", "amount": "_currency_" }
 ```
 
 ### Withdraw coin
