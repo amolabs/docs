@@ -188,11 +188,12 @@ Upon receiving a `stake` transaction from an account, an AMO blockchain node per
 
 **Validity check:**
 1. `balance` &ge; `amount`
+1. There is no other stake holder with the same `validator key` as this transaction.
 
 **State change:**
 1. `balance` &larr; `balance` - `amount`
 1. `stake` &larr; `stake` + `amount`
-1. If the previous validator key is different from the key in the current `stake` transaction, then the stake holder's validator key is replaced with the new one.
+1. If the previous `validator key` is different from the key in the current `stake` transaction, then the stake holder's `validator key` is replaced with the new one.
 
 Upon receiving a `withdraw` transaction from an account, an AMO blockchain node performs a validity check and relieves requested coins from `stake` store and increases the account's balance when the transaction is valid.
 
