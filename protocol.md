@@ -250,15 +250,13 @@ If there is at least one of `stake`, `withdraw`, `delegate` or `retract` transac
 When we use one-to-one relation between stake value and voting power, exceeding this max limit is not very likely, but possible anyway. So, the validator set update mechanism must adjust voting power of each validator, so that total sum of voting power does not exceed `MaxTotalVotingPower`:
 1. For each validator `Val_i`, set voting power `vp_i` to be `stake` of `Val_i`.
 1. Calculate `TotalVotingPower`, which is the sum of `vp_i`s of all validators in the new validator set.
-1. If `TotalVotingPower` > `MaxTotalVotingPower`
-    1. Calculate `adjFactor`, which is `TotalVotingPower` / `MaxTotalVotingPower`.
-    1. For each validator `Val_i`, calculate `vp_i` as follows:<br/>
-    `vp_i` = `stake` * `adjFactor` (type-casted to integer)
-    1. For each validator `Val_i`, set new voting power as `vp_i`.
+1. `adjFactor` &larr; 0 (use this as a persistent factor)
+1. While `TotalVotingPower` > `MaxTotalVotingPower`
+    1. `adjFactor` &larr; `adjFactor` + 1
+    1. `TotalVotingPower` &larr; `TotalVotingPower` / 2
+    1. For each validator `Val_i`, `vp_i` &larr; `vp_i` / 2
 
 **NOTE:** When `vp_i` reaches to zero, then `Val_i` shall be removed from the new validator set.
-
-**TODO:** Use more efficient method using shift operation(division by 2): right-shift all `vp_i` until `TotalVotingPower` &le; `MaxTotalVotingPower`.
 
 ### Registering data
 
