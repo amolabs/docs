@@ -65,6 +65,7 @@ A transaction is represented by a JSON document which has the following format:
 - stake body:
 ```json
 {
+    "validator": "_validator_pubkey_",
     "amount": "_currency_"
 }
 ```
@@ -150,7 +151,7 @@ A transaction is represented by a JSON document which has the following format:
         - value: balance
     - stake store:
         - key: address
-        - value: stake
+        - value: {validator pubkey, stake}
     - delegate store:
         - key: address \*
         - value: {delegator address, stake}
@@ -191,6 +192,7 @@ Upon receiving a `stake` transaction from an account, an AMO blockchain node per
 **State change:**
 1. `balance` &larr; `balance` - `amount`
 1. `stake` &larr; `stake` + `amount`
+1. If the previous validator key is different from the key in the current `stake` transaction, then the stake holder's validator key is replaced with the new one.
 
 Upon receiving a `withdraw` transaction from an account, an AMO blockchain node performs a validity check and relieves requested coins from `stake` store and increases the account's balance when the transaction is valid.
 
@@ -238,7 +240,7 @@ If there is at least one of `stake`, `withdraw`, `delegate` or `retract` transac
 
 **NOTE:** `n_val` is a global parameter fixed across nodes and blocks (and so the time). So, it shall be set at the genesis time.
 
-**TM:** New list of validators shall be transferred to the Tendermint daemon via `EndBlock` response. Each validator has the voting power in proportion to the effective stake value.
+**TM:** New list of validator pubkeys shall be transferred to the Tendermint daemon via `EndBlock` response. Each validator has the voting power in proportion to the effective stake value.
 
 **TODO:** more accurate validator update time. consider non-tendermint implementations.
 
