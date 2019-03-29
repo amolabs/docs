@@ -254,7 +254,9 @@ When we use one-to-one relation between stake value and voting power, exceeding 
 1. While `TotalVotingPower` > `MaxTotalVotingPower`
     1. `adjFactor` &larr; `adjFactor` + 1
     1. `TotalVotingPower` &larr; `TotalVotingPower` / 2
+    <br/>(implemented as right-shift)
     1. For each validator `Val_i`, `vp_i` &larr; `vp_i` / 2
+    <br/>(implemented as right-shift)
 
 **NOTE:** When `vp_i` reaches to zero, then `Val_i` shall be removed from the new validator set.
 
@@ -263,6 +265,27 @@ When we use one-to-one relation between stake value and voting power, exceeding 
 ### Requesting data
 
 ### Granting data
+
+## Block Reward
+**TM:** Tendermint provides a block information via `BeginBlock()` ABCI method, which includes a block proposer address. This address is derived from the validator pubkey who proposed the block. In AMO ABCI app, we can look up the original stake holder in the `stake` store having the same validator pubkey.
+
+A stake holder who proposed a block receives a block reward. This is the only step in which there is a state change in `balance` store without involving any transaction:<br/>
+`R` &larr; `b_reward` + `n_tr` \* `tx_reward`<br/>
+where `R` is the final block reward, `b_reward` a block reward rate, `n_tr` the number of transactions in the block, and `tx_reward` a transaction reward rate.
+    
+When the block reward is `R`, this reward shall be distributed among the stake holder and the delegated stake holders. The distribution mechanism is as the following:
+1. `wStakes` &larr; `w_val` \* `stake_0` (stake of the proposer)
+1. For each delegated stake `stake_i`, `wStakes` &larr; `wStakes` + `w_ds` \* `stake_i`
+1. Calculate the reward for the proposer
+`R_0` &larr; `R` \* `w_val` \* `stake_0` / `wStakes`.
+1. For each delegated stake holder, calculate the reward for `i`-th delegated stake,
+`R_i` &larr; `R` \* `w_ds` \* `stake_i` / `wStakes`.
+
+where `w_val` is the validator stake weight, and `w_ds` is the delegated stake weight.
+
+**TODO:** Eliminate ambiguity in float number arithmetic.
+
+**TODO:** Take care of overflow situation.
 
 ## Genesis App State
 Initial state of the app (_genesis app state_) is defined by genesis document (genesis.json file in tendermint config directory, typically $HOME/.tendermint/config/genesis.json). Initial app state is described in `app_state` field in a genesis document. For example:
