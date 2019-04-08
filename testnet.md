@@ -10,11 +10,11 @@ However, there must be notable differences including:
 ### Client connection
 ### Block explorer
 
-## Testnet 190412
-This testnet is scheduled to launch on 2019-04-12 18:00 KST. This testnet nodes will run software version `pre-release1`.
+## Testnet 190415
+This testnet is scheduled to launch on 2019-04-15 12:00 KST. This testnet nodes will run software version `pre-release1`.
 
 ### AMO blockchain nodes
-- [genesis file](files/testnet_190412/genesis.json)
+- [genesis file](files/testnet_190415/genesis.json)
 - seed validator node
     - node0
         - p2p connection: ` id_to_be_announced@139.162.116.176 `
