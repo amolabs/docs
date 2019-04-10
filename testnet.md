@@ -10,30 +10,39 @@ However, there must be notable differences including:
 ### Client connection
 ### Block explorer
 
+## Node layout
+<p align="center"><img src="images/AMO deploy-testnet layout.svg"/></p>
+
 ## Testnet 190415
 This testnet is scheduled to launch on 2019-04-15 12:00 KST. This testnet nodes will run software version `pre-release1`.
+
+### Testnet configuration
+- number of validators: 3 (subject to change)
 
 ### AMO blockchain nodes
 - [genesis file](files/testnet_190415/genesis.json)
 - seed validator node
     - node0
-        - p2p connection: ` id_to_be_announced@139.162.116.176 `
-        - rpc connection: https://139.162.116.176/
+        - amo p2p connection: ` id_to_be_announced@139.162.116.176:26656 `
+        - pdb p2p connection: ` id_to_be_announced@139.162.116.176:26659 `
+        - amo rpc connection: http://139.162.116.176/amo/
+        - pdb rpc connection: http://139.162.116.176/pdb/
 - non-seed validator nodes
     - node1
-        - p2p connection: ` id_to_be_announced@ip_to_be_announced `
-        - rpc connection: TBA
+        - amo p2p connection: ` id_to_be_announced@ip_to_be_announced:26656 `
+        - pdb p2p connection: ` id_to_be_announced@ip_to_be_announced:26659 `
+        - amo rpc connection: http://ip_to_be_announced/amo/
+        - pdb rpc connection: http://ip_to_be_announced/pdb/
     - node2
-        - p2p connection:` id_to_be_announced@ip_to_be_announced `
-        - rpc connection: TBA
+        - amo p2p connection: ` id_to_be_announced@ip_to_be_announced:26656 `
+        - pdb p2p connection: ` id_to_be_announced@ip_to_be_announced:26659 `
+        - amo rpc connection: http://ip_to_be_announced/amo/
+        - pdb rpc connection: http://ip_to_be_announced/pdb/
 - block explorer
-    - https://ip_to_be_announced
-
-### Testnet configuration
-- number of validators: 3 (subject to change)
+    - http://ip_to_be_announced
 
 ### AMO storage nodes
-TBA
+PAUST-DB will be used as a native AMO storage service. Each AMO blockchain node will run its own storage node.
 
 ### Additional nodes
 In case of software failure in the seed node, the blockchain shall freshly start using the same genesis state.
