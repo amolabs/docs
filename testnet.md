@@ -10,9 +10,6 @@ However, there must be notable differences including:
 ### Client connection
 ### Block explorer
 
-## Node layout
-<p align="center"><img src="images/AMO deploy-testnet layout.svg"/></p>
-
 ## Testnet 190415
 This testnet is scheduled to launch on 2019-04-15 12:00 KST. This testnet nodes will run software version `pre-release1`.
 
