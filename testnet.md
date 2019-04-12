@@ -7,11 +7,32 @@ However, there must be notable differences including:
 - There shall be a fixed number of validators and cannot be changed during the lifetime of a testnet. ( *This policy may change in the future.* )
 
 ## Test guide
-### Client connection
 ### Block explorer
+You can visit [block explorer]() web site to explore the internals of AMO blockchain testnet: list of blocks, list transactions in a block, individual transaction, and various internal data of AMO blockchain state.
+
+### Client connection
+In order to participate as an AMO client, you need to download AMO client source code from AMOLabs' github [repository](https://github.com/amolabs/amoabci). For more information about downloading and building AMO client CLI, see [README.md](https://github.com/amolabs/amoabci/blob/master/README.md).
+
+After you get an AMO CLI program(amocli), you can connect any AMO blockchain node as follows:
+```bash
+amocli --rpc <rpc_node_ip:port> <command> <args>
+```
+You can ommit `--rpc` option in order to connect to a node on a localhost.
+
+### Validator node
+In order to participate as a validator node, you need to download AMO blockchain node source code from AMOLabs' github [repository](https://github.com/amolabs/amoabci). For more information about downloading and building AMO blockchain node, see [README.md](https://github.com/amolabs/amoabci/blob/master/README.md).
+
+- Prepare a data directory
+- Generate a validator key pair
+- Obtain enough AMO coins
+- Obtain a stake with the AMO coins and a validator public key
+- Run a _stable_ AMO blockchain node (config)
+
+### Non-validator ndoe
+- Run an AMO blockchain node (config)
 
 ## Testnet 190415
-This testnet is scheduled to launch on 2019-04-15 12:00 KST. This testnet nodes will run software version `pre-release1`.
+This testnet is scheduled to launch on 2019-04-15 12:00 KST. This testnet nodes will run software version `v1.0-alpha1`.
 
 ### Testnet configuration
 - number of validators: 3 (subject to change)
