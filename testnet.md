@@ -52,9 +52,9 @@ will run software version `v1.0-alpha2`.
 
 ### Testnet configuration
 - number of validators: 3 (subject to change)
+- [genesis file](https://github.com/amolabs/testnet/blob/master/testnet_190415/genesis.json)
 
 ### AMO blockchain nodes
-- [genesis file](https://github.com/amolabs/testnet/blob/master/testnet_190415/genesis.json)
 - seeder (validator 0)
 	- p2p: ` 3e4f83cb37f5a8be3efdc7eaa3e40329b5370fc8@139.162.116.176:26656 `
 	- rpc: http://139.162.116.176:26657
@@ -64,11 +64,12 @@ will run software version `v1.0-alpha2`.
 - validator 2
 	- p2p: ` 8b3a95b3432103c23c65e76c4d91970201ff29b0@139.162.180.153:26656 `
 	- rpc: http://139.162.180.153:26657
-- block explorer
-    - http://explorer.amolabs.io
+
+### AMO blockchain explorer
+- http://explorer.amolabs.io
 
 ### AMO storage nodes
-TBA
+Not included in this testnet.
 
 ### Additional nodes
 In case of software failure in the seed node, the blockchain shall freshly
