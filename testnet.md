@@ -12,7 +12,7 @@ However, there must be notable differences including:
 
 ## Test guide
 ### Block explorer
-You can visit [block explorer]() web site to explore the internals of AMO
+You can visit [block explorer](http://explorer.amolabs.io) web site to explore the internals of AMO
 blockchain testnet: list of blocks, list transactions in a block, individual
 transaction, and various internal data of AMO blockchain state.
 
