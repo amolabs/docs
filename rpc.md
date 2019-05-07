@@ -56,7 +56,7 @@ When querying an account's _stake_, `data` is a `hex` conversion of the double-q
 ### Delegate query
 When querying an account's _delegate_ for specific _delegator_, `data` is a `hex` conversion of a JSON representation of (`holder address`, `delegator address`), where this JSON representation is as the following example:
 ```json
-{ "holder" : "_address_", "delegator": "_delegator_address_" }
+"_address_"
 ```
 
 ### Parcel query
@@ -68,13 +68,13 @@ When querying a _parcel_, `data` is a `hex` conversion of the double-quoted _dat
 ### Request query
 When querying a _request_ for specific _parcel_, `data` is a `hex` conversion of a JSON representation of (`buyer address`, `data parcel ID`), where this JSON representation is as the following example:
 ```json
-{ "buyer" : "_address_", "parcel" : "_parcel_ID_" }
+{ "buyer" : "_address_", "target" : "_parcel_ID_" }
 ```
 
 ### Usage query
 When querying a _usage_ for specific _parcel_, `data` is a `hex` conversion of a JSON representation of (`buyer address`, `data parcel ID`), where this JSON representqtion is as the following example:
 ```json
-{ "buyer" : "_address_", "parcel" : "_parcel_ID_" }
+{ "buyer" : "_address_", "target" : "_parcel_ID_" }
 ```
 
 ## Broadcast tx parameters
@@ -106,7 +106,7 @@ Full `message` body of `transfer`:
     "type": "_tx_type_",
     "sender": "_sender_address_",
     "nonce": "_HEX-encoded_nonce_bytes_",
-    "params": {
+    "payload": {
 		"to": "_recipient_address_",
 		"amount": "_currency_"
 	},
@@ -162,10 +162,9 @@ Retract all or part of the AMO coin locked as a delegated stake.
 - tx type: `retract`
 
 ```json
-{ "from": "_delegator_address_", "amount": "_currency_" }
+"amount": "_currency_"
 ```
 
-### Upload Data (PDB operation)
 ### Register Data
 
 Register `parcel` with `extra`( price, description, expired_date, etc... ). This command causes a chage in the state of the `store/parcel`.
@@ -237,5 +236,6 @@ Discard the registered data in `store/parcel`. After `discard` is recorded in AM
 { "target" : "_parcel_id_" }
 ```
 
+### Upload Data (PDB operation)
 ### Retrieve Data (PDB operation)
 ### Delete Data (PDB operation)
