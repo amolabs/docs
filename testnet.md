@@ -46,35 +46,6 @@ downloading and building AMO blockchain node, see
 ### Non-validator ndoe
 - Run an AMO blockchain node (config)
 
-## Testnet 190423
-This testnet is scheduled to launch on 2019-04-23 12:00 KST. This testnet nodes
-will run software version `v1.0-alpha4`.
-
-### Testnet configuration
-- number of validators: 3 (subject to change)
-- [genesis file](https://github.com/amolabs/testnet/blob/master/testnet_190423/genesis.json)
-
-### AMO blockchain nodes
-- seeder (validator 0)
-	- p2p: ` a944a1fa8259e19a9bac2c2b41d050f04ce50e51@139.162.116.176:26656 `
-	- rpc: http://139.162.116.176:26657
-- validator 1
-	- p2p: ` 85f77642d233fdff6cb16a73e3484bc7b2bf8e37@96.126.125.11:26656 `
-	- rpc: http://96.126.125.11:26657
-- validator 2
-	- p2p: ` aaa9ac5fcf4aae14576c75e3d6c0b875f1fce377@139.162.180.153:26656 `
-	- rpc: http://139.162.180.153:26657
-
-### AMO blockchain explorer
-- http://explorer.amolabs.io
-
-### AMO storage nodes
-Not included in this testnet.
-
-### Additional nodes
-In case of software failure in the seed node, the blockchain shall freshly
-start using the same genesis state.
-
 ## Testnet 190509
 This testnet is scheduled to launch on 2019-05-09 13:00 KST. This testnet nodes
 will run software version `v1.0-alpha5`.
@@ -100,6 +71,35 @@ will run software version `v1.0-alpha5`.
 ### AMO storage nodes
 - p2p: ` ea1d9e5314da8bc2b521e439ffd5e77f3eb6b12b@139.162.116.176:26659 `
 - rpc: 139.162.116.176:26660
+
+### Additional nodes
+In case of software failure in the seed node, the blockchain shall freshly
+start using the same genesis state.
+
+## Testnet 190423
+This testnet is scheduled to launch on 2019-04-23 12:00 KST. This testnet nodes
+will run software version `v1.0-alpha4`.
+
+### Testnet configuration
+- number of validators: 3 (subject to change)
+- [genesis file](https://github.com/amolabs/testnet/blob/master/testnet_190423/genesis.json)
+
+### AMO blockchain nodes
+- seeder (validator 0)
+	- p2p: ` a944a1fa8259e19a9bac2c2b41d050f04ce50e51@139.162.116.176:26656 `
+	- rpc: http://139.162.116.176:26657
+- validator 1
+	- p2p: ` 85f77642d233fdff6cb16a73e3484bc7b2bf8e37@96.126.125.11:26656 `
+	- rpc: http://96.126.125.11:26657
+- validator 2
+	- p2p: ` aaa9ac5fcf4aae14576c75e3d6c0b875f1fce377@139.162.180.153:26656 `
+	- rpc: http://139.162.180.153:26657
+
+### AMO blockchain explorer
+- http://explorer.amolabs.io
+
+### AMO storage nodes
+Not included in this testnet.
 
 ### Additional nodes
 In case of software failure in the seed node, the blockchain shall freshly
