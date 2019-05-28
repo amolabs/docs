@@ -46,6 +46,27 @@ downloading and building AMO blockchain node, see
 ### Non-validator ndoe
 - Run an AMO blockchain node (config)
 
+## Testnet 190527
+This testnet is scheduled to launch on 2019-05-27 13:00 KST. This testnet nodes
+will run software version `v1.0-alpha6`.
+
+### Testnet configuration
+- number of validators: 3 (subject to change)
+- [genesis file](https://github.com/amolabs/testnet/blob/master/testnet_190527/genesis.json)
+
+### AMO blockchain nodes
+Same as [testnet-190509](#testnet-190509).
+
+### AMO blockchain explorer
+- http://explorer.amolabs.io
+
+### AMO storage nodes
+TBA
+
+### Additional nodes
+In case of software failure in the seed node, the blockchain shall freshly
+start using the same genesis state.
+
 ## Testnet 190509
 This testnet is scheduled to launch on 2019-05-09 13:00 KST. This testnet nodes
 will run software version `v1.0-alpha5`.
