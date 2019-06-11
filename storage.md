@@ -1,55 +1,225 @@
-# AMO Storage Service Requirements
-Any AMO storage service must meet the following requirements in order to participate in AMO environment as a AMO-compatible storage service.
+# AMO Storage Service
+DRAFT
 
-## Storage Service Identification
-A storage service must be registered as AMO-compatible storage service. Upon registration a storage service shall receives a unique identifier. AMO-compatible clients will use this identifier to locate the storage service and figure out how to connect and interact with the service nodes.
+Any storage service must meet the following requirements in order to
+participate in AMO environment as an AMO storage service.
 
-## Data Identification
-A storage service must provide a form of an object storage service. Every data item in the storage must be able to be identified by a unique identifier. An typical example is Amazon S3 service. In AMO environment, all data items are identified, uploaded, and retrieved by the unit of *parcel*. A data *parcel* does not have any special internal structure. It is just a unit of addressing and merchandizing. Its content may be a single *byte* or a *bulk* of data with the size of several terabytes.
+There is a default AMO storage service, and its availability is guaranteed by
+AMO Labs. See [Default AMO Storage Service](ceph.md) for more information.
 
-## Access Control
-A service must implement a access control mechanism to meet the minimum data protection requirement. A public key signature scheme is used for user authentication, and AMO blockchain query is used for permission check.
+## General Requirements
+* high availability and guarantee of persistent storage medium
+* object storage
+* updatable data body
 
-### Overall flow
-1. AMO client &rarr; storage node
-    1. An AMO client or AMO-compatible client sends a request<sup>&dagger;</sup> to retrieve a data parcel.
-    1. Storage node verifies the signature of the request<sup>&dagger;&dagger;</sup>.
-    1. Storage node records a user address from the client request.
-1. storage node &lrarr; AMO blockchain node
-    1. Storage node sends a query to an AMO blockchain node via AMO client RPC<sup>&dagger;&dagger;&dagger;</sup> to check if the user has a *granted usage* to the target data *parcel*.
-    1. AMO blockchain node replies to the RPC query.
-1. AMO client &larr; storage node
-    1. Storage node checks the permission
-    1. Storage node either transfer the data parcel or reject the request.
+## Data Parcel
+A _data parcel_ is a generic term used to call any data item for sale in AMO
+infrastructure. Each data parcel should have a globally unique identifier. A
+data parcel has no intrinsic properties related to internal data structure or
+contextual meaning. It can be a single byte or a tera byte-sized multi-media
+data. One requirement is that anyone shall get an identical data from an AMO
+storage service for the same data parcel identifier and for a given time.
 
-&dagger; See [Data format](#data-format).<br/>
-&dagger;&dagger; See [User authentication](#user-authentication).<br/>
-&dagger;&dagger;&dagger; See [Usage query](rpc.md#usage-query).
+_For a convention, empty data body means there is no data parcel registered
+with a given data parcel ID._
 
-### User authentication
-AMO client must sends a signed request along with a public key and a time-stamp to a storage node. The storage node must verify the signature before any action. AMO storage node shall derive the user account address from the public key. See [AMO Blockchain Protocol Specification](protocol.md) for the address derivation method.
+## Identifiers
 
-### Permission check
-See [Usage query](rpc.md#usage-query) for how to query via RPC channel.<br/>
-See [AMO Blockchain Protocol Specification](protocol.md) for how to interpret RPC response.
+### Storage Service ID
+TODO:
+globally and uniquely identify storage service name and access point.
+there must be some mechanism to make a consensus on a globally unique storage
+service identifier.
 
-### Data format
+### Data Parcel ID
+TODO:
+globally and uniquey identify data parcel throughout all storage services.
+there must be some mechanism to generate new globally unique data parcel
+identifier.
 
-##### AMO client &rarr; storage node
+## AMO Storage Adapter
+TODO:
+define homogeneous API outfit
+
+## Protocol Messages
+### User Identity
+```json
+"_account_address_"
+```
+* *address* is arealdy a hex-encoded 16-byte binary sequence. _address_ is used
+  to uniquely identify a user account in AMO ecosystem. See [AMO Blockchain
+  Protocol Specification](protocol.md) for more information.
+
+### Signature Appendix
 ```json
 {
-    "address" : "_user_account_address_",
-    "data_parcel": "_data_parcel_id_",
-    "timestamp": "_time_of_the_request_",
-    "signature": {
-        "pubkey": "_hex_encoded_public_key_",
-        "sig_bytes": "_hex_encoded_signature_"
-    }
+	"pubkey": "_hex-encoded_ECDSA_public_key_",
+	"sig_bytes": "_hex-encoded_ECDSA_signature_"
+}
+```
+* _pubkey_ is a hexadecimal representation of a compressed elliptic curve
+  point. See [AMO Blockchain Protocol Specification](protocol.md) for more
+  information.
+* *sig_bytes*  is a hexadecimal representation of concatenated ECDSA signature
+  bytes.
+
+### Data Parcel Identifier
+```json
+"_hex-encoded_binary_sequence_"
+```
+
+### Data Parcel
+```json
+{
+	"id": _data_parcel_ID_,
+	"owner": _user_identity_,
+	"metadata": _metadata_,
+	"data": _hex-encoded_binary_sequence_
+}
+```
+* *id* may be omitted.
+* *metadata* is any JSON object and can be null.
+
+### Initiation Message Type 1
+```json
+{
+	"user": _user_identity_,
+	"operation": _operation_description_,
+	"signature": _signature_appendix_
+}
+```
+* signing bytes for the *signature* is the initiation message itself without
+  *signature* field.
+
+### Initiation Message Type 2
+```json
+{
+	"user": _user_identity_,
+	"operation": _operation_description_
 }
 ```
 
-##### storage node &lrarr; AMO blockchain node
-See [Usage query](rpc.md#usage-query).
+### Auth Challenge Message
+```json
+{
+	"challenge": "_hex-encoded_256-bit_sequence_"
+}
+```
+* _challenge_ is a hexadecimal representation of a 256-bit binary sequence
 
-##### storage node &rarr; AMO client
-specific to each storage service type.
+### Auth Response Message
+```json
+{
+	"signature": _signature_appendix_
+}
+```
+* signing bytes for the *signature* is the concatenation of initiation message
+  and challenge message.
+
+### Result Message
+```json
+{
+	"code": _integer_,
+	"data": _operation_specific_result_data_
+}
+```
+
+## API Operations
+list of tier 1 operations
+
+### Upload
+Operation description is as follows:
+```json
+{
+	"name": "upload",
+	"hash": "_hex-encoded_256-bit_hash_"
+}
+```
+* *hash* is SHA256 output of the data body.
+
+Operation steps are as follows:
+* client &rArr; storage: initiation message type 1
+* client &lArr; storage: continue or fail
+* client &rArr; storage: data parcel
+* client &lArr; storage: result message with no data field
+
+Upon receiving *initiation message*, storage service shall perform signature
+verification and response to the client with either *continue* or *fail*. No
+access control than this.
+
+Result data is a *data parcel ID*.
+**need discussion**
+
+### Inspect
+Operation description is as follows:
+```json
+{
+	"name": "inspect",
+	"id": _data_parcel_ID_
+}
+```
+
+Operation steps are as follows:
+* client &rArr; storage: initiation message type 2
+* client &lArr; storage: result message
+
+No access control at this operation.
+
+Result data is a data parcel metadata.
+
+### Download
+Operation description is as follows:
+```json
+{
+	"name": "download",
+	"id": _data_parcel_ID_
+}
+```
+
+Operation steps are as follows:
+* client &rArr; storage: initiation message type 2
+* client &lArr; storage: auth challenge
+* client &rArr; storage: auth response
+* client &lArr; storage: result message
+
+Upon receiving *auth response*, storage service shall access AMO blockchain to
+perform AMO-based access control.
+
+Result data is either empty or a *data parcel* depending on the access control
+result.
+
+### Remove
+Operation description is as follows:
+```json
+{
+	"name": "remove",
+	"id": _data_parcel_ID_
+}
+```
+
+Operation steps are as follows:
+* client &rArr; storage: initiation message type 2
+* client &lArr; storage: auth challenge
+* client &rArr; storage: auth response
+* client &lArr; storage: result message
+
+Upon receiving *auth response*, storege service shall perform local identity
+matching.
+
+Result data is empty.
+
+### *Append*
+optional. tier 2 oepration
+### *Replace*
+optional. tier 2 oepration
+
+## Access Control
+### AMO-Based Access Control
+TODO
+
+See [Usage query](rpc.md#usage-query) for how to query via RPC channel.
+
+### Local Identity Matching
+It's a simple account address matching. Identity from the user is reliable
+enough, and if it exactly matches the owner field in the saved data parcel the
+access control result is success. Fail otherwise.
