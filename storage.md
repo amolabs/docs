@@ -8,8 +8,9 @@ There is a default AMO storage service, and its availability is guaranteed by
 AMO Labs. See [Default AMO Storage Service](ceph.md) for more information.
 
 ## General Requirements
-* high availability and guarantee of persistent storage medium
 * object storage
+* high availability
+* long-term persistent storage
 * updatable data body
 
 ## Data Parcel
@@ -39,7 +40,7 @@ identifier.
 
 ## AMO Storage Adapter
 TODO:
-define homogeneous API outfit
+define common API outfit
 
 ## Protocol Messages
 ### User Identity
