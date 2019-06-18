@@ -27,16 +27,39 @@ with a given data parcel ID._
 ## Identifiers
 
 ### Storage Service ID
-TODO:
-globally and uniquely identify storage service name and access point.
-there must be some mechanism to make a consensus on a globally unique storage
-service identifier.
+A storage service ID is used to identify a specific storage service and its
+access point. It is a natural requirement that this ID should be globally
+unique one. Since AMO blockchain is a decentralized service, there is no single
+authority to announce storage IDs for various AMO-compatible storage services.
+In AMO infrastructure, this storage service ID is decided by community. There
+shall be a single logical repository in the internet and anyone can contribute
+to this repository.  
+
+A storage service ID is a four-byte binary sequence, represented by 8
+hexadecimal digits.
+
+| service ID | canonical name | access point |
+|--------------------------------------------|
+| 00000001   | AMO primary    | TBA          |
 
 ### Data Parcel ID
-TODO:
-globally and uniquey identify data parcel throughout all storage services.
-there must be some mechanism to generate new globally unique data parcel
-identifier.
+A data parcel ID is used to identify a single *data parcel* in AMO
+infrastructure. A storage service may introduce its own internal ID to identify
+a data item or object within the storage. But since each storage service is run
+independently, there is no guarantee that an internal ID used in a storage
+service is also unique in whole AMO ecosystem. To solve this problem, a data
+parcel ID in AMO infrastructure is composed of a storage service ID and an
+internal ID or index. In a human readable form or in a protocol message, this
+data parcel ID is represented by concatenation of an 8-digit hexadecimal
+sequence, a colon character(':'), and a binary sequence represented by a
+hexadecimal sequence with the maximum length of 256-byte.
+
+One possible strategy to generate an internal ID for a data parcel is to take a
+SHA-256 hash of the (metadata, payload), or just the payload. In that case, a
+data parcel ID would have the form like the following (every zero-byte(0x00)
+counts):
+
+	00000001:0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF
 
 ## AMO Storage Adapter
 TODO:
@@ -47,8 +70,8 @@ define common API outfit
 ```json
 "_account_address_"
 ```
-* *address* is arealdy a hex-encoded 16-byte binary sequence. _address_ is used
-  to uniquely identify a user account in AMO ecosystem. See [AMO Blockchain
+* *address* is a hex-encoded 20-byte binary sequence. _address_ is used to
+  uniquely identify a user account in AMO ecosystem. See [AMO Blockchain
   Protocol Specification](protocol.md) for more information.
 
 ### Signature Appendix
