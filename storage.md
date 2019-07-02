@@ -39,7 +39,7 @@ A storage service ID is a four-byte binary sequence, represented by 8
 hexadecimal digits.
 
 | service ID | canonical name | access point |
-|--------------------------------------------|
+|------------|----------------|--------------|
 | 00000001   | AMO primary    | TBA          |
 
 ### Data Parcel ID
@@ -102,7 +102,7 @@ define common API outfit
 }
 ```
 * *id* may be omitted.
-* *metadata* is any JSON object and can be null.
+* *metadata* is any JSON object with a mandatory field `owner`.
 
 ### Initiation Message Type 1
 ```json
