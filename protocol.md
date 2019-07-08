@@ -9,7 +9,7 @@ Some notes related to Tendermint will be tagged with **TM**.
 ### Key
 AMO blockchain uses ECDSA key pair to sign and verify various transactions and messages. AMO blockchain uses NIST P256 curve as its default ECDSA domain parameter.
 
-A key pair in AMO blockchain is a pair of a private key and a public key. A private key is a sequence 32 bytes, and a public key is a sequence of 33 bytes(compressed form. TODO: give a reference). These byte sequences are represented by HEX encoding when transmitted over a communication channel or stored as a marshaled form, while they reside *as is* in a program's internal memory space.
+A key pair in AMO blockchain is a pair of a private key and a public key. A private key is a sequence 32 bytes, and a public key is a sequence of 65 bytes(uncompressed form with 0x04 prefix. TODO: give a reference). These byte sequences are represented by HEX encoding when transmitted over a communication channel or stored as a marshaled form, while they reside *as is* in a program's internal memory space.
 
 ### Key custody
 A key custody is a special form of key transfer medium. It is a public-key encryption of a data encryption key: `PKEnc(PK, DEK)`, where `PKEnc` is a sort of a hybrid encryption (combination of public key encryption and symmetric key encryption). For `PKEnc`, we use a combination of ECDH ephemeral mode and AES. For ECDH ephemeral key generation, we use ECDSA key generation algorithm.`PK` is a public key of a recipient and `DEK` is a data encryption key of an encrypted *data parcel*.
