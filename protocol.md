@@ -133,9 +133,16 @@ A transaction is represented by a JSON document which has the following format:
 }
 ```
 
-`"pubkey"` is of type P256, neither of ed25519 or secp256k1. It is a HEX-encoding of a compressed elliptic curve point with the length of 33 bytes.
+`"pubkey"` is of type P256, neither of ed25519 or secp256k1. It is a
+HEX-encoding of a compressed elliptic curve point with the length of 65 bytes.
 
-`"sig_bytes"` is HEX-encoded ECDSA signature, which is a concatenation of `r` and `s`. This is `(r, s) = ECDSA(privkey, sb)`, where `privkey` is the corresponding private key, and `sb` is a concatenation of values of `"type"`, `"sender"`, `"nonce"` and `"params"`.
+`"sig_bytes"` is HEX-encoded ECDSA signature, which is a concatenation of `r`
+and `s`. This is `(r, s) = ECDSA(privkey, sb)`, where `privkey` is the
+corresponding private key, and `sb` is a compact JSON representation of a
+transaction with all the HEX-encoded string in upper case as the following:
+```json
+{"type":"_tx_type_","sender":"_sender_address_","nonce":"_HEX-encoded_nonce_bytes_","params":"_HEX-encoded_JSON_object_"}
+```
 
 ### Transaction Result
 **TM:** TBA
