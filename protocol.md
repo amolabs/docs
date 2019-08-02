@@ -93,7 +93,7 @@ A transaction is represented by a JSON document which has the following format:
 ```json
 {
     "target": "_parcel_id_",
-    "key_custody": "_owner_custody_",
+    "custody": "_owner_custody_",
     "extra": "_extra_info_"
 }
 ```
@@ -116,7 +116,7 @@ A transaction is represented by a JSON document which has the following format:
 {
     "target": "_parcel_id_",
     "grantee": "_buyer_address_",
-    "key_custody": "_buyer_custody_"
+    "custody": "_buyer_custody_"
 }
 ```
 - revoke body
