@@ -40,7 +40,7 @@ hexadecimal digits.
 
 | service ID | canonical name | access point |
 |------------|----------------|--------------|
-| 00000001   | AMO primary    | TBA          |
+| 00000001   | AMO default    | TBA          |
 
 ### Data Parcel ID
 A data parcel ID is used to identify a single *data parcel* in AMO
