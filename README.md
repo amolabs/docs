@@ -11,7 +11,7 @@
 ## Manuals
 * [AMO blockchain node
   manual](https://github.com/amolabs/amoabci/blob/master/README.md)
-  (<s>[한국어](https://github.com/amolabs/amoabci/blob/master/README.ko.md)</s>)
+  ([한국어](https://github.com/amolabs/amoabci/blob/master/README.ko.md))
 * [AMO client
   manual](https://github.com/amolabs/amo-client-go/blob/master/README.md)
   ([한국어](https://github.com/amolabs/amo-client-go/blob/master/README.ko.md))
