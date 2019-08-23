@@ -1,4 +1,5 @@
 # Quick Start Guide for Validator Node
+This docuemtn is available in [Korean](qs_val.ko.md) also.
 
 ## Introduction
 This quick start guide describes how to prepare and launch validator node in
@@ -53,11 +54,11 @@ a backup. We assume the validator public key is as follows:
 ```
 
 ## Run validator node
-Run the following command to run the daemons:
+Execute the following command to run the daemons:
 ```bash
 docker run -it --rm -p 26656-26657 -v /mynode/tendermint:/tendermint:Z -v /mynode/amo:/amo:Z --name mynode -d amolabs/amod:latest
 ```
-Observer the output of the docker container for a while to see if the daemons
+Observe the output of the docker container for a while to see if the daemons
 are functioning correctly.
 ```bash
 docker logs -f mynode
