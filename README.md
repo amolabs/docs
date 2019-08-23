@@ -20,7 +20,7 @@
 * [AMO public testnet guide](testnet.md) (<s>[한국어](testnet.ko.md)</s>)
   * [Testnet quick start guide](https://github.com/amolabs/testnet/blob/master/README.md)
 	for testnet launch scripts.
-	(<s>[한국어](https://github.com/amolabs/testnet/blob/master/README.ko.md)</s>)
+	([한국어](https://github.com/amolabs/testnet/blob/master/README.ko.md))
 * [Validator quick start guide](qs_val.md) ([한국어](qs_val.ko.md))
 
 ## Other notes
