@@ -17,7 +17,7 @@
   ([한국어](https://github.com/amolabs/amo-client-go/blob/master/README.ko.md))
 
 ## Guides
-* [AMO public testnet guide](testnet.md) (<s>[한국어](testnet.ko.md)</s>)
+* [AMO public testnet guide](testnet.md) ([한국어](testnet.ko.md))
   * [Testnet quick start guide](https://github.com/amolabs/testnet/blob/master/README.md)
 	for testnet launch scripts.
 	([한국어](https://github.com/amolabs/testnet/blob/master/README.ko.md))
