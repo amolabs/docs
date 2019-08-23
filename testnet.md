@@ -28,8 +28,8 @@ Labs provide a general-purpose CLI program,
 [`amo-client-go`](https://github.com/amolabs/amo-client-go), and you can
 interact with the AMO blockchain, including testnet, on your own way.
 
-In order to participate as an AMO client, you need to download AMO client
-source code from AMOLabs' github
+In order to participate as an AMO client using `amo-client-go`, you need to
+download AMO client source code from AMOLabs' github
 [repository](https://github.com/amolabs/amo-client-go). For more information
 about downloading and building AMO client CLI, see
 [README.md](https://github.com/amolabs/amo-client-go/blob/master/README.md).
@@ -49,7 +49,8 @@ node. You may see a separate [quick start
 guide](https://github.com/amolabs/docs/blob/master/qs_val.md).
 
 ### Launching non-validator node
-TBA
+In order to participage as a non-validator, you may see
+[README.md](https://github.com/amolabs/testnet/blob/master/README.md).
 
 ## Network information
 ### AMO blockchain nodes
