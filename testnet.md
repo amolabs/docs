@@ -1,4 +1,6 @@
 # AMO Testnet
+This document is available in [Korean](testnet.ko.md) also.
+
 The purpose of the AMO testnet is demonstrating functions of AMO blockchain
 without spending real-world monetary assets. There is intended to be no other
 functional differences between mainnet and testnet than this key difference.

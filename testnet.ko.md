@@ -1,4 +1,6 @@
 # AMO 테스트넷
+This document is available in [English](testnet.md) also.
+
 AMO 테스트넷의 목적은 실제 금전 자산을 소비하지 않으면서도 AMO 블록체인의
 기능들을 활용해 보는 것이다. 메인넷과 테스트넷 사이에는 이런 차이 외에 다른
 기능상의 차이는 없다. 주요한 차이점은 다음과 같다:
