@@ -16,15 +16,16 @@ the mainnet. For both of testnet and mainnet, you need to acquire AMO coins
 before you send a `stake` transaction (the last step in this guide).
 
 ## Prepare environment
-### Host machine
-In order to run a validator node, you need a physical or virtual machine to
-launch necessary blockchain node daemons. In this guide, we assume typical
+### Server machine
+In order to run a validator node, you need a physical server with a stable
+internet connection or a virtual machine on a cloud service(Amazon AWS, Google
+cloud, Microsoft Azure or similar services). In this guide, we assume typical
 Ubuntu Linux is instlalled on the host machine.
 
 ### Install necessary packages
-Install Docker:
+Connect to a console of the server machine and install Docker:
 ```bash
-apt install docker.io
+sudo apt install docker.io
 ```
 
 ### Prepare
