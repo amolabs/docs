@@ -16,19 +16,58 @@ AMO 코인을 획득하는 것은 전적으로 사용자에게 달려 있다. �
 `stake` 거래를 전송(이 가이드의 가장 마지막 단계)하기 전에 코인을 확보해 놓아야
 한다.
 
-## 환경 준비
+## 서버 환경 준비
 ### 서버 머신
 Validator 노드를 실행하기 위해서는 인터넷 연결이 안정적인 물리적인 서버나
 클라우드 서비스(Amazon AWS, Google cloud, Microsoft Azure 또는 유사한 서비스들)
-상의 가상머신을 준비해야 한다. 이 가이드에서는 흔히 쓰이는 우분투 리눅스가
-서버에 설치돼 있다고 가정한다.
+상의 가상머신을 준비해야 한다. 이 가이드에서는 흔히 쓰이는 Ubuntu Linux나
+MacOS가 서버에 설치돼 있다고 가정한다.
 
 ### 필요한 패키지 설치
-서버의 콘솔에 접속하여 root 권한으로 Docker를 설치한다:
+서버의 터미널에 접속하여 root 권한으로 Docker와 git을 설치한다:
 ```bash
-sudo apt install docker.io
+sudo apt install docker.io git
 ```
 
+## Testnet에서 실행
+### 준비
+먼저, 데이터 디렉토리를 어디에 둘 것인지 결정한다. 이 문서에서는
+`/testnet/mynode`를 사용한다고 가정한다. 노드의 이름을 무엇으로 할 것인지
+결정한다. 이 문서에서는 `mynodename`을 사용한다고 가정한다. 서버의 터미널에
+접속하여 다음 명령을 실행한다:
+```bash
+cd $HOME
+git clone https://github.com/amolabs/testnet
+cd testnet
+./setup.sh /testnet/mynode mynodename f5123e0f663fe8e0662b82de8f6a1d843a9d4fbd@172.104.88.12:26656
+```
+
+### 키 백업
+`/testnet/mynode/tendermint/config/priv_validator_key.json` 파일을 안전한 곳에
+보관한다.
+
+### 실행
+서버의 터미널에 접속하여 다음 명령을 실행한다:
+```bash
+cd $HOME/testnet
+./run.sh /testnet/mynode
+```
+
+### 정보 수집
+서버의 터미널에서 `curl` 패키지를 설치한다:
+```bash
+sudo apt install curl
+```
+실행 여부를 묻는 경우 y를 입력하고 엔터 키를 입력한다.
+
+다음 명령으로 노드의 validator 주소와 공개키를 확인하여 편리한 곳에 기록해
+둔다.
+```bash
+curl localhost:26657/status
+```
+<p align="center"><img src="images/node_status.png"/></p>
+
+## Mainnet에서 실행
 ### 준비
 amoabci 문서에서
 [실행준비](https://github.com/amolabs/amoabci#prepare-for-launch) 섹션을
@@ -56,7 +95,7 @@ docker -it --rm -v /mynode/tendermint:/tendermint:Z -v /mynode/amo:/amo:Z amolab
 }
 ```
 
-## Validator 노드 실행
+### 노드 실행
 데몬들을 실행하기 위해 다음 명령을 수행한다:
 ```bash
 docker run -it --rm -p 26656-26657 -v /mynode/tendermint:/tendermint:Z -v /mynode/amo:/amo:Z --name mynode -d amolabs/amod:latest
@@ -77,6 +116,10 @@ curl localhost:26657/status
 때까지 기다린다.
 
 ## Stake 생성
+**NOTE:** 메인넷인 경우는 아래의 방법 등과 같이 보다 통제된 방법을 사용해야
+하지만, 테스트넷인 경우는 <a href="http://explorer.amolabs.io/wallet">AMO
+블록체인 탐색기</a>에 접속하여 안내에 따른다. (*9월 6일부터 사용 가능*)
+
 코인을 stake하기 위해서는 AMO 클라이언트가 필요하다.
 ```bash
 apt install golang
