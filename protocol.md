@@ -250,7 +250,7 @@ If there is at least one of `stake`, `withdraw`, `delegate` or `retract` transac
 
 **TM:** New list of validator pubkeys shall be transferred to the Tendermint daemon via `EndBlock` response. Each validator has the voting power in proportion to the effective stake value.
 
-**TODO:** more accurate validator update time. consider non-tendermint implementations.
+**TM:** According to the official documentation of tendermint and several experimental results, to maintain a blockchain network, it is mandatory for over 2/3 validator(MUST-ONLINE) nodes to be online. Also, the voting power of a validator node matters to the ratio of **MUST-ONLINE** nodes. That is, stopping validator nodes of which the sum of voting power is over 1/3 breaks the consensus algorithm of tendermint and results in the interruption of generating blocks on the chain.
 
 #### Voting power calculation
 **TM:** In tendermint, a **voting power** has a similar role as a stake in PoS or DPoS consensus mechanism. One limitation is that sum of voting powers of all validators must not exceed the value `MaxTotalVotingPower`, which is 2^60 - 1.
