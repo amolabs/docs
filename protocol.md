@@ -151,29 +151,82 @@ transaction with all the HEX-encoded string in upper case as the following:
 
 **TM:** Tendermint core sends a **Transaction** to AMO app, and the app replies with the response **ResponseDeliverTx**. This **ResponseDeliverTx** is defined in Tendermint, but is not part of AMO blockchain protocol. However, this is an important reply to the users indicating whether the transmitted transaction was successfully processed or not. This reply is described in [RPC](rpc.md) document. Moreover, [CLI](https://github.com/amolabs/amoabci/tree/master/cmd/amocli) may process this reply and prompt the user with a more human-friendly output.
 
-## Internal Data
-- coins and stakes
-    - balance store:
-        - key: address
-        - value: balance
-    - stake store:
-        - key: address
-        - value: {validator pubkey, stake}
-    - delegate store:
-        - key: address \*
-        - value: {delegator address, stake}
-- parcels
-    - parcel store:
-        - key: parcel id
-        - value: {owner address, key custody, extra info}
-    - request store:
-        - key: {buyer address, parcel id}
-        - value: {payment, exp cond}
-    - usage store:
-        - key: {buyer address, parcel id}
-        - value: {key custody, exp cond}
+## Blockchain Data
 
-**NOTE:** In `delegate` store, a key to the database is just `address`, not `{holder address, delegator address}`. This means that a user cannot delegate his/her stakes to **multiple** delegators. While an AMO-compliant node can freely choose the actual database implementation, this constraint must be enforced in any way. An implementor may choose to keep this `address` as a unique key, or use more generous database implementation with an application code or a wrapper layer to keep this constraint on top of it.
+### Data Type
+
+- `Address`
+    - described in [Account Address](#account-address)
+    - hex-encoded 
+- `PublicKey`
+    - a public key derived from ed25519
+    - json-encoded
+- `Currency`
+    - expressed as a decimal number, then enclosed in quotes and json-encoded
+- `Custody`
+    - described in [Key custody](#key-custody)
+    - hex-encoded
+- `Info`
+    - extra information
+    - hex-encoded
+- `ParcelID`
+    - an ID of a parcel
+    - hex-encoded
+- `Time`
+    - an expiration time
+    - json-encoded
+- `Stake`
+    - {validator `PublicKey`, stake `Currency`}
+    - json-encoded
+- `Delegate`
+    - {delegator `Address`, stake `Currency`}
+    - json-encoded
+- `ParcelValue`
+    - {owner `Address`, key `Custody`, extra `Info`}
+    - json-encoded
+- `RequestValue`
+    - {payment `Currency`, expiration `Time`}
+    - json-encoded
+- `Usage`
+    - {key `Custody`, expiration `Time`}
+    - json-encoded
+
+### State DB
+
+**NOTE:** The key and value of data are stored on the database in the type of byte array. To prevent unexpected collisions, derived from using the same key, such as overwriting or deleting data, hardcoded prefix value is attached to the key.
+
+- balance(`Address`, `Currency`)
+    - prefix: `"balance:"`
+    - key: {prefix + `Address`}
+    - value: `Currency`
+- stake(`Address`, `StakeValue`)
+    - prefix: `"stake:"`
+    - key: {prefix + `Address`}
+    - value: `StakeValue`
+- delegate(`Address`, `Delgate`)
+    - prefix: `"delegate:"`
+    - key: {prefix + `Address`}
+    - value: `Delegate`
+- parcel(`parcelID`, `ParcelValue`)
+    - prefix: `"parcel:"`
+    - key: {prefix + `parcelID`}
+    - value: `ParcelValue`
+- request(`Address`, `parcelID`, `RequestValue`)
+    - prefix: `"request:"`
+    - key: {prefix + `Address` + `ParcelID`}
+    - value: `RequestValue`
+- usage(`Address`, `ParcelID`, `UsageValue`)
+    - prefix: `"usage:"`
+    - key: {prefix + `Address` + `ParcelID`}
+    - value: `UsageValue`
+
+### Calculating app hash
+
+The data are stored in key-value format in a single `stateDB` storage of LevelDB provided by tendermint. The merkle tree is used to efficiently ensure that all nodes on a blockchain network maintain the same stateDB.
+
+Any type of key-value data supposed to get stored on `stateDB` are put into the merkle tree in the unit of a leaf node. The leaf nodes are sorted by the key and they are labelled with a hash derived from `hash(key + value)`. A pair of leaf nodes generates a one-level higher inner node labelled with `hash(ln1_hash + ln2_hash)`. In the similar way, another one-level higher inner node is added to the merkle tree with the label of `hash(in1_hash + in2_hash)`. The above process is repeated until only one single root node appears at the top of the merkle tree. As a final process, the hash of the root node is recorded to `app_hash` of a newly generated block.
+
+**NOTE:** For `delegate`, a key to the database is just `Address`, not `{holder Address, delegator Address}`. This means that a user cannot delegate his/her stakes to **multiple** delegators. While an AMO-compliant node can freely choose the actual database implementation, this constraint must be enforced in any way. An implementor may choose to keep this `Address` as a unique key, or use more generous database implementation with an application code or a wrapper layer to keep this constraint on top of it.
 
 ## Operations
 **There shall be no other state change than described in this section.**
