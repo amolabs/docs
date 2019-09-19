@@ -54,7 +54,14 @@ When querying an account's _stake_, `data` is a `hex` conversion of the double-q
 ```
 
 ### Delegate query
-When querying an account's _delegate_ for specific _delegator_, `data` is a `hex` conversion of a JSON representation of (`holder address`, `delegator address`), where this JSON representation is as the following example:
+When querying an account's _delegated stake_, `data` is a `hex` conversion of the double-quoted _address_ of the account.
+```json
+"_address_"
+```
+
+### Validator query
+When querying a _validator_'s holder and list of appointed _delegated stakes_,
+`data` is a `hex` conversion of the double-quoted _address_ of the validator.
 ```json
 "_address_"
 ```
@@ -148,12 +155,12 @@ Withdraw all or part of the AMO coin locked as a `stake`.
 ```
 
 ### Delegate stake
-Lock sender's AMO coin as a **delegated** `stake` of the delegator, or lock additional coin and increase delegated `stake` value.
+Lock sender's AMO coin as a **delegated** `stake` appointed to a delegatee, or lock additional coin and increase delegated `stake` value.
 
 - tx type: `delegate`
 
 ```json
-{ "to": "_delegator_address_", "amount": "_currency_" }
+{ "to": "_delegatee_address_", "amount": "_currency_" }
 ```
 
 ### Retract stake

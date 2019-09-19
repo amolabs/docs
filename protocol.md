@@ -78,14 +78,13 @@ A transaction is represented by a JSON document which has the following format:
 - delegate body:
 ```json
 {
-    "to": "_delegator_address_",
+    "to": "_delegatee_address_",
     "amount": "_currency_"
 }
 ```
 - retract body:
 ```json
 {
-    "from": "_delegator_address_",
     "amount": "_currency_"
 }
 ```
@@ -179,7 +178,7 @@ transaction with all the HEX-encoded string in upper case as the following:
     - {validator `PublicKey`, stake `Currency`}
     - json-encoded
 - `Delegate`
-    - {delegator `Address`, stake `Currency`}
+    - {delegatee `Address`, stake `Currency`}
     - json-encoded
 - `ParcelValue`
     - {owner `Address`, key `Custody`, extra `Info`}
@@ -226,7 +225,7 @@ The data are stored in key-value format in a single `stateDB` storage of LevelDB
 
 Any type of key-value data supposed to get stored on `stateDB` are put into the merkle tree in the unit of a leaf node. The leaf nodes are sorted by the key and they are labelled with a hash derived from `hash(key + value)`. A pair of leaf nodes generates a one-level higher inner node labelled with `hash(ln1_hash + ln2_hash)`. In the similar way, another one-level higher inner node is added to the merkle tree with the label of `hash(in1_hash + in2_hash)`. The above process is repeated until only one single root node appears at the top of the merkle tree. As a final process, the hash of the root node is recorded to `app_hash` of a newly generated block.
 
-**NOTE:** For `delegate`, a key to the database is just `Address`, not `{holder Address, delegator Address}`. This means that a user cannot delegate his/her stakes to **multiple** delegators. While an AMO-compliant node can freely choose the actual database implementation, this constraint must be enforced in any way. An implementor may choose to keep this `Address` as a unique key, or use more generous database implementation with an application code or a wrapper layer to keep this constraint on top of it.
+**NOTE:** For `delegate`, a key to the database is just `Address`, not `{holder Address, delegatee Address}`. This means that a user cannot delegate his/her stakes to **multiple** delegatees. While an AMO-compliant node can freely choose the actual database implementation, this constraint must be enforced in any way. An implementor may choose to keep this `Address` as a unique key, or use more generous database implementation with an application code or a wrapper layer to keep this constraint on top of it.
 
 ## Operations
 **There shall be no other state change than described in this section.**
@@ -259,9 +258,9 @@ Upon receiving a `withdraw` transaction from an account, an AMO blockchain node 
 
 **Validity check:**
 1. `stake` &ge; `amount`
-1. `stake` &gt; `amount` if this account is a delegator for any of delegated stakes
+1. `stake` &gt; `amount` if this account is a delegatee for any of delegated stakes
 
-**TODO:** minimum required stake to be a delegator
+**TODO:** minimum required stake to be a delegatee
 
 **State change:**
 1. `balance` &larr; `balance` + `amount`
@@ -277,7 +276,7 @@ Upon receiving a `delegate` transaction from an account, an AMO blockchain node 
 **Validity check:**
 1. `balance` &ge; `amount`
 1. `to` address already has a positive stake in `stake` store
-1. the account has no previous delegator or `to` is the same as the previous delegator
+1. the account has no previous delegatee or `to` is the same as the previous delegatee
 
 **State change:**
 1. `balance` &larr; `balance` - `amount`
@@ -297,7 +296,7 @@ Upon receiving a `retract` transaction from an account, an AMO blockchain node p
 ### Updating validator set
 If there is at least one of `stake`, `withdraw`, `delegate` or `retract` transaction in the last block, the top `n_val` accounts with the highest *effective stake* value shall be selected again. These accounts shall be new validators for the upcoming blocks.
 
-**NOTE:** Effective stake value is the sum of his/her own stake in the `stake` store and all items in the `delegate` store having the same `delegator` field as the account address in question
+**NOTE:** Effective stake value is the sum of his/her own stake in the `stake` store and all items in the `delegate` store having the same `delegatee` field as the account address in question
 
 **NOTE:** `n_val` is a global parameter fixed across nodes and blocks (and so the time). So, it shall be set at the genesis time.
 
