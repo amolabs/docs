@@ -32,7 +32,7 @@ A transaction is represented by a JSON document which has the following format:
     "sender": "_sender_address_",
     "nonce": "_HEX-encoded_nonce_bytes_",
     "params": "_HEX-encoded_JSON_object_",
-	"fee": "_currency_",
+    "fee": "_currency_",
     "signature": {
         "pubkey": "_HEX-encoded_public_key_bytes_",
         "sig_bytes": "_HEX-encoded_signature_bytes_"
@@ -54,7 +54,7 @@ A transaction is represented by a JSON document which has the following format:
 	- `"cancel"`
 	- `"revoke"`
 
-`_sender_address_` identifies the sender or originator of this transaction. `"nonce"` is a ***random*** byte sequence with the length of 20 bytes represented by HEX-encoding(See [Replay Attack](#replay-attack)). `"params"` is a HEX-encoded JSON object, which is different for each transaction type. `"fee"` represents a specific amount of money expected to get transferred to a block validator after the transaction is committed to a block.
+`_sender_address_` identifies the sender or originator of this transaction. `"nonce"` is a ***random*** byte sequence with the length of 20 bytes represented by HEX-encoding(See [Replay Attack](#replay-attack)). `"params"` is a HEX-encoded JSON object, which is different for each transaction type. `"fee"` represents a specific amount of money expected to get transferred to a block proposer after the transaction is committed to a block.
 
 - transfer body:
 ```json
@@ -241,7 +241,7 @@ Upon receiving a `transfer` transaction from an account, an AMO blockchain node 
 
 **State change:**
 1. `account_balance` &larr; `account_balance` - `fee` - `amount`
-1. `validator_balance` &larr; `validator_balance` + `fee`
+1. `block_proposer_balance` &larr; `block_proposer_balance` + `fee`
 1. `recipient_balance` &larr; `recipient_balance` + `amount`
 
 ### Staking coin
@@ -253,7 +253,7 @@ Upon receiving a `stake` transaction from an account, an AMO blockchain node per
 
 **State change:**
 1. `account_balance` &larr; `account_balance` - `fee` - `amount`
-1. `validator_balance` &larr; `validator_balance` + `fee`
+1. `block_proposer_balance` &larr; `block_proposer_balance` + `fee`
 1. `stake` &larr; `stake` + `amount`
 1. If the previous `validator key` is different from the key in the current `stake` transaction, then the stake holder's `validator key` is replaced with the new one.
 
@@ -269,7 +269,7 @@ Upon receiving a `withdraw` transaction from an account, an AMO blockchain node 
 **State change:**
 1. `stake` &larr; `stake` - `amount`
 1. `account_balance` &larr; `account_balance` - `fee` + `amount`
-1. `validator_balance` &larr; `validator_balance` + `fee`
+1. `block_proposer_balance` &larr; `block_proposer_balance` + `fee`
 
 **TODO:** need rounding? or currency to stake ratio?
 
@@ -285,7 +285,7 @@ Upon receiving a `delegate` transaction from an account, an AMO blockchain node 
 
 **State change:**
 1. `account_balance` &larr; `account_balance` - `fee` - `amount`
-1. `validator_balance` &larr; `validator_balance` + `fee`
+1. `block_proposer_balance` &larr; `block_proposer_balance` + `fee`
 1. `delegated_stake` &larr; `delegated_stake` + `amount`
 
 Upon receiving a `retract` transaction from an account, an AMO blockchain node performs a validity check and relieves requested coins from `delegate` store and increases the account's balance when the transaction is valid.
@@ -297,7 +297,7 @@ Upon receiving a `retract` transaction from an account, an AMO blockchain node p
 **State change:**
 1. `delegatedstake` &larr; `delegated_stake` - `amount`
 1. `account_balance` &larr; `account_balance` - `fee` + `amount`
-1. `validator_balance` &larr; `validator_balance` + `fee`
+1. `block_proposer_balance` &larr; `block_proposer_balance` + `fee`
 
 **NOTE:** `delegated_stake` is a `stake` value in the `delegate` store where the `address` is the sender account.
 
