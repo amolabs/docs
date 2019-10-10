@@ -32,6 +32,7 @@ A transaction is represented by a JSON document which has the following format:
     "sender": "_sender_address_",
     "nonce": "_HEX-encoded_nonce_bytes_",
     "params": "_HEX-encoded_JSON_object_",
+    "fee": "_currency_",
     "signature": {
         "pubkey": "_HEX-encoded_public_key_bytes_",
         "sig_bytes": "_HEX-encoded_signature_bytes_"
@@ -53,7 +54,7 @@ A transaction is represented by a JSON document which has the following format:
 	- `"cancel"`
 	- `"revoke"`
 
-`_sender_address_` identifies the sender or originator of this transaction. `"nonce"` is a ***random*** byte sequence with the length of 20 bytes represented by HEX-encoding(See [Replay Attack](#replay-attack)). `"params"` is a HEX-encoded JSON object, which is different for each transaction type.
+`_sender_address_` identifies the sender or originator of this transaction. `"nonce"` is a ***random*** byte sequence with the length of 20 bytes represented by HEX-encoding(See [Replay Attack](#replay-attack)). `"params"` is a HEX-encoded JSON object, which is different for each transaction type. `"fee"` represents a specific amount of money expected to get transferred to a block proposer after the transaction is committed to a block.
 
 - transfer body:
 ```json
@@ -233,38 +234,42 @@ Any type of key-value data supposed to get stored on `stateDB` are put into the 
 **TM:** These operations are implemented by `DeliverTx` method in the ABCI application.
 
 ### Transferring coin
-Upon receiving a `transfer` transaction from a sender, an AMO blockchain node performs a validity check and transfers coins from sender's balance to recipient's balance when the transaction is valid.
+Upon receiving a `transfer` transaction from an account, an AMO blockchain node performs a validity check and transfers coins from sender's balance to recipient's balance when the transaction is valid.
 
 **Validity check:**
-1. `sender_balance` &ge; `amount`.
+1. `account_balance` &ge; `fee` + `amount`.
 
 **State change:**
-1. `sender_balance` &larr; `sender_balance` - `amount`
+1. `account_balance` &larr; `account_balance` - `fee` - `amount`
+1. `block_proposer_balance` &larr; `block_proposer_balance` + `fee`
 1. `recipient_balance` &larr; `recipient_balance` + `amount`
 
 ### Staking coin
 Upon receiving a `stake` transaction from an account, an AMO blockchain node performs a validity check and locks requested coins to `stake` store and decreases the account's balance when the transaction is valid.
 
 **Validity check:**
-1. `balance` &ge; `amount`
+1. `account_balance` &ge; `fee` + `amount`
 1. There is no other stake holder with the same `validator key` as this transaction.
 
 **State change:**
-1. `balance` &larr; `balance` - `amount`
+1. `account_balance` &larr; `account_balance` - `fee` - `amount`
+1. `block_proposer_balance` &larr; `block_proposer_balance` + `fee`
 1. `stake` &larr; `stake` + `amount`
 1. If the previous `validator key` is different from the key in the current `stake` transaction, then the stake holder's `validator key` is replaced with the new one.
 
 Upon receiving a `withdraw` transaction from an account, an AMO blockchain node performs a validity check and relieves requested coins from `stake` store and increases the account's balance when the transaction is valid.
 
 **Validity check:**
+1. `account_balance` &ge; `fee`
 1. `stake` &ge; `amount`
 1. `stake` &gt; `amount` if this account is a delegatee for any of delegated stakes
 
 **TODO:** minimum required stake to be a delegatee
 
 **State change:**
-1. `balance` &larr; `balance` + `amount`
 1. `stake` &larr; `stake` - `amount`
+1. `account_balance` &larr; `account_balance` - `fee` + `amount`
+1. `block_proposer_balance` &larr; `block_proposer_balance` + `fee`
 
 **TODO:** need rounding? or currency to stake ratio?
 
@@ -274,22 +279,25 @@ There may be users who have the intention to participate in the block production
 Upon receiving a `delegate` transaction from an account, an AMO blockchain node performs a validity check and locks requested coins to `delegate` store and decreases the account's balance when the transaction is valid.
 
 **Validity check:**
-1. `balance` &ge; `amount`
+1. `account_balance` &ge; `fee` + `amount`
 1. `to` address already has a positive stake in `stake` store
 1. the account has no previous delegatee or `to` is the same as the previous delegatee
 
 **State change:**
-1. `balance` &larr; `balance` - `amount`
+1. `account_balance` &larr; `account_balance` - `fee` - `amount`
+1. `block_proposer_balance` &larr; `block_proposer_balance` + `fee`
 1. `delegated_stake` &larr; `delegated_stake` + `amount`
 
 Upon receiving a `retract` transaction from an account, an AMO blockchain node performs a validity check and relieves requested coins from `delegate` store and increases the account's balance when the transaction is valid.
 
 **Validity check:**
+1. `account_balance` &ge; `fee`
 1. `delegated_stake` &ge; `amount`
 
 **State change:**
-1. `balance` &larr; `balance` + `amount`
-1. `delegated_stake` &larr; `delegated_stake` - `amount`
+1. `delegatedstake` &larr; `delegated_stake` - `amount`
+1. `account_balance` &larr; `account_balance` - `fee` + `amount`
+1. `block_proposer_balance` &larr; `block_proposer_balance` + `fee`
 
 **NOTE:** `delegated_stake` is a `stake` value in the `delegate` store where the `address` is the sender account.
 
