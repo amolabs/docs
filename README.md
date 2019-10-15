@@ -1,8 +1,5 @@
 # AMO Blockchain Documentation
 
-## Overview
-* <s>[AMO infrastructure](amo_infra.md) ([한국어](amo_infra.ko.md))</s>
-
 ## Specs
 * [AMO blockchain protocol specification](protocol.md)
 * [AMO storage service specification](storage.md)
