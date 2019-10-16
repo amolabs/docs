@@ -355,7 +355,6 @@ When the incentive is `I`, this incentive shall be distributed among the stake h
 `I_0` &larr; `I` \* `w_val` \* `stake_0` / `wStakes`.
 1. For each delegated stake holder, calculate the incentive for `i`-th delegated stake,
 `I_i` &larr; `I` \* `w_ds` \* `stake_i` / `wStakes`.
-test
 
 where `w_val` is the validator stake weight, and `w_ds` is the delegated stake weight.
 
