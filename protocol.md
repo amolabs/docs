@@ -369,11 +369,11 @@ where `w_val` is the validator stake weight, and `w_ds` is the delegated stake w
 The information on incentives distributed to stake holders per block creation is recorded in the history database. The concerned data are stored in two different types, containing identical contents, as follows, to facilitate both `BlockHeight`-first and `Address`-first search.
 
 - BlockHeightAddressHistory
-    - prefix: `"ba:"`
+    - prefix: `"ba"`
 	- key: {prefix + `BlockHeight` + `Address`}
 	- value: `Amount`
 - AddressBlockHeightHistory
-    - prefix: `"ab:"`
+    - prefix: `"ab"`
 	- key: {prefix + `Address` + `BlockHeight`}
 	- value: `Amount`
 
