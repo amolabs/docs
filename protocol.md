@@ -333,26 +333,50 @@ When we use one-to-one relation between stake value and voting power, exceeding 
 
 ### Granting data
 
-## Block Reward
-**TM:** Tendermint provides a block information via `BeginBlock()` ABCI method, which includes a block proposer address. This address is derived from the validator pubkey who proposed the block. In AMO ABCI app, we can look up the original stake holder in the `stake` store having the same validator pubkey.
+## Incentive 
+**TM:** Tendermint provides a block information, in `BeginBlock()` method which is called at the beginning of a block creation, including a block proposer address. This address is derived from the validator pubkey who proposes the block. In AMO ABCI app, we can look up the original stake holder in the `stake` store having the same validator pubkey.
 
-A stake holder who proposed a block receives a block reward. This is the only step in which there is a state change in `balance` store without involving any transaction:<br/>
-`R` &larr; `b_reward` + `n_tr` \* `tx_reward`<br/>
-where `R` is the final block reward, `b_reward` a block reward rate, `n_tr` the number of transactions in the block, and `tx_reward` a transaction reward rate.
-    
-When the block reward is `R`, this reward shall be distributed among the stake holder and the delegated stake holders. The distribution mechanism is as the following:
+Incentive refers to the sum of a block reward and transaction fees. The fees of transactions which are successfully verified(delivered) by the block proposer are accumulated and then transferred to the stake holder at the end of a block creation.
+
+### Calculation
+A stake holder who proposes a block receives an incentive. This is the only step in which there is a state change in `balance` store without involving any transaction:
+
+`R` &larr; `b_reward` + `n_delivered_txs` \* `tx_reward`<br/>
+`I` &larr; `R` + `acc_fee`
+
+where `R` is the final block reward, `b_reward` a block reward rate, `n_delivered_txs` the number of delivered transactions in the block, `tx_reward` a transaction reward rate, `I` the final incentive and `acc_fee` the accumulated fee.
+
+### Distribution
+When the incentive is `I`, this incentive shall be distributed among the stake holder and the delegated stake holders. The distribution mechanism is as the following:
+
 1. `wStakes` &larr; `w_val` \* `stake_0` (stake of the proposer)
 1. For each delegated stake `stake_i`, `wStakes` &larr; `wStakes` + `w_ds` \* `stake_i`
-1. Calculate the reward for the proposer
-`R_0` &larr; `R` \* `w_val` \* `stake_0` / `wStakes`.
-1. For each delegated stake holder, calculate the reward for `i`-th delegated stake,
-`R_i` &larr; `R` \* `w_ds` \* `stake_i` / `wStakes`.
+1. Calculate the incentive for the proposer
+`I_0` &larr; `I` \* `w_val` \* `stake_0` / `wStakes`.
+1. For each delegated stake holder, calculate the incentive for `i`-th delegated stake,
+`I_i` &larr; `I` \* `w_ds` \* `stake_i` / `wStakes`.
 
 where `w_val` is the validator stake weight, and `w_ds` is the delegated stake weight.
 
 **TODO:** Eliminate ambiguity in float number arithmetic.
 
 **TODO:** Take care of overflow situation.
+
+### History Record
+**NOTE:** The key and value of data are stored on the database in the type of byte array. To prevent unexpected collisions, derived from using the same key, such as overwriting or deleting data, hardcoded prefix value is attached to the key.
+
+The information on incentives distributed to stake holders per block creation is recorded in the history database. The concerned data are stored in two different types, containing identical contents, as follows, to facilitate both `BlockHeight`-first and `Address`-first search.
+
+- BlockHeightAddressHistory
+    - prefix: `"ba"`
+	- key: {prefix + `BlockHeight` + `Address`}
+	- value: `Amount`
+- AddressBlockHeightHistory
+    - prefix: `"ab"`
+	- key: {prefix + `Address` + `BlockHeight`}
+	- value: `Amount`
+
+where `BlockHeight` is the height of a newly generated block, `Address` the address of a stake holder, `Amount` the amount of incentive distributed to a stake holder.
 
 ## Genesis App State
 Initial state of the app (_genesis app state_) is defined by genesis document (genesis.json file in tendermint config directory, typically $HOME/.tendermint/config/genesis.json). Initial app state is described in `app_state` field in a genesis document. For example:
