@@ -389,16 +389,16 @@ The types of abnormal behavior and parameters are defined as follows:
 The relevant validators including the block proposer pay the price for misbehavior by burning the specific amount of coins staked and delegated to them. The penalty ratio depends on the types of validator to reflect the degree of responsibilities in maintaining the chain; `2 * p` for the block proposer and `p` the validators.
 
 #### parameters
-- `p`: 0.01
+- `p`
 
 ### Downtime
 
 If the ratio the validator's absence, in the fixed height window `DowntimeBlockWindow` is over `MinRatioPerWindow`, the total amount of coins staked and delegated to the validator would be penalized in `DowntimePenaltyFranction` ratio.
 
 #### parameters
-- `DowntimeBlockWindow` default: 4096 blocks
-- `MinRatioPerWindow` default: 0.5 
-- `DowntimePenaltyFrction` default: 0.01
+- `DowntimeBlockWindow`
+- `MinRatioPerWindow`
+- `DowntimePenaltyFrction`
 
 ## Genesis App State
 Initial state of the app (_genesis app state_) is defined by genesis document (genesis.json file in tendermint config directory, typically $HOME/.tendermint/config/genesis.json). Initial app state is described in `app_state` field in a genesis document. For example:
