@@ -389,7 +389,7 @@ The types of abnormal behavior and parameters are defined as follows:
 The relevant validators including the block proposer pay the price for misbehavior by burning the specific amount of coins staked and delegated to them. The penalty ratio depends on the types of validator to reflect the degree of responsibilities in maintaining the chain; `2 * p` for the block proposer and `p` the validators.
 
 #### parameters
-- `p` default: 0.01
+- `p`: 0.01
 
 ### Downtime
 
