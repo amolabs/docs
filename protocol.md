@@ -381,16 +381,15 @@ where `BlockHeight` is the height of a newly generated block, `Address` the addr
 ## Penalty
 To maintain the DPoS blockchain as healthy as possible, it is essential to encourage block validators to participate in creating and verifying blocks with incentive, but also to impose responsibilites on their misbehavior with penalty.
 
-The types of abnormal behavior are defined as follows:
+The types of abnormal behavior and parameters are defined as follows:
 
 ### Evidence
-**TM:** The evidence of validators' misbehavior, which is called `ByzantineValidators()`, is provided by Tendermint, in `BeginBlock()` method which is called at the beginning of a block creation.
+**TM:** The evidence of validators' misbehavior is provided by Tendermint in `BeginBlock()` method which is called at the beginning of a block creation. Tendermint supports currently only a single type of evidence, the `DuplicateVoteEvidence`.
 
-When validating a block, if the height difference between the current block and the evidence is less than `MaxEvidenceAge`, the total amount of coins staked and delegated to the validator would be penalized in `EvidencePenaltyFraction` ratio.
+The relevant validators including the block proposer pay the price for misbehavior by burning the specific amount of coins staked and delegated to them. The penalty ratio depends on the types of validator to reflect the degree of responsibilities in maintaining the chain; `2 * p` for the block proposer and `p` the validators.
 
 #### parameters
-- `MaxEvidenceAge` default: 10 block
-- `EvidencePenaltyFraction` default: 0.01
+- `p` default: 0.01
 
 ### Downtime
 
@@ -399,7 +398,7 @@ If the ratio the validator's absence, in the fixed height window `DowntimeBlockW
 #### parameters
 - `DowntimeBlockWindow` default: 4096 blocks
 - `MinRatioPerWindow` default: 0.5 
-- `DowntimePenaltyFraction` default: 0.01
+- `DowntimePenaltyFrction` default: 0.01
 
 ## Genesis App State
 Initial state of the app (_genesis app state_) is defined by genesis document (genesis.json file in tendermint config directory, typically $HOME/.tendermint/config/genesis.json). Initial app state is described in `app_state` field in a genesis document. For example:
