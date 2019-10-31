@@ -393,6 +393,28 @@ The information on incentives distributed to stake holders per block creation is
 
 where `BlockHeight` is the height of a newly generated block, `Address` the address of a stake holder, `Amount` the amount of incentive distributed to a stake holder.
 
+## Penalty
+To maintain the DPoS blockchain as healthy as possible, it is essential to encourage block validators to participate in creating and verifying blocks with incentive, but also to impose responsibilites on their misbehavior with penalty.
+
+The types of abnormal behavior and parameters are defined as follows:
+
+### Evidence
+**TM:** The evidence of validators' misbehavior is provided by Tendermint in `BeginBlock()` method which is called at the beginning of a block creation. Tendermint supports currently only a single type of evidence, the `DuplicateVoteEvidence`.
+
+The relevant validators including the block proposer pay the price for misbehavior by burning the specific amount of coins staked and delegated to them. The penalty ratio depends on the types of validator to reflect the degree of responsibilities in maintaining the chain; `2 * p` for the block proposer and `p` the validators.
+
+#### parameters
+- `p`
+
+### Downtime
+
+If the ratio the validator's absence, in the fixed height window `DowntimeBlockWindow` is over `MinRatioPerWindow`, the total amount of coins staked and delegated to the validator would be penalized in `DowntimePenaltyFranction` ratio.
+
+#### parameters
+- `DowntimeBlockWindow`
+- `MinRatioPerWindow`
+- `DowntimePenaltyFrction`
+
 ## Genesis App State
 Initial state of the app (_genesis app state_) is defined by genesis document (genesis.json file in tendermint config directory, typically $HOME/.tendermint/config/genesis.json). Initial app state is described in `app_state` field in a genesis document. For example:
 ```json
