@@ -273,7 +273,20 @@ Upon receiving a `withdraw` transaction from an account, an AMO blockchain node 
 
 **TODO:** need rounding? or currency to stake ratio?
 
-**NOTE:** *Stake Lock-up* feature locks a newly added stake for a certain period of time. The time is measured in terms of number of blocks. If a stake is set at the block height `h`, the stake can be withdrawn after the block height reaches `h + l`, where `l` is the pre-configured lock-up period. Upon receiving a `stake` transaction from an account, an AMO blockchain node records the stake in `LockedStake` with `l`. Then, the stake's `l` decreases by 1 block height per block creation. When `l` becomes `0`, the stake gets removed from `LockedStake` and put into `UnlockedStake`.
+**Stake Lock-up**
+
+This feature locks a newly added stake for a certain period of time. The time is measured in terms of number of blocks. If a stake is set at the block height `h`, the stake can be withdrawn after the block height reaches `h + l`, where `l` is the pre-configured lock-up period.
+
+Upon receiving a `stake` transaction from an account, an AMO blockchain node records the stake in `LockedStake` with `l`. Then, the stake's `l` decreases by 1 block height per block creation. When `l` becomes `0`, the stake gets removed from `LockedStake` and put into `UnlockedStake`.
+
+**Block Progress(Creation) Conditon**
+
+As tendermint's `create_empty_blocks` config is set to `false` on an AMO blockchain node, the block is progressed only if there is a change of `appHash`, the root hash value of `State` merkle tree. The conditions in which the `appHash` can change are as follows:
+
+- Successfully delivered(processed) transactions
+- Stakes in `LockedStake` 
+
+Even though there is no transaction to process on an AMO blockchain node, the `appHash` can change. The lock-period `l` of locked stakes decrease by 1 block height and it is written in `State`, resulting in the change of `appHash`.
 
 ### Delegating stake
 There may be users who have the intention to participate in the block production but don't have enough stake value or computing power to competent in the validator selection race. In this case, a user can delegate his/her stake to a more competent validator.
