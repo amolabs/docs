@@ -1,7 +1,7 @@
 # AMO Blockchain Protocol Specification
 
 ## Introduction
-Although the current implementation of AMO blockchain depends ***heavily*** on Tendermint, AMO blockchain protocol itself is independent of Tendermint. It is described by several protocol messages and corresponding state transition in abstract internal database of each blockchain node. While the protocol messages are concretely defined(meaning and format), abstract internal database of a blockchain node is implementation-specific. But, note that every AMO blockchain node **MUST** incorporate a kind of database storing all kinds of data items described in [Internal Data](#internal-data) section.
+Although the current implementation of AMO blockchain depends ***heavily*** on Tendermint, AMO blockchain protocol itself is independent of Tendermint. It is described by several protocol messages and corresponding state transition in abstract internal database of each blockchain node. While the protocol messages are concretely defined(meaning and format), abstract internal database of a blockchain node is implementation-specific. But, note that every AMO blockchain node **MUST** incorporate a kind of database storing all kinds of data items described in [Blockchain Data](#blockchain-data) section.
 
 Some notes related to Tendermint will be tagged with **TM**.
 
@@ -30,7 +30,6 @@ A transaction is represented by a JSON document which has the following format:
 {
     "type": "_tx_type_",
     "sender": "_sender_address_",
-    "nonce": "_HEX-encoded_nonce_bytes_",
     "params": "_HEX-encoded_JSON_object_",
     "fee": "_currency_",
     "signature": {
@@ -54,7 +53,7 @@ A transaction is represented by a JSON document which has the following format:
 	- `"cancel"`
 	- `"revoke"`
 
-`_sender_address_` identifies the sender or originator of this transaction. `"nonce"` is a ***random*** byte sequence with the length of 20 bytes represented by HEX-encoding(See [Replay Attack](#replay-attack)). `"params"` is a HEX-encoded JSON object, which is different for each transaction type. `"fee"` represents a specific amount of money expected to get transferred to a block proposer after the transaction is committed to a block.
+`_sender_address_` identifies the sender or originator of this transaction. `"params"` is a HEX-encoded JSON object, which is different for each transaction type. `"fee"` represents a specific amount of money expected to get transferred to a block proposer after the transaction is committed to a block.
 
 - transfer body:
 ```json
@@ -141,7 +140,7 @@ and `s`. This is `(r, s) = ECDSA(privkey, sb)`, where `privkey` is the
 corresponding private key, and `sb` is a compact JSON representation of a
 transaction with all the HEX-encoded string in upper case as the following:
 ```json
-{"type":"_tx_type_","sender":"_sender_address_","nonce":"_HEX-encoded_nonce_bytes_","params":"_HEX-encoded_JSON_object_"}
+{"type":"_tx_type_","sender":"_sender_address_","params":"_HEX-encoded_JSON_object_"}
 ```
 
 ### Transaction Result
@@ -398,22 +397,26 @@ To maintain the DPoS blockchain as healthy as possible, it is essential to encou
 
 The types of abnormal behavior and parameters are defined as follows:
 
+- Convict
+  - Malicious Validator: `PenaltyRatioM`
+  - Lazy Validator: `PenaltyRatioL`
+
 ### Evidence
 **TM:** The evidence of validators' misbehavior is provided by Tendermint in `BeginBlock()` method which is called at the beginning of a block creation. Tendermint supports currently only a single type of evidence, the `DuplicateVoteEvidence`.
 
-The relevant validators including the block proposer pay the price for misbehavior by burning the specific amount of coins staked and delegated to them. The penalty ratio depends on the types of validator to reflect the degree of responsibilities in maintaining the chain; `2 * p` for the block proposer and `p` the validators.
+The relevant validators pay the price for misbehavior by burning the specific amount of coins staked and delegated to them, immediately at the moment when their misbehaviors are caught. The penalty shall be distributed amont the stake holder and the delegated stake holders according to the distribution mechanism presented in [Incentive Distribution](#distribution). 
 
 #### parameters
-- `p`
+- `PenaltyRatioM`
 
 ### Downtime
 
-If the ratio the validator's absence, in the fixed height window `DowntimeBlockWindow` is over `MinRatioPerWindow`, the total amount of coins staked and delegated to the validator would be penalized in `DowntimePenaltyFranction` ratio.
+If the ratio of the validator's absence, in the fixed height window of `LazinessCounter`, is over `LazinessCounterRatio`, the specfic amount of coins staked and delegated to the validator would be penalized. The penalty shall be distributed amont the stake holder and the delegated stake holders according to the distribution mechanism presented in [Incentive Distribution](#distribution).
 
 #### parameters
-- `DowntimeBlockWindow`
-- `MinRatioPerWindow`
-- `DowntimePenaltyFrction`
+- `LazinessCounterSize`
+- `LazinessCounterRatio`
+- `PenaltyRatioL`
 
 ## Genesis App State
 Initial state of the app (_genesis app state_) is defined by genesis document (genesis.json file in tendermint config directory, typically $HOME/.tendermint/config/genesis.json). Initial app state is described in `app_state` field in a genesis document. For example:
@@ -435,6 +438,6 @@ An AMO-compliant blockchain node should have some mechanisms to modify internal 
 
 ## Further Notes
 ### Replay Attack
-In order to prevent [replay attack](https://en.wikipedia.org/wiki/Replay_attack) (in some sense, double-spending), every AMO transaction includes a `nonce` byte-sequence. Basic idea is that when a blockchain node sees a transaction that is already included in the blockchain, it immediately discards the transaction. Here, every transaction has a `tx hash` in Tendermint context. This `tx hash` is a hash of whole byte sequence representing the transaction. Since we incorporated ECDSA signature to authenticate the sender's identity, this gives randomness already, and it can prevent replay attacks. However, AMO blockchain protocol itself is independent of Tendermint. Moreover a future version AMO blockchain may not use Tendermint as a base platform. So, in order to provide some generic countermeasure against replay attacks, we introduced this `nonce` bytes.
+In order to prevent [replay attack](https://en.wikipedia.org/wiki/Replay_attack) (in some sense, double-spending), every AMO transaction is checked for whether it is already introduced or processed in preveious blocks. Basic idea is that when a blockchain node sees a transaction that is already presented in the blockchain network, it immediately discards the transaction. Here, every transaction has a `tx hash` in Tendermint context. This `tx hash` is a hash of whole byte sequence representing the transaction. Since we incorporated ECDSA signature to authenticate the sender's identity, this gives randomness to the transaction, and it can prevent replay attacks. However, AMO blockchain protocol itself is independent of Tendermint. Moreover a future version AMO blockchain may not use Tendermint as a base platform. So, in order to provide some generic countermeasure against replay attacks, we use `ReplayPreventer`, a module which monitors every incoming transaction to prevent its replay attacks by checking its existence in the blockchain network.
 
-However, if every transaction has different meaning and context from other transactions, users may choose `nonce` to be a fixed bytes. But, if a user wants to send the same amount of coin to the same recipient again, then the user must choose a different `nonce` than the previous transaction. This nonce need not be cryptographically random. The only requirement is that it must be ***different*** if the transaction context is the same as a previously processed one. An AMO-compliant client may introduce any method to do this.
+If a user wants to send the same amount of coin to the same recipient again, then the user must put into the transaction a signature different from the one used for the previous transaction. If so, the transaction would have a different `tx hash` and be treated as a different one, passing the transaction check process of `ReplayPreventer` successfully.
