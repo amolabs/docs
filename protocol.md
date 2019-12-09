@@ -411,11 +411,11 @@ The relevant validators pay the price for misbehavior by burning the specific am
 
 ### Downtime
 
-If the ratio of the validator's absence, in the fixed height window of `LazinessCounter`, is over `LazinessCounterRatio`, the specfic amount of coins staked and delegated to the validator would be penalized. The penalty shall be distributed amont the stake holder and the delegated stake holders according to the distribution mechanism presented in [Incentive Distribution](#distribution).
+If the ratio of the validator's absence ratio, in the fixed height window `LazinessCounterWindow`, is over `LazinessThreshold`, the specfic amount of coins staked and delegated to the validator would be penalized. The penalty shall be distributed amont the stake holder and the delegated stake holders according to the distribution mechanism presented in [Incentive Distribution](#distribution).
 
 #### parameters
-- `LazinessCounterSize`
-- `LazinessCounterRatio`
+- `LazinessCounterWindow`
+- `LazinessThreshold`
 - `PenaltyRatioL`
 
 ## Genesis App State
