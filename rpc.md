@@ -19,12 +19,17 @@ NOTES:
 Ignore `height` and `prove` for now.
 
 `path` decides which data store the app should look for:
+- `/app_config`: config of AMO abci app
 - `/balance`: list of accounts' AMO coin balances
 - `/stake`: list of accounts' stake values
 - `/delegate`: list of accounts' delegated stake values
+- `/validator`: address of validator's stake holder
 - `/parcel`: list of data parcel registrations
 - `/request`: list of data parcel requests
 - `/usage`: list of granted data parcel usages
+- `/inc_block`: list of accounts' incentive history of given block height
+- `/inc_address`: list of accounts' incentive history of given address
+- `/inc`: list of acoounts' incentive history of given block height and address
 
 `data` specifies the key to find a match in the data store. `data` must be a `hex` conversion of a proper JSON object.
 
@@ -40,6 +45,8 @@ In full RPC request body:
     }
 }
 ```
+### App Config Query
+When querying AMO abci app's *app_config*,`data` is null
 
 ### Balance query
 When querying an account's _balance_, `data` is a `hex` conversion of the double-quoted _address_ of the account.
@@ -82,6 +89,24 @@ When querying a _request_ for specific _parcel_, `data` is a `hex` conversion of
 When querying a _usage_ for specific _parcel_, `data` is a `hex` conversion of a JSON representation of (`buyer address`, `data parcel ID`), where this JSON representqtion is as the following example:
 ```json
 { "buyer" : "_address_", "target" : "_parcel_ID_" }
+```
+
+### Incentive Block query
+When querying a *incentive_info* of a specific block height, `data` is a `string`-formatted block height.
+```json
+"_height_"
+```
+
+### Incentive Address query
+When querying a *incentive_info* of a specific stake or delegate holder, `data` is a `hex` conversion of the double-quoted address of the account.
+```json
+"_address_"
+```
+
+### Incentive query
+When query a *incentive_info* of a specific block height and a specific stake or delegate holder, `data` is a `hex` conversion of a JSON representation of (`block height`, `holder address`), where this JSON representation is as the following example:
+```json
+{ "height": "_height_", "address": "_address_" }
 ```
 
 ## Broadcast tx parameters
@@ -196,18 +221,6 @@ Request `parcel` to purchase with `payment` as offer amount and `extra` ( expire
 { "target" : "_parcel_id_", "payment" : "_currency_", "extra" : "_extra_info_" }
 ``` 
 
-### Cancel Request
-
-Cancel the `request` of `parcel` in `store/request`. It deletes the previous `request_data` of `myself_address` in `store/request` and releases the amount of `payment` which was *locked*.
-
-- tx type : `cancel`
-- affected store : `request`
-- `myself_address`  *(implicit)*
-
-```json
-{ "target" : "_parcel_id_" }
-```
-
 ### Grant Data Usage
 
 Grant the `request` of `parcel` in `store/request` by *data owner*. Specify `grantee` to avoid confusion with other purchasers of the same `parcel`. After `grant` is recorded in AMO blockchain, *locked* AMO coin will be added in owner's balance. The `request` in `store/request` will be deleted and added in `store/usage` as (`buyer_address`, `parcel_id`, `key_custody`, `exp_condition`).
@@ -218,17 +231,6 @@ Grant the `request` of `parcel` in `store/request` by *data owner*. Specify `gra
 
 ```json
 { "target" : "_parcel_id_", "grantee" : "_buyer_address_", "key_custody" : "_buyer_custody_" }
-```
-### Revoke Data Usage
-
-Delete the `usage` of `parcel` in `store/usage`.
-
-- tx type : `revoke`
-- affected store : `usage`
-- `owner_address`  *(implicit)*
-
-```json
-{ "target" : "_parcel_id_", "grantee" : "_buyer_address_" }
 ```
 
 ### Discard Data
@@ -241,6 +243,30 @@ Discard the registered data in `store/parcel`. After `discard` is recorded in AM
 
 ```json
 { "target" : "_parcel_id_" }
+```
+
+### Cancel Request
+
+Cancel the `request` of `parcel` in `store/request`. It deletes the previous `request_data` of `myself_address` in `store/request` and releases the amount of `payment` which was *locked*.
+
+- tx type : `cancel`
+- affected store : `request`
+- `myself_address`  *(implicit)*
+
+```json
+{ "target" : "_parcel_id_" }
+```
+
+### Revoke Data Usage
+
+Delete the `usage` of `parcel` in `store/usage`.
+
+- tx type : `revoke`
+- affected store : `usage`
+- `owner_address`  *(implicit)*
+
+```json
+{ "target" : "_parcel_id_", "grantee" : "_buyer_address_" }
 ```
 
 ### Upload Data (PDB operation)
