@@ -27,9 +27,9 @@ Ignore `height` and `prove` for now.
 - `/parcel`: data parcel registration
 - `/request`: data parcel request
 - `/usage`: granted data parcel usage
-- `/inc_block`: list of accounts' incentive history of given block height
-- `/inc_address`: list of accounts' incentive history of given address
-- `/inc`: list of acoounts' incentive history of given block height and address
+- `/inc_block`: incentive history of given block height
+- `/inc_address`: incentive history of given address
+- `/inc`: incentive history of given block height and address
 
 `data` specifies the key to find a match in the data store. `data` must be a `hex` conversion of a proper JSON object.
 
