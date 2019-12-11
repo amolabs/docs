@@ -20,13 +20,13 @@ Ignore `height` and `prove` for now.
 
 `path` decides which data store the app should look for:
 - `/app_config`: config of AMO abci app
-- `/balance`: list of accounts' AMO coin balances
-- `/stake`: list of accounts' stake values
-- `/delegate`: list of accounts' delegated stake values
-- `/validator`: address of validator's stake holder
-- `/parcel`: list of data parcel registrations
-- `/request`: list of data parcel requests
-- `/usage`: list of granted data parcel usages
+- `/balance`: account's AMO coin balance
+- `/stake`: account's stake
+- `/delegate`: account's delegated stake
+- `/validator`: validator's holder and list of appointed delegated stakes
+- `/parcel`: data parcel registration
+- `/request`: data parcel request
+- `/usage`: granted data parcel usage
 - `/inc_block`: list of accounts' incentive history of given block height
 - `/inc_address`: list of accounts' incentive history of given address
 - `/inc`: list of acoounts' incentive history of given block height and address
@@ -41,7 +41,7 @@ In full RPC request body:
     "method":"abci_query",
     "params": {
         "path": "/balance",
-        "data": "hex conversion of \"12FF....\""
+        "data": "hex conversion of 12FF...."
     }
 }
 ```
