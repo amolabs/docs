@@ -93,7 +93,8 @@ A transaction is represented by a JSON document which has the following format:
 {
     "target": "_parcel_id_",
     "custody": "_owner_custody_",
-    "extra": "_extra_info_"
+    "extra": "_extra_info_",
+    "proxy_account": "_delegatee_address_"
 }
 ```
 - request body:
@@ -181,7 +182,7 @@ transaction with all the HEX-encoded string in upper case as the following:
     - {delegatee `Address`, stake `Currency`}
     - json-encoded
 - `ParcelValue`
-    - {owner `Address`, key `Custody`, extra `Info`}
+    - {owner `Address`, key `Custody`, extra `Info`, proxy_account `Address`}
     - json-encoded
 - `RequestValue`
     - {payment `Currency`, expiration `Time`}
