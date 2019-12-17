@@ -250,6 +250,7 @@ Upon receiving a `stake` transaction from an account, an AMO blockchain node per
 
 **Validity check:**
 1. `amount` > `0`
+1. `amount` % `minimum_staking_unit` == `0`: check for stake amount to respect minimum staking unit
 1. `account_balance` &ge; `fee` + `amount`
 1. There is no other stake holder with the same `validator key` as this transaction.
 
@@ -298,6 +299,7 @@ Upon receiving a `delegate` transaction from an account, an AMO blockchain node 
 
 **Validity check:**
 1. `amount` > `0`
+1. `amount` % `minimum_staking_unit` == `0`: check for delegate amount to respect minimum staking unit
 1. `account_balance` &ge; `fee` + `amount`
 1. `to` address already has a positive stake in `stake` store
 1. the account has no previous delegatee or `to` is the same as the previous delegatee
