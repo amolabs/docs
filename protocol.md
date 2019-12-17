@@ -237,7 +237,8 @@ Any type of key-value data supposed to get stored on `stateDB` are put into the 
 Upon receiving a `transfer` transaction from an account, an AMO blockchain node performs a validity check and transfers coins from sender's balance to recipient's balance when the transaction is valid.
 
 **Validity check:**
-1. `account_balance` &ge; `fee` + `amount`.
+1. `amount` > `0`
+1. `account_balance` &ge; `fee` + `amount`
 
 **State change:**
 1. `account_balance` &larr; `account_balance` - `fee` - `amount`
@@ -248,6 +249,7 @@ Upon receiving a `transfer` transaction from an account, an AMO blockchain node 
 Upon receiving a `stake` transaction from an account, an AMO blockchain node performs a validity check and locks requested coins to `stake` store and decreases the account's balance when the transaction is valid.
 
 **Validity check:**
+1. `amount` > `0`
 1. `account_balance` &ge; `fee` + `amount`
 1. There is no other stake holder with the same `validator key` as this transaction.
 
@@ -260,6 +262,7 @@ Upon receiving a `stake` transaction from an account, an AMO blockchain node per
 Upon receiving a `withdraw` transaction from an account, an AMO blockchain node performs a validity check and relieves requested coins from `stake` store and increases the account's balance when the transaction is valid.
 
 **Validity check:**
+1. `amount` > `0`
 1. `account_balance` &ge; `fee`
 1. `stake` &ge; `amount`
 1. `stake` &gt; `amount` if this account is a delegatee for any of delegated stakes
@@ -294,6 +297,7 @@ There may be users who have the intention to participate in the block production
 Upon receiving a `delegate` transaction from an account, an AMO blockchain node performs a validity check and locks requested coins to `delegate` store and decreases the account's balance when the transaction is valid.
 
 **Validity check:**
+1. `amount` > `0`
 1. `account_balance` &ge; `fee` + `amount`
 1. `to` address already has a positive stake in `stake` store
 1. the account has no previous delegatee or `to` is the same as the previous delegatee
@@ -306,11 +310,12 @@ Upon receiving a `delegate` transaction from an account, an AMO blockchain node 
 Upon receiving a `retract` transaction from an account, an AMO blockchain node performs a validity check and relieves requested coins from `delegate` store and increases the account's balance when the transaction is valid.
 
 **Validity check:**
+1. `amount` > `0`
 1. `account_balance` &ge; `fee`
 1. `delegated_stake` &ge; `amount`
 
 **State change:**
-1. `delegatedstake` &larr; `delegated_stake` - `amount`
+1. `delegated_stake` &larr; `delegated_stake` - `amount`
 1. `account_balance` &larr; `account_balance` - `fee` + `amount`
 1. `block_proposer_balance` &larr; `block_proposer_balance` + `fee`
 
