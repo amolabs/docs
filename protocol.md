@@ -16,6 +16,34 @@ A key custody is a special form of key transfer medium. It is a public-key encry
 
 ### Account address
 An address is a human-readable character string which is a hex-encoding of a byte sequence with the length of 20 bytes (=160-bit). Hence, the opaque form of an address is a 40-byte character string which consists of `[0-9]` and `[a-f]` only.
+### Extra info
+`register`, `request` and `grant` tx may carry extra information. It must be a
+JSON object, but its internal structure is application-specific. Internal DB of
+a blockchain node must store extra informations from the previous steps also,
+i.e. `parcel` stores extra from reigster tx, `request` stores extra from
+register tx and request tx, `usage` stores extra from register tx, request tx
+and grant tx.
+parcel store extra
+```json
+{
+    "register": {} /* application-specific JSON object */
+}
+```
+request store extra
+```json
+{
+    "register": {}, /* application-specific JSON object */
+    "request": {} /* application-specific JSON object */
+}
+```
+usage store extra
+```json
+{
+    "register": {}, /* application-specific JSON object */
+    "request": {}, /* application-specific JSON object */
+    "grant": {} /* application-specific JSON object */
+}
+```
 
 An account address is derived from the public key of an account. First, take 32 bytes by applying SHA256 on the public key bytes. Next, take 20 bytes by truncating the first 20 bytes from the 32-byte SHA256 output: `addr_bin = trunc_20(SHA256(PK))`. For the last step, convert this `addr_bin` by hex-encoding. An AMO-compliant program may utilize this `addr_bin` for its internal purpose, but it should apply hex-encoding before sending to other protocol party or storing to other medium outside the program.
 
