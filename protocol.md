@@ -225,7 +225,7 @@ A payload format for each transaction type is as the following.
 - `transfer` payload:
 ```json
 {
-    "udc": "_udc_id_",
+    "udc": "_udc_id_", // optional
     "to": "_HEX_encoded_account_address_",
     "amount": "_currency_"
 }
@@ -498,51 +498,72 @@ that every blockchain node hash the same state DB contents for a given block
 height.
 
 ## Operations
-**There shall be no other state change than described in this section.**
+This section describes how the AMO blockchain state is changed when a
+transaction is included in a block or a block is completed. There shall be no
+other state change than described in this section.
 
-**TM:** These operations are implemented by `DeliverTx` method in the ABCI application.
+In following subsections, `blk.incentive` is accumulated from the beginning of a
+block until the end of a block. When completing a block, this incentive is
+distributed among the validator who produced a block and the users who
+delegated stakes to the validator.
+
+**TM:** These operations are implemented by `DeliverTx` and `EndBlock` method
+in the ABCI application.
 
 ### Transferring coin
-Upon receiving a `transfer` transaction from an account, an AMO blockchain node performs a validity check and transfers coins from sender's balance to recipient's balance when the transaction is valid.
+Upon receiving a `transfer` transaction from an account, an AMO blockchain node
+performs a validity check and transfers coins from sender's balance to
+recipient's balance when the transaction is valid.
 
-**Validity check:**
-1. `amount` > `0`
-1. `account_balance` &ge; `fee` + `amount`
+1. validity check
+	1. `tx.amount` > `0`
+	1. `sender.balance` &ge; `tx.amount` + `tx.fee`
+1. state change
+	1. `sender.balance` &larr; `sender.balance` - `tx.amount` - `tx.fee`
+	1. `to.balance` &larr; `to.balance` + `tx.amount`
+	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
-**State change:**
-1. `account_balance` &larr; `account_balance` - `fee` - `amount`
-1. `block_proposer_balance` &larr; `block_proposer_balance` + `fee`
-1. `recipient_balance` &larr; `recipient_balance` + `amount`
+When optional parameter `udc` is given, the operation is changed as follows.
+1. validity check
+	1. UDC id `<udc>` is registered
+	1. `tx.amount` > `0`
+	1. `<udc>.sender.balance` &ge; `tx.amount`
+	1. `sender.balance` &ge; `tx.fee`
+1. state change
+	1. `<udc>.sender.balance` &larr; `<udc>.sender.balance` - `tx.amount`
+	1. `<udc>.to.balance` &larr; `<udc>.to.balance` + `tx.amount`
+	1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
 ### Staking coin
-Upon receiving a `stake` transaction from an account, an AMO blockchain node performs a validity check and locks requested coins to `stake` store and decreases the account's balance when the transaction is valid.
+Upon receiving a `stake` transaction from an account, an AMO blockchain node
+performs a validity check and locks requested coins to stake store and
+decreases the sender's balance when the transaction is valid.
 
-**Validity check:**
-1. `amount` > `0`
-1. `amount` % `minimum_staking_unit` == `0`: check for stake amount to respect minimum staking unit
-1. `account_balance` &ge; `fee` + `amount`
-1. There is no other stake holder with the same `validator key` as this transaction.
-
-**State change:**
-1. `account_balance` &larr; `account_balance` - `fee` - `amount`
-1. `block_proposer_balance` &larr; `block_proposer_balance` + `fee`
-1. `stake` &larr; `stake` + `amount`
-1. If the previous `validator key` is different from the key in the current `stake` transaction, then the stake holder's `validator key` is replaced with the new one.
+1. validity check
+	1. `tx.amount` > `0`
+	1. `tx.amount % config.minimum_staking_unit` == `0` (check staking uint
+	   restriction)
+	1. `sender.balance` &ge; `tx.amount` + `tx.fee`
+	1. There is no other account `holder` having `holder.stake.validator =
+	   tx.validator`
+	1. `sender.stake.validator = tx.validator` if `sender.stake` exists
+1. state change
+	1. `sender.balance` &larr; `sender.balance` - `tx.amount` - `tx.fee`
+	1. `sender.stake.amount` &larr; `sender.stake.amount` + `tx.amount`
+	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
 Upon receiving a `withdraw` transaction from an account, an AMO blockchain node performs a validity check and relieves requested coins from `stake` store and increases the account's balance when the transaction is valid.
 
-**Validity check:**
-1. `amount` > `0`
-1. `account_balance` &ge; `fee`
-1. `stake` &ge; `amount`
-1. `stake` &gt; `amount` if this account is a delegatee for any of delegated stakes
-
-**TODO:** minimum required stake to be a delegatee
-
-**State change:**
-1. `stake` &larr; `stake` - `amount`
-1. `account_balance` &larr; `account_balance` - `fee` + `amount`
-1. `block_proposer_balance` &larr; `block_proposer_balance` + `fee`
+1. validity check
+	1. `amount` > `0`
+	1. `account_balance` &ge; `fee`
+	1. `stake` &ge; `amount`
+	1. `stake` &gt; `amount` if this account is a delegatee for any of delegated stakes
+1. state change
+	1. `stake` &larr; `stake` - `amount`
+	1. `account_balance` &larr; `account_balance` - `fee` + `amount`
+	1. `block_proposer_balance` &larr; `block_proposer_balance` + `fee`
 
 **TODO:** need rounding? or currency to stake ratio?
 
