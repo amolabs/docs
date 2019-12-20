@@ -1,21 +1,112 @@
 # AMO Blockchain Protocol Specification
 
 ## Introduction
-Although the current implementation of AMO blockchain depends ***heavily*** on Tendermint, AMO blockchain protocol itself is independent of Tendermint. It is described by several protocol messages and corresponding state transition in abstract internal database of each blockchain node. While the protocol messages are concretely defined(meaning and format), abstract internal database of a blockchain node is implementation-specific. But, note that every AMO blockchain node **MUST** incorporate a kind of database storing all kinds of data items described in [Blockchain Data](#blockchain-data) section.
+Although the current implementation of AMO blockchain depends ***heavily*** on
+Tendermint, AMO blockchain protocol itself is independent of Tendermint. It is
+described by several protocol messages and corresponding state transition in
+abstract internal database of each blockchain node. While the protocol messages
+are concretely defined(meaning and format), abstract internal database of a
+blockchain node is implementation-specific. But, note that every AMO blockchain
+node **MUST** incorporate a kind of database storing all kinds of data items
+described in [Blockchain Data](#blockchain-data) section.
 
 Some notes related to Tendermint will be tagged with **TM**.
 
 ## Data Format
-### Key
-AMO blockchain uses ECDSA key pair to sign and verify various transactions and messages. AMO blockchain uses NIST P256 curve as its default ECDSA domain parameter.
+### Account Key
+AMO blockchain uses ECDSA key pair to sign and verify various transactions and
+messages. AMO blockchain uses NIST P256 curve(aka. secp256r1) and SHA256 as
+its default ECDSA domain parameter.
 
-A key pair in AMO blockchain is a pair of a private key and a public key. A private key is a sequence 32 bytes, and a public key is a sequence of 65 bytes(uncompressed form with 0x04 prefix. TODO: give a reference). These byte sequences are represented by HEX encoding when transmitted over a communication channel or stored as a marshaled form, while they reside *as is* in a program's internal memory space.
+A key pair in AMO blockchain is a pair of a private key and a public key. A
+private key is a sequence 32 bytes, and a public key is a sequence of 65
+bytes(uncompressed form with 0x04 prefix). These byte sequences are represented
+by HEX encoding when transmitted over a communication channel or stored as a
+marshaled form, while they may reside as other format in a program's internal
+memory space.
+
+A private key should **NEVER** be transmitted via a network communication
+channel. A public key must be HEX-encoded in a protocol message.
+
+The following types are used in this document.
+- `_HEX_encoded_public_key_bytes_`
+
+### Signature
+A signature field has the following form:
+```json
+{
+    "pubkey": "_HEX_encoded_public_key_bytes_",
+    "sig_bytes": "_HEX_encoded_signature_bytes_"
+}
+```
+`pubkey` is the signer's public key, and `sig_bytes` is HEX-encoded ECDSA
+signature bytes, which is a concatenation of `r` and `s`. `(r, s) =
+ECDSA(privkey, sb)` is output of ECDSA signature algorithm, where `privkey` is
+the signer's private key.
+
+### Validator Key
+A validator key pair is a ed25519 key pair and handled by Tendermint, but
+validator's public key is carried in a AMO blockchain protocol message when
+staking AMO coin to acquire stakes. In this case, a validator's public key must
+be HEX-encoded.
+
+The following types are used in this document.
+- `_HEX_encoded_ed25519_pubkey_`
 
 ### Key custody
-A key custody is a special form of key transfer medium. It is a public-key encryption of a data encryption key: `PKEnc(PK, DEK)`, where `PKEnc` is a sort of a hybrid encryption (combination of public key encryption and symmetric key encryption). For `PKEnc`, we use a combination of ECDH ephemeral mode and AES. For ECDH ephemeral key generation, we use ECDSA key generation algorithm.`PK` is a public key of a recipient and `DEK` is a data encryption key of an encrypted *data parcel*.
+A key custody is a special form of key transfer medium. It is recommended to be
+a public-key encryption of a data encryption key `PKEnc(PK, DEK)`, where
+`PKEnc` is a sort of a hybrid encryption (combination of public key encryption
+and symmetric key encryption).  For `PKEnc`, we use a combination of ECDH
+ephemeral mode and AES-256. For ECDH ephemeral key generation, we reuse ECDSA
+key generation algorithm. `PK` is a public key of a recipient and `DEK` is a
+data encryption key of an encrypted *data parcel*.
+
+The following types are used in this document.
+- `_HEX_encoded_key_custody_`
 
 ### Account address
-An address is a human-readable character string which is a hex-encoding of a byte sequence with the length of 20 bytes (=160-bit). Hence, the opaque form of an address is a 40-byte character string which consists of `[0-9]` and `[a-f]` only.
+An address is a human-readable character string which is a hex-encoding of a
+byte sequence with the length of 20 bytes (=160-bit). Hence, the opaque form of
+an address is a 40-byte character string which consists of `[0-9]` and `[A-F]`
+only.
+
+An account address is derived from the public key of an account. First, take 32
+bytes by applying SHA256 on the public key bytes. Next, take 20 bytes by
+truncating the first 20 bytes from the 32-byte SHA256 output: `addr_bin =
+trunc_20(SHA256(PK))`. For the last step, convert this `addr_bin` by
+HEX-encoding. An AMO-compliant program may utilize this `addr_bin` for its
+internal purpose, but it should apply hex-encoding before sending to other
+protocol party or storing to other medium outside the program.
+
+**NOTE:** In Bitcoin, they use `addr_bin = RIPEMD160(SHA256(PK))`, but we
+cannot use RIPEMD160. See [Notes on Cryptography](crypto.md) for more details
+and reasons.
+
+The following types are used in this document.
+- `_account_address_` = `addr_bin`
+- `_HEX_encoded_account_address_` = HEX encoding of `_account_address_`
+
+### Currency
+Amount of AMO coin or user-defined coin must be expressed as a decimal number
+enclosed in double-quotes when included in a JSON-format message, i.e. all
+protocol messages. However it may be expressed in other formats in blockchain
+node's *internal* memory.
+
+The following types are used in this document.
+- `_currency_`
+
+### ParcelID
+See [AMO Storage Specification](storage.md) for more detail.
+
+The following types are used in this document.
+- `_parcel_id_`
+- `_HEX_encoded_parcel_id_` = HEX encoding of `_parcel_id_`
+
+### User-defined coin ID
+The following types are used in this document.
+- `_udc_id_`
+
 ### Extra info
 `register`, `request` and `grant` tx may carry extra information. It must be a
 JSON object, but its internal structure is application-specific. Internal DB of
@@ -26,235 +117,385 @@ and grant tx.
 parcel store extra
 ```json
 {
-    "register": {} /* application-specific JSON object */
+    "register": {} // application-specific JSON object
 }
 ```
 request store extra
 ```json
 {
-    "register": {}, /* application-specific JSON object */
-    "request": {} /* application-specific JSON object */
+    "register": {}, // application-specific JSON object
+    "request": {} // application-specific JSON object
 }
 ```
 usage store extra
 ```json
 {
-    "register": {}, /* application-specific JSON object */
-    "request": {}, /* application-specific JSON object */
-    "grant": {} /* application-specific JSON object */
+    "register": {}, // application-specific JSON object
+    "request": {}, // application-specific JSON object
+    "grant": {} // application-specific JSON object
 }
 ```
 
-An account address is derived from the public key of an account. First, take 32 bytes by applying SHA256 on the public key bytes. Next, take 20 bytes by truncating the first 20 bytes from the 32-byte SHA256 output: `addr_bin = trunc_20(SHA256(PK))`. For the last step, convert this `addr_bin` by hex-encoding. An AMO-compliant program may utilize this `addr_bin` for its internal purpose, but it should apply hex-encoding before sending to other protocol party or storing to other medium outside the program.
-
-**NOTE:** In Bitcoin, they use `addr_bin = RIPEMD160(SHA256(PK))`, but we cannot use RIPEMD160. See [Notes on Cryptography](crypto.md) for more details and reasons.
-
 ## Message Format
 ### Transaction
-A transaction is a description of the state change in a blockchain node's internal database(i.e. blockchain state). In other words, sending a transaction to a blockchain node is the only way to change blockchain state. When a transaction is received by a node and eventually included in a _block_, a blockchain node shall modify the internal database according to each transaction type.
+A transaction is a description of the state change in a blockchain node's
+internal database(i.e. blockchain state). In other words, sending a transaction
+to a blockchain node is the only way to trigger the change in a blockchain
+state. When a transaction is received by a node and eventually included in a
+*block*, a blockchain node shall modify the internal database according to each
+transaction type.
 
 A transaction is represented by a JSON document which has the following format:
 ```json
 {
     "type": "_tx_type_",
-    "sender": "_sender_address_",
-    "params": "_HEX-encoded_JSON_object_",
+    "sender": "_HEX_encoded_account_address_",
     "fee": "_currency_",
+    "last_height": "_decimal_number",
+    "payload": {}, /* tx-specific json object */
     "signature": {
-        "pubkey": "_HEX-encoded_public_key_bytes_",
-        "sig_bytes": "_HEX-encoded_signature_bytes_"
+        "pubkey": "_HEX_encoded_public_key_bytes_",
+        "sig_bytes": "_HEX_encoded_signature_bytes_"
     }
 }
 ```
-`"_tx_type_"` is one of :
+
+`type` identifies a transaction type. The value `_tx_type_` is one of the
+following:
 - coins and stakes
-	- `"transfer"`
-	- `"stake"`
-	- `"withdraw"`
-	- `"delegate"`
-	- `"retract"`
+    - `transfer`
+    - `stake`
+    - `withdraw`
+    - `delegate`
+    - `retract`
 - parcels
-	- `"register"`
-	- `"request"`
-	- `"grant"`
-	- `"discard"`
-	- `"cancel"`
-	- `"revoke"`
+    - `register`
+    - `request`
+    - `grant`
+    - `discard`
+    - `cancel`
+    - `revoke`
+- user-defined coin
+    - `issue`
+    - `burn`
+    - `lock`
 
-`_sender_address_` identifies the sender or originator of this transaction. `"params"` is a HEX-encoded JSON object, which is different for each transaction type. `"fee"` represents a specific amount of money expected to get transferred to a block proposer after the transaction is committed to a block.
+`sender` identifies the sender or originator of this transaction. `fee` is
+amount of AMO coin expected to get transferred to a block proposer after the
+transaction is committed to a block. `last_height` is the last height of AMO
+blockchain at the time creating the transaction. `payload` is a JSON object,
+which is specific for each transaction type.
 
-- transfer body:
+`signature` is an ECDSA signature of the sender on the compact JSON
+representation of a transaction with all the HEX-encoded string in **upper
+case** as the following:
+
+```json
+{"type":"transfer","sender":"662E3DD1C6470CFE12C8EDBCE5F44C08E2763753","fee":"0","last_height":"4052","payload":{"to":"614A9F2FC4E6B119D7612C35BC150E33CB38BB40","amount":"100"}}
+```
+
+A signed transaction is as the following:
+```json
+{"type":"transfer","sender":"662E3DD1C6470CFE12C8EDBCE5F44C08E2763753","fee":"0","last_height":"4052","payload":{"to":"614A9F2FC4E6B119D7612C35BC150E33CB38BB40","amount":"100"},"signature":{"pubkey":"04DBCEC2C0F52018606F588713305E1DA49367037281B960F51C46BE64E3144977009A811A865B3CB3331B788147C03853C7920C4C8FB6FFB5B0D435DAEB3F59A4","sig_bytes":"50A8307AAFF6611AE67ADD09EA813F37668072A214230DF375CFA25FB368B0EBD861943661EC690AE0E5D789E738B3C4518F78D768E5E006C9EB53E81821671D"}}
+```
+
+An example RPC message to send the previous transaction is as the following (in
+pretty format):
 ```json
 {
-    "to": "_recipient_address_",
+  "method": "broadcast_tx_sync",
+  "params": {
+    "tx": "eyJ0eXBlIjoidHJhbnNmZXIiLCJzZW5kZXIiOiI2NjJFM0REMUM2NDcwQ0ZFMTJDOEVEQkNFNUY0NEMwOEUyNzYzNzUzIiwiZmVlIjoiMCIsImxhc3RfaGVpZ2h0IjoiNDA1MiIsInBheWxvYWQiOnsidG8iOiI2MTRBOUYyRkM0RTZCMTE5RDc2MTJDMzVCQzE1MEUzM0NCMzhCQjQwIiwiYW1vdW50IjoiMTAwIn0sInNpZ25hdHVyZSI6eyJwdWJrZXkiOiIwNGRiY2VjMmMwZjUyMDE4NjA2ZjU4ODcxMzMwNWUxZGE0OTM2NzAzNzI4MWI5NjBmNTFjNDZiZTY0ZTMxNDQ5NzcwMDlhODExYTg2NWIzY2IzMzMxYjc4ODE0N2MwMzg1M2M3OTIwYzRjOGZiNmZmYjViMGQ0MzVkYWViM2Y1OWE0Iiwic2lnX2J5dGVzIjoiNTBhODMwN2FhZmY2NjExYWU2N2FkZDA5ZWE4MTNmMzc2NjgwNzJhMjE0MjMwZGYzNzVjZmEyNWZiMzY4YjBlYmQ4NjE5NDM2NjFlYzY5MGFlMGU1ZDc4OWU3MzhiM2M0NTE4Zjc4ZDc2OGU1ZTAwNmM5ZWI1M2U4MTgyMTY3MWQifX0="
+  },
+  "id": 0,
+  "jsonrpc": "2.0"
+}
+```
+Note that the `tx` field is a Base64 encoding of a signed transaction. Line
+breaks may not be as you expected in this document display. Copy and paste the
+texts into a wide editor window. However, it is ok with the compact
+format(without any line breaks and spaces after colons(`:`).
+
+**TM:** Tendermint receives transactions via tendermint-specific RPC channel.
+For the exact RPC message format, see [AMO Client RPC Specification](rpc.md).
+
+### Transaction payload
+A payload format for each transaction type is as the following.
+
+- `transfer` payload:
+```json
+{
+    "udc": "_udc_id_",
+    "to": "_HEX_encoded_account_address_",
     "amount": "_currency_"
 }
 ```
-- stake body:
+where `udc` is an optional identifier of a user-defined coin, `to` is recipient
+of the transfer, and `amount` is amount AMO coin or user-defined coin.
+`_udc_id_` must be one of registered user-defined coin ID. If `udc` is
+ommitted, transfer AMO coin, which is the default. `_currency_` is a string
+representation of a decimal number.
+
+- `stake` payload:
 ```json
 {
-    "validator": "_validator_pubkey_",
+    "validator": "_HEX_encoded_ed25519_pubkey_",
     "amount": "_currency_"
 }
 ```
-- withdraw body:
+where `validator` is the only public key tyep other than P256 public key used
+in AMO blockchain protocol. It must be obtained from underlying Tendermint
+node, but in HEX encoding, not Base64 encoding. `amount` is amount of AMO coin
+to be locked as stake.
+
+- `withdraw` payload:
 ```json
 {
     "amount": "_currency_"
 }
 ```
-- delegate body:
+where `amount` is amount of AMO coin to be withdrawn from stake.
+
+- `delegate` payload:
 ```json
 {
-    "to": "_delegatee_address_",
+    "to": "_HEX_encoded_account_address_",
     "amount": "_currency_"
 }
 ```
-- retract body:
+where `to` is an address of an account which has stakes already and `amount` is
+amount of AMO coin to be delegated.
+
+- `retract` payload:
 ```json
 {
     "amount": "_currency_"
 }
 ```
-- register body:
+where `amount` is amount of AMO coin to be retracted from delegated stake.
+
+- `register` payload:
 ```json
 {
-    "target": "_parcel_id_",
-    "custody": "_owner_custody_",
-    "extra": "_extra_info_",
-    "proxy_account": "_delegatee_address_"
+    "target": "_HEX_encoded_parcel_id_",
+    "custody": "_HEX_encoded_key_custody_",
+    "proxy_account": "_HEX_encoded_account_address_",
+    "extra": {} // application-specific JSON object
 }
 ```
-- request body:
+where `target` is the id of a parcel currently being registered, `custody` is
+a encrypted key material used to encrypt the data parcel body, and the key
+material is encrypted by the owner(seller)'s public key.
+
+- `request` payload:
 ```json
 {
-    "target": "_parcel_id_",
+    "target": "_HEX_encoded_parcel_id_",
     "payment": "_currency_",
-    "extra": "_extra_info_"
+    "extra": {} // application-specific JSON object
 }
 ```
-- cancel body
+where `target` is the id of a parcel for which the sender wants usage grant,
+`payment` is amount of AMO coin to be collected by the seller.
+
+- `grant` payload
 ```json
 {
-    "target": "_parcel_id_"
+    "target": "_HEX_encoded_parcel_id_",
+    "grantee": "_HEX_encoded_account_address_",
+    "custody": "_HEX_encoded_key_custody_",
+    "extra": {} // application-specific JSON object
 }
 ```
-- grant body
+where `target` is the id of a parcel currently being granted, `grantee` is the
+address of a buyer, `custody` is a encrypted key material used to encrypt the
+data parcel body, and the key material is encrypted by the buyer's public key.
+
+- `discard` payload
 ```json
 {
-    "target": "_parcel_id_",
-    "grantee": "_buyer_address_",
-    "custody": "_buyer_custody_"
+    "target": "_HEX_encoded_parcel_id_"
 }
 ```
-- revoke body
+where `target` is the id of a parcel currently being discarded.
+
+- `cancel` payload
 ```json
 {
-    "target": "_parcel_id_",
-    "grantee": "_buyer_address_"
+    "target": "_HEX_encoded_parcel_id_"
 }
 ```
-- discard body
+where `target` is the id of a parcel which the sender requested previously.
+
+- `revoke` payload
 ```json
 {
-    "target": "_parcel_id_"
+    "target": "_HEX_encoded_parcel_id_",
+    "grantee": "_HEX_encoded_account_address_"
 }
 ```
+where `target` is the id of a parcel currently being revoked, and `grantee` is
+the address of a buyer which is previously granted a usage on the parcel.
 
-`"pubkey"` is of type P256, neither of ed25519 or secp256k1. It is a
-HEX-encoding of a compressed elliptic curve point with the length of 65 bytes.
-
-`"sig_bytes"` is HEX-encoded ECDSA signature, which is a concatenation of `r`
-and `s`. This is `(r, s) = ECDSA(privkey, sb)`, where `privkey` is the
-corresponding private key, and `sb` is a compact JSON representation of a
-transaction with all the HEX-encoded string in upper case as the following:
+- `issue` payload
 ```json
-{"type":"_tx_type_","sender":"_sender_address_","params":"_HEX-encoded_JSON_object_"}
+{
+    "id": "_udc_id_",
+    "desc": "human-readable string describing this user-defined coin",
+    "operators": ["_HEX_encoded_account_address_", ...],
+    "amount": "_currency_"
+}
 ```
+where `operators` is an optional list of operator addresses, and `amount` is the
+amount of UDC balance to be created.
 
-### Transaction Result
-**TM:** TBA
+- `burn` payload
 
-![protocol_transaction](./images/protocol_transaction.svg)
-
-**TM:** Tendermint core sends a **Transaction** to AMO app, and the app replies with the response **ResponseDeliverTx**. This **ResponseDeliverTx** is defined in Tendermint, but is not part of AMO blockchain protocol. However, this is an important reply to the users indicating whether the transmitted transaction was successfully processed or not. This reply is described in [RPC](rpc.md) document. Moreover, [CLI](https://github.com/amolabs/amoabci/tree/master/cmd/amocli) may process this reply and prompt the user with a more human-friendly output.
+- `lock` payload
 
 ## Blockchain Data
 
-### Data Type
-
-- `Address`
-    - described in [Account Address](#account-address)
-    - hex-encoded 
-- `PublicKey`
-    - a public key derived from ed25519
-    - json-encoded
-- `Currency`
-    - expressed as a decimal number, then enclosed in quotes and json-encoded
-- `Custody`
-    - described in [Key custody](#key-custody)
-    - hex-encoded
-- `Info`
-    - extra information
-    - hex-encoded
-- `ParcelID`
-    - an ID of a parcel
-    - hex-encoded
-- `Time`
-    - an expiration time
-    - json-encoded
-- `Stake`
-    - {validator `PublicKey`, stake `Currency`}
-    - json-encoded
-- `Delegate`
-    - {delegatee `Address`, stake `Currency`}
-    - json-encoded
-- `ParcelValue`
-    - {owner `Address`, key `Custody`, extra `Info`, proxy_account `Address`}
-    - json-encoded
-- `RequestValue`
-    - {payment `Currency`, expiration `Time`}
-    - json-encoded
-- `Usage`
-    - {key `Custody`, expiration `Time`}
-    - json-encoded
-
 ### State DB
+AMO blockchain state is an exact snapshot of all the active data items.
+Typically, this state is stored as a key-value database, but the exact method
+for managing this database may be different for each implementation. One
+obligation is that every blockchain node must be able to calculate the same
+`app_hash` for a given block height, and all kinds of implementation must have
+the same semantic meaning. This section describes the data format suitable for
+calculating `app_hash`.
 
-**NOTE:** The key and value of data are stored on the database in the type of byte array. To prevent unexpected collisions, derived from using the same key, such as overwriting or deleting data, hardcoded prefix value is attached to the key.
+The state database stores data items in separate logical *stores* according to
+the data type. To separate each logical store from the others, each data store
+has unique prefix for the database key. A prefix is a human-readable ascii
+string, but it is treated as a byte array when concatenating with the in-store
+data item key.
 
-- balance(`Address`, `Currency`)
-    - prefix: `"balance:"`
-    - key: {prefix + `Address`}
-    - value: `Currency`
-- stake(`Address`, `StakeValue`)
-    - prefix: `"stake:"`
-    - key: {prefix + `Address`}
-    - value: `StakeValue`
-- delegate(`Address`, `Delgate`)
-    - prefix: `"delegate:"`
-    - key: {prefix + `Address`}
-    - value: `Delegate`
-- parcel(`parcelID`, `ParcelValue`)
-    - prefix: `"parcel:"`
-    - key: {prefix + `parcelID`}
-    - value: `ParcelValue`
-- request(`Address`, `parcelID`, `RequestValue`)
-    - prefix: `"request:"`
-    - key: {prefix + `Address` + `ParcelID`}
-    - value: `RequestValue`
-- usage(`Address`, `ParcelID`, `UsageValue`)
-    - prefix: `"usage:"`
-    - key: {prefix + `Address` + `ParcelID`}
-    - value: `UsageValue`
+There is also a top-level data item not associated with any logical data store.
+This item has the key as `config` and the value is a JSON marshaled blockchain
+configuration.
 
-### Calculating app hash
+### Data stores
+There are 7 default data stores and optional UDC(user-defined coin) balance
+stores. 
 
-The data are stored in key-value format in a single `stateDB` storage of LevelDB provided by tendermint. The merkle tree is used to efficiently ensure that all nodes on a blockchain network maintain the same stateDB.
+| store | prefix |
+|-|-|
+| default coin balance (AMO coin) | `balance:` |
+| stake | `stake:` |
+| delegate | `delegate:` |
+| parcel | `parcel:` |
+| request | `request:` |
+| usage | `usage:` |
+| user-defined coin | `udc:` |
+| optional coin balance (user-defined coin) | `balance:<udc_id>:` |
 
-Any type of key-value data supposed to get stored on `stateDB` are put into the merkle tree in the unit of a leaf node. The leaf nodes are sorted by the key and they are labelled with a hash derived from `hash(key + value)`. A pair of leaf nodes generates a one-level higher inner node labelled with `hash(ln1_hash + ln2_hash)`. In the similar way, another one-level higher inner node is added to the merkle tree with the label of `hash(in1_hash + in2_hash)`. The above process is repeated until only one single root node appears at the top of the merkle tree. As a final process, the hash of the root node is recorded to `app_hash` of a newly generated block.
+- default coin balance
+    - key: `_account_address_`
+    - value: JSON string `"_currency_"`
+    - key is the owner of a coin balance
+- stake
+    - key: `_account_address_`
+    - value: compact representation of a JSON object
+    ```json
+    {
+        "validator": "_HEX_encoded_ed25519_pubkey_",
+        "amount": "_currency"
+    }
+    ```
+    - key is the sender of a stake tx
+- delegate
+    - key: `_account_address_`
+    - value: compact representation of a JSON object
+    ```json
+    {
+        "delegatee": "_HEX_encoded_accont_address_",
+        "amount": "_currency_"
+    }
+    ```
+    - key is the sender of a delegate tx
+    - **NOTE:** For delegate store, a key to the database is just
+      `_account_address_`, instead of a concatenation of holder address and
+      delegatee address. This means that a user can have only one delegated
+      stake. In other words, a user cannot delegate his/her stakes to
+      **multiple** delegatees. While an AMO-compliant node can freely choose
+      the actual database implementation, this constraint must be enforced in
+      any way. An implementor may choose to keep this `_account_address_` as a
+      unique key, or use more loose database implementation with an application
+      code or a wrapper layer to keep this constraint on top of it.
+- parcel
+    - key: `_parcel_id_`
+    - value: compact representation of a JSON object
+    ```json
+    {
+        "owner": "_HEX_encoded_account_address_",
+        "custody": "_HEX_encoded_key_custody_",
+        "proxy_account": "_HEX_encoded_account_address_",
+        "extra": {} // application-specific JSON object
+    }
+    ```
+    - key is the `target` of a register tx
+    - `owner` is the sender of a register tx
+- request
+    - key: `_account_address_` + `_parcel_id_`
+    - value: compact representation of a JSON object
+    ```json
+    {
+        "payment": "_currency_",
+        "extra": {} // application-specific JSON object
+    }
+    ```
+    - key is a concatenation of the sender and `target` of a request tx
+- usage
+    - key: `_account_address_` + `_parcel_id_`
+    - value: compact representation of a JSON object
+    ```json
+    {
+        "custody": "_HEX_encoded_key_custody_",
+        "extra": {} // application-specific JSON object
+    }
+    ```
+    - key is a concatenation of `grantee` and `target` of a grant tx
+- user-defined coin
+    - key: `_udc_id_`
+    - value: compact representation of a JSON object
+    ```json
+    {
+        "owner": "_HEX_encoded_account_address_",
+        "desc": "human-readable string describing this user-defined coin",
+        "operators": ["_HEX_encoded_account_address_", ...],
+        "total": "_currency_"
+    }
+    ```
+    - key is `id` of an issue tx
+    - `owner` is the sender of an *initial* issue tx
 
-**NOTE:** For `delegate`, a key to the database is just `Address`, not `{holder Address, delegatee Address}`. This means that a user cannot delegate his/her stakes to **multiple** delegatees. While an AMO-compliant node can freely choose the actual database implementation, this constraint must be enforced in any way. An implementor may choose to keep this `Address` as a unique key, or use more generous database implementation with an application code or a wrapper layer to keep this constraint on top of it.
+An optional UDC balance store has the same internal data type as the default
+coin balance.
+
+### Merke tree and app hash
+Although the internal state DB is composed of top-level data items and several
+logical data stores, its actual form is a linear key-value database. In
+viewpoint of state management, it suffices to manage this database in any form
+as long as the contents are equivalent. However, in order to interact with the
+underlying Tendermint consensus engine, we need to calculate *app hash* from
+the state DB contents. Every blockchain node must be able to calculate the same
+app hash from the equivalent state DB contents. To calculate this app hash, we
+assume that the database is stored as a Merkle tree.
+
+Every data item in the database is stored as a leaf node in a Merkle tree with
+the key as the concatenation of the prefix and in-store key. The leaf nodes are
+sorted by the key and they are labelled with a hash derived from `hash(key +
+value)`. A pair of leaf nodes generates a one-level higher inner node labelled
+with `hash(ln1_hash + ln2_hash)`. In the similar way, another one-level higher
+inner node is added to the merkle tree with the label of `hash(in1_hash +
+in2_hash)`. The above process is repeated until only one single root node
+appears at the top of the merkle tree. The resulting app hash is the hash label
+of the root node.
+
+**TM:** This app hash is calculated every time a new block is committed and
+stored as *app hash* in the *next* block. App hash is to provide an evidence
+that every blockchain node hash the same state DB contents for a given block
+height.
 
 ## Operations
 **There shall be no other state change than described in this section.**
