@@ -542,87 +542,128 @@ decreases the sender's balance when the transaction is valid.
 
 1. validity check
 	1. `tx.amount` > `0`
-	1. `tx.amount % config.minimum_staking_unit` == `0` (check staking uint
+	1. `tx.amount % config.minimum_staking_unit` == `0` (check staking unit 
 	   restriction)
 	1. `sender.balance` &ge; `tx.amount` + `tx.fee`
-	1. There is no other account `holder` having `holder.stake.validator =
-	   tx.validator`
-	1. `sender.stake.validator = tx.validator` if `sender.stake` exists
+	1. There is no other account `holder` having `holder.stake.validator` ==
+	   `tx.validator`
+	1. `sender.stake.validator` == `tx.validator` if `sender.stake` exists
 1. state change
 	1. `sender.balance` &larr; `sender.balance` - `tx.amount` - `tx.fee`
 	1. `sender.stake.amount` &larr; `sender.stake.amount` + `tx.amount`
+    1. `sender.stake.locked_height` &larr; `config.lockup_period`
 	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
-Upon receiving a `withdraw` transaction from an account, an AMO blockchain node performs a validity check and relieves requested coins from `stake` store and increases the account's balance when the transaction is valid.
+Upon receiving a `withdraw` transaction from an account, an AMO blockchain node
+performs a validity check and relieves requested coins from `stake` store and
+increases the account's balance when the transaction is valid.
 
 1. validity check
-	1. `amount` > `0`
-	1. `account_balance` &ge; `fee`
-	1. `stake` &ge; `amount`
-	1. `stake` &gt; `amount` if this account is a delegatee for any of delegated stakes
+	1. `tx.amount` > `0`
+	1. `sender.balance` &ge; `tx.fee`
+	1. `sender.stake.unlocked` == `true`
+	1. `sender.stake.amount` &ge; `tx.amount`
+	1. `sender.stake.amount` &gt; `tx.amount` if this account is a delegatee
+	   for any of delegated stakes
+	1. `sender.stake.delegate` is empty
 1. state change
-	1. `stake` &larr; `stake` - `amount`
-	1. `account_balance` &larr; `account_balance` - `fee` + `amount`
-	1. `block_proposer_balance` &larr; `block_proposer_balance` + `fee`
+	1. `sender.stake.amount` &larr; `sender.stake.amount` - `tx.amount`
+	1. `sender.balance` &larr; `sender.balance` - `tx.fee` + `tx.amount`
+	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
 **TODO:** need rounding? or currency to stake ratio?
 
 **Stake Lock-up**
 
-This feature locks a newly added stake for a certain period of time. The time is measured in terms of number of blocks. If a stake is set at the block height `h`, the stake can be withdrawn after the block height reaches `h + l`, where `l` is the pre-configured lock-up period.
+This feature locks a newly added stake for a certain period of time. The time
+is measured in terms of number of blocks. If a stake is set at the block height
+`h`, the stake can be withdrawn after the block height reaches `h + l`, where
+`l` is the pre-configured lock-up period.
 
-Upon receiving a `stake` transaction from an account, an AMO blockchain node records the stake in `LockedStake` with `l`. Then, the stake's `l` decreases by 1 block height per block creation. When `l` becomes `0`, the stake gets removed from `LockedStake` and put into `UnlockedStake`.
+Upon receiving a `stake` transaction from an account, an AMO blockchain node
+records the stake in `LockedStake` with `l`. Then, the stake's `l` decreases by
+1 block height per block creation. When `l` becomes `0`, the stake gets removed
+from `LockedStake` and put into `UnlockedStake`.
 
 **Block Progress(Creation) Conditon**
 
-As tendermint's `create_empty_blocks` config is set to `false` on an AMO blockchain node, the block is progressed only if there is a change of `appHash`, the root hash value of `State` merkle tree. The conditions in which the `appHash` can change are as follows:
+As tendermint's `create_empty_blocks` config is set to `false` on an AMO
+blockchain node, the block is progressed only if there is a change of
+`appHash`, the root hash value of `State` merkle tree. The conditions in which
+the `appHash` can change are as follows:
 
 - Successfully delivered(processed) transactions
 - Stakes in `LockedStake` 
 
-Even though there is no transaction to process on an AMO blockchain node, the `appHash` can change. The lock-period `l` of locked stakes decrease by 1 block height and it is written in `State`, resulting in the change of `appHash`.
+Even though there is no transaction to process on an AMO blockchain node, the
+`appHash` can change. The lock-period `l` of locked stakes decrease by 1 block
+height and it is written in `State`, resulting in the change of `appHash`.
 
 ### Delegating stake
-There may be users who have the intention to participate in the block production but don't have enough stake value or computing power to competent in the validator selection race. In this case, a user can delegate his/her stake to a more competent validator.
+There may be users who have the intention to participate in the block
+production but don't have enough stake value or computing power to competent in
+the validator selection race. In this case, a user can delegate his/her stake
+to a more competent validator.
 
-Upon receiving a `delegate` transaction from an account, an AMO blockchain node performs a validity check and locks requested coins to `delegate` store and decreases the account's balance when the transaction is valid.
+Upon receiving a `delegate` transaction from an account, an AMO blockchain node
+performs a validity check and locks requested coins to `delegate` store and
+decreases the account's balance when the transaction is valid.
 
-**Validity check:**
-1. `amount` > `0`
-1. `amount` % `minimum_staking_unit` == `0`: check for delegate amount to respect minimum staking unit
-1. `account_balance` &ge; `fee` + `amount`
-1. `to` address already has a positive stake in `stake` store
-1. the account has no previous delegatee or `to` is the same as the previous delegatee
+1. validity check
+	1. `tx.amount` > `0`
+	1. `tx.amount` % `config.minimum_staking_unit` == `0` (check staking unit
+	   restriction)
+	1. `sender.balance` &ge; `tx.fee` + `tx.amount`
+	1. `to` address already has a positive stake in `stake` store
+	1. the account has no previous delegatee or `to` is the same as the
+	   previous delegatee
 
-**State change:**
-1. `account_balance` &larr; `account_balance` - `fee` - `amount`
-1. `block_proposer_balance` &larr; `block_proposer_balance` + `fee`
-1. `delegated_stake` &larr; `delegated_stake` + `amount`
+1. state change
+	1. `sender.balance` &larr; `sender.balance` - `tx.fee` - `tx.amount`
+	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+	1. `sender.delegate.amount` &larr; `sender.delegate.amount` + `tx.amount`
 
-Upon receiving a `retract` transaction from an account, an AMO blockchain node performs a validity check and relieves requested coins from `delegate` store and increases the account's balance when the transaction is valid.
+Upon receiving a `retract` transaction from an account, an AMO blockchain node
+performs a validity check and relieves requested coins from `delegate` store
+and increases the account's balance when the transaction is valid.
 
-**Validity check:**
-1. `amount` > `0`
-1. `account_balance` &ge; `fee`
-1. `delegated_stake` &ge; `amount`
+1. validity check
+	1. `tx.amount` > `0`
+	1. `sender.balance` &ge; `tx.fee`
+	1. `sender.delegate.amount` &ge; `tx.amount`
 
-**State change:**
-1. `delegated_stake` &larr; `delegated_stake` - `amount`
-1. `account_balance` &larr; `account_balance` - `fee` + `amount`
-1. `block_proposer_balance` &larr; `block_proposer_balance` + `fee`
+1. state change
+	1. `sender.delegate.amount` &larr; `sender.delegate.amount` - `tx.amount`
+	1. `sender.balance` &larr; `sender.balance` - `tx.fee` + `tx.amount`
+	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
-**NOTE:** `delegated_stake` is a `stake` value in the `delegate` store where the `address` is the sender account.
+**NOTE:** `delegated_stake` is a `stake` value in the `delegate` store where
+the `address` is the sender account.
 
 ### Updating validator set
-If there is at least one of `stake`, `withdraw`, `delegate` or `retract` transaction in the last block, the top `n_val` accounts with the highest *effective stake* value shall be selected again. These accounts shall be new validators for the upcoming blocks.
+If there is at least one of `stake`, `withdraw`, `delegate` or `retract`
+transaction in the last block, the top `n_val` accounts with the highest
+*effective stake* value shall be selected again. These accounts shall be new
+validators for the upcoming blocks.
 
-**NOTE:** Effective stake value is the sum of his/her own stake in the `stake` store and all items in the `delegate` store having the same `delegatee` field as the account address in question
+**NOTE:** Effective stake value is the sum of his/her own stake in the `stake`
+store and all items in the `delegate` store having the same `delegatee` field
+as the account address in question
 
-**NOTE:** `n_val` is a global parameter fixed across nodes and blocks (and so the time). So, it shall be set at the genesis time.
+**NOTE:** `n_val` is a global parameter fixed across nodes and blocks (and so
+the time). So, it shall be set at the genesis time.
 
-**TM:** New list of validator pubkeys shall be transferred to the Tendermint daemon via `EndBlock` response. Each validator has the voting power in proportion to the effective stake value.
+**TM:** New list of validator pubkeys shall be transferred to the Tendermint
+daemon via `EndBlock` response. Each validator has the voting power in
+proportion to the effective stake value.
 
-**TM:** According to the official documentation of tendermint and several experimental results, to maintain a blockchain network, it is mandatory for over 2/3 validator(MUST-ONLINE) nodes to be online. Also, the voting power of a validator node matters to the ratio of **MUST-ONLINE** nodes. That is, stopping validator nodes of which the sum of voting power is over 1/3 breaks the consensus algorithm of tendermint and results in the interruption of generating blocks on the chain.
+**TM:** According to the official documentation of tendermint and several
+experimental results, to maintain a blockchain network, it is mandatory for
+over 2/3 validator(MUST-ONLINE) nodes to be online. Also, the voting power of a
+validator node matters to the ratio of **MUST-ONLINE** nodes. That is, stopping
+validator nodes of which the sum of voting power is over 1/3 breaks the
+consensus algorithm of tendermint and results in the interruption of generating
+blocks on the chain.
 
 #### Voting power calculation
 **TM:** In tendermint, a **voting power** has a similar role as a stake in PoS or DPoS consensus mechanism. One limitation is that sum of voting powers of all validators must not exceed the value `MaxTotalVotingPower`, which is 2^60 - 1.
