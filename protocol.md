@@ -502,8 +502,8 @@ This section describes how the AMO blockchain state is changed when a
 transaction is included in a block or a block is completed. There shall be no
 other state change than described in this section.
 
-In following subsections, `blk.incentive` is accumulated from the beginning of a
-block until the end of a block. When completing a block, this incentive is
+In following subsections, `blk.incentive` is accumulated from the beginning of
+a block until the end of a block. When completing a block, this incentive is
 distributed among the validator who produced a block and the users who
 delegated stakes to the validator.
 
@@ -637,10 +637,27 @@ and increases the account's balance when the transaction is valid.
 	1. `sender.balance` &larr; `sender.balance` - `tx.fee` + `tx.amount`
 	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
-**NOTE:** `delegated_stake` is a `stake` value in the `delegate` store where
+**NOTE:** `sender.delegate` is a `stake` value in the `delegate` store where
 the `address` is the sender account.
 
-### Updating validator set
+### Registering data
+
+### Requesting data
+
+### Granting data
+
+### Completing Block
+After processing state changes triggered by users' transactions in
+`DeliverTx()`, the nodes complete a block in `EndBlock()` by applying
+additional state changes which are the artifacts of following operations.
+
+#### Distributing Incentive
+`tx.fee` is collected while transactions are processed and it gets included in
+`blk.incentive`. Then, `blk.incentive` is distributed among the stakers and the
+delegators at the end of block creation. The process is explained in [incentive
+distribution](#distribution) section, in more detail.
+
+#### Updating validator set
 If there is at least one of `stake`, `withdraw`, `delegate` or `retract`
 transaction in the last block, the top `n_val` accounts with the highest
 *effective stake* value shall be selected again. These accounts shall be new
@@ -665,7 +682,7 @@ validator nodes of which the sum of voting power is over 1/3 breaks the
 consensus algorithm of tendermint and results in the interruption of generating
 blocks on the chain.
 
-#### Voting power calculation
+##### Voting power calculation
 **TM:** In tendermint, a **voting power** has a similar role as a stake in PoS
 or DPoS consensus mechanism. One limitation is that sum of voting powers of all
 validators must not exceed the value `MaxTotalVotingPower`, which is 2^60 - 1.
@@ -688,11 +705,11 @@ of voting power does not exceed `MaxTotalVotingPower`:
 **NOTE:** When `vp_i` reaches to zero, then `Val_i` shall be removed from the
 new validator set.
 
-### Registering data
-
-### Requesting data
-
-### Granting data
+#### Penalizing convicts
+At the beginning of block creation `BeginBlock()`, AMO ABCI app receives a list
+of convicts from tendermint. The convits get penalized in `EndBlock()` for its
+malicious attempts to harm the blockchain network. The detailed penalization
+process is explained in [penalty](#penalty) section.
 
 ## Incentive 
 **TM:** Tendermint provides a block information, in `BeginBlock()` method which
@@ -704,7 +721,7 @@ store having the same validator pubkey.
 Incentive refers to the sum of a block reward and transaction fees. The fees of
 transactions which are successfully verified(delivered) by the block proposer
 are accumulated and then transferred to the stake holder at the end of a block
-creation.
+creation in `EndBlock()`.
 
 ### Calculation
 A stake holder who proposes a block receives an incentive. This is the only
@@ -791,7 +808,6 @@ presented in [Incentive Distribution](#distribution).
 - `PenaltyRatioM`
 
 ### Downtime
-
 If the ratio of the validator's absence ratio, in the fixed height window
 `LazinessCounterWindow`, is over `LazinessThreshold`, the specfic amount of
 coins staked and delegated to the validator would be penalized. The penalty
