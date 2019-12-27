@@ -203,23 +203,6 @@ A signed transaction is as the following:
 {"type":"transfer","sender":"662E3DD1C6470CFE12C8EDBCE5F44C08E2763753","fee":"0","last_height":"4052","payload":{"to":"614A9F2FC4E6B119D7612C35BC150E33CB38BB40","amount":"100"},"signature":{"pubkey":"04DBCEC2C0F52018606F588713305E1DA49367037281B960F51C46BE64E3144977009A811A865B3CB3331B788147C03853C7920C4C8FB6FFB5B0D435DAEB3F59A4","sig_bytes":"50A8307AAFF6611AE67ADD09EA813F37668072A214230DF375CFA25FB368B0EBD861943661EC690AE0E5D789E738B3C4518F78D768E5E006C9EB53E81821671D"}}
 ```
 
-An example RPC message to send the previous transaction is as the following (in
-pretty format):
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 0,
-  "method": "broadcast_tx_sync",
-  "params": {
-    "tx": "eyJ0eXBlIjoidHJhbnNmZXIiLCJzZW5kZXIiOiI2NjJFM0REMUM2NDcwQ0ZFMTJDOEVEQkNFNUY0NEMwOEUyNzYzNzUzIiwiZmVlIjoiMCIsImxhc3RfaGVpZ2h0IjoiNDA1MiIsInBheWxvYWQiOnsidG8iOiI2MTRBOUYyRkM0RTZCMTE5RDc2MTJDMzVCQzE1MEUzM0NCMzhCQjQwIiwiYW1vdW50IjoiMTAwIn0sInNpZ25hdHVyZSI6eyJwdWJrZXkiOiIwNGRiY2VjMmMwZjUyMDE4NjA2ZjU4ODcxMzMwNWUxZGE0OTM2NzAzNzI4MWI5NjBmNTFjNDZiZTY0ZTMxNDQ5NzcwMDlhODExYTg2NWIzY2IzMzMxYjc4ODE0N2MwMzg1M2M3OTIwYzRjOGZiNmZmYjViMGQ0MzVkYWViM2Y1OWE0Iiwic2lnX2J5dGVzIjoiNTBhODMwN2FhZmY2NjExYWU2N2FkZDA5ZWE4MTNmMzc2NjgwNzJhMjE0MjMwZGYzNzVjZmEyNWZiMzY4YjBlYmQ4NjE5NDM2NjFlYzY5MGFlMGU1ZDc4OWU3MzhiM2M0NTE4Zjc4ZDc2OGU1ZTAwNmM5ZWI1M2U4MTgyMTY3MWQifX0="
-  }
-}
-```
-Note that the `tx` field is a Base64 encoding of a signed transaction. Line
-breaks may not be as you expected in this document display. Copy and paste the
-texts into a wide editor window. However, it is ok with the compact
-format(without any line breaks and spaces after colons(`:`).
-
 **TM:** Tendermint receives transactions via tendermint-specific RPC channel.
 For the exact RPC message format, see [AMO Client RPC Specification](rpc.md).
 
