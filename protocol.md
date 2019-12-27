@@ -502,8 +502,8 @@ This section describes how the AMO blockchain state is changed when a
 transaction is included in a block or a block is completed. There shall be no
 other state change than described in this section.
 
-In following subsections, `blk.incentive` is accumulated from the beginning of a
-block until the end of a block. When completing a block, this incentive is
+In following subsections, `blk.incentive` is accumulated from the beginning of
+a block until the end of a block. When completing a block, this incentive is
 distributed among the validator who produced a block and the users who
 delegated stakes to the validator.
 
@@ -542,93 +542,243 @@ decreases the sender's balance when the transaction is valid.
 
 1. validity check
 	1. `tx.amount` > `0`
-	1. `tx.amount % config.minimum_staking_unit` == `0` (check staking uint
+	1. `tx.amount % config.minimum_staking_unit` == `0` (check staking unit 
 	   restriction)
 	1. `sender.balance` &ge; `tx.amount` + `tx.fee`
-	1. There is no other account `holder` having `holder.stake.validator =
-	   tx.validator`
-	1. `sender.stake.validator = tx.validator` if `sender.stake` exists
+	1. There is no other account `holder` having `holder.stake.validator` ==
+	   `tx.validator`
+	1. `sender.stake.validator` == `tx.validator` if `sender.stake` exists
 1. state change
 	1. `sender.balance` &larr; `sender.balance` - `tx.amount` - `tx.fee`
 	1. `sender.stake.amount` &larr; `sender.stake.amount` + `tx.amount`
+    1. `sender.stake.locked_height` &larr; `config.lockup_period`
 	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
-Upon receiving a `withdraw` transaction from an account, an AMO blockchain node performs a validity check and relieves requested coins from `stake` store and increases the account's balance when the transaction is valid.
+Upon receiving a `withdraw` transaction from an account, an AMO blockchain node
+performs a validity check and relieves requested coins from `stake` store and
+increases the account's balance when the transaction is valid.
 
 1. validity check
-	1. `amount` > `0`
-	1. `account_balance` &ge; `fee`
-	1. `stake` &ge; `amount`
-	1. `stake` &gt; `amount` if this account is a delegatee for any of delegated stakes
+	1. `tx.amount` > `0`
+	1. `sender.balance` &ge; `tx.fee`
+	1. `sender.stake.unlocked` == `true`
+	1. `sender.stake.amount` &ge; `tx.amount`
+	1. `sender.stake.amount` &gt; `tx.amount` if this account is a delegatee
+	   for any of delegated stakes
+	1. `sender.stake.delegate` is empty
 1. state change
-	1. `stake` &larr; `stake` - `amount`
-	1. `account_balance` &larr; `account_balance` - `fee` + `amount`
-	1. `block_proposer_balance` &larr; `block_proposer_balance` + `fee`
+	1. `sender.stake.amount` &larr; `sender.stake.amount` - `tx.amount`
+	1. `sender.balance` &larr; `sender.balance` - `tx.fee` + `tx.amount`
+	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
 **TODO:** need rounding? or currency to stake ratio?
 
 **Stake Lock-up**
 
-This feature locks a newly added stake for a certain period of time. The time is measured in terms of number of blocks. If a stake is set at the block height `h`, the stake can be withdrawn after the block height reaches `h + l`, where `l` is the pre-configured lock-up period.
+This feature locks a newly added stake for a certain period of time. The time
+is measured in terms of number of blocks. If a stake is set at the block height
+`h`, the stake can be withdrawn after the block height reaches `h + l`, where
+`l` is the pre-configured lock-up period.
 
-Upon receiving a `stake` transaction from an account, an AMO blockchain node records the stake in `LockedStake` with `l`. Then, the stake's `l` decreases by 1 block height per block creation. When `l` becomes `0`, the stake gets removed from `LockedStake` and put into `UnlockedStake`.
+Upon receiving a `stake` transaction from an account, an AMO blockchain node
+records the stake in `LockedStake` with `l`. Then, the stake's `l` decreases by
+1 block height per block creation. When `l` becomes `0`, the stake gets removed
+from `LockedStake` and put into `UnlockedStake`.
 
 **Block Progress(Creation) Conditon**
 
-As tendermint's `create_empty_blocks` config is set to `false` on an AMO blockchain node, the block is progressed only if there is a change of `appHash`, the root hash value of `State` merkle tree. The conditions in which the `appHash` can change are as follows:
+As tendermint's `create_empty_blocks` config is set to `false` on an AMO
+blockchain node, the block is progressed only if there is a change of
+`appHash`, the root hash value of `State` merkle tree. The conditions in which
+the `appHash` can change are as follows:
 
 - Successfully delivered(processed) transactions
 - Stakes in `LockedStake` 
 
-Even though there is no transaction to process on an AMO blockchain node, the `appHash` can change. The lock-period `l` of locked stakes decrease by 1 block height and it is written in `State`, resulting in the change of `appHash`.
+Even though there is no transaction to process on an AMO blockchain node, the
+`appHash` can change. The lock-period `l` of locked stakes decrease by 1 block
+height and it is written in `State`, resulting in the change of `appHash`.
 
 ### Delegating stake
-There may be users who have the intention to participate in the block production but don't have enough stake value or computing power to competent in the validator selection race. In this case, a user can delegate his/her stake to a more competent validator.
+There may be users who have the intention to participate in the block
+production but don't have enough stake value or computing power to competent in
+the validator selection race. In this case, a user can delegate his/her stake
+to a more competent validator.
 
-Upon receiving a `delegate` transaction from an account, an AMO blockchain node performs a validity check and locks requested coins to `delegate` store and decreases the account's balance when the transaction is valid.
+Upon receiving a `delegate` transaction from an account, an AMO blockchain node
+performs a validity check and locks requested coins to `delegate` store and
+decreases the account's balance when the transaction is valid.
 
-**Validity check:**
-1. `amount` > `0`
-1. `amount` % `minimum_staking_unit` == `0`: check for delegate amount to respect minimum staking unit
-1. `account_balance` &ge; `fee` + `amount`
-1. `to` address already has a positive stake in `stake` store
-1. the account has no previous delegatee or `to` is the same as the previous delegatee
+1. validity check
+	1. `tx.amount` > `0`
+	1. `tx.amount` % `config.minimum_staking_unit` == `0` (check staking unit
+	   restriction)
+	1. `sender.balance` &ge; `tx.fee` + `tx.amount`
+	1. `tx.to` address already has a positive stake in `stake` store
+	1. the `sender` has no previous delegatee or `tx.to` is the same as the
+	   previous delegatee
+1. state change
+	1. `sender.balance` &larr; `sender.balance` - `tx.fee` - `tx.amount`
+	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+	1. `sender.delegate.amount` &larr; `sender.delegate.amount` + `tx.amount`
 
-**State change:**
-1. `account_balance` &larr; `account_balance` - `fee` - `amount`
-1. `block_proposer_balance` &larr; `block_proposer_balance` + `fee`
-1. `delegated_stake` &larr; `delegated_stake` + `amount`
+Upon receiving a `retract` transaction from an account, an AMO blockchain node
+performs a validity check and relieves requested coins from `delegate` store
+and increases the account's balance when the transaction is valid.
 
-Upon receiving a `retract` transaction from an account, an AMO blockchain node performs a validity check and relieves requested coins from `delegate` store and increases the account's balance when the transaction is valid.
+1. validity check
+	1. `tx.amount` > `0`
+	1. `sender.balance` &ge; `tx.fee`
+	1. `sender.delegate.amount` &ge; `tx.amount`
+1. state change
+	1. `sender.delegate.amount` &larr; `sender.delegate.amount` - `tx.amount`
+	1. `sender.balance` &larr; `sender.balance` - `tx.fee` + `tx.amount`
+	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
-**Validity check:**
-1. `amount` > `0`
-1. `account_balance` &ge; `fee`
-1. `delegated_stake` &ge; `amount`
+**NOTE:** `sender.delegate` is a `stake` value in the `delegate` store where
+the `address` is the sender account.
 
-**State change:**
-1. `delegated_stake` &larr; `delegated_stake` - `amount`
-1. `account_balance` &larr; `account_balance` - `fee` + `amount`
-1. `block_proposer_balance` &larr; `block_proposer_balance` + `fee`
+### Registering data
+Upon receiving a `register` transaction from an account, an AMO blockchain node
+performs a validity check and add a new record with its extra information in
+`parcel` store.
 
-**NOTE:** `delegated_stake` is a `stake` value in the `delegate` store where the `address` is the sender account.
+1. validity check
+	1. `sender.balance` &ge; `tx.fee`
+	1. `tx.target` should NOT exist in `parcel` store
+1. state change
+	1. add new record with `owner`, `custody`, `proxy_account`, `extra` in
+	   `parcel` store
+	1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
-### Updating validator set
-If there is at least one of `stake`, `withdraw`, `delegate` or `retract` transaction in the last block, the top `n_val` accounts with the highest *effective stake* value shall be selected again. These accounts shall be new validators for the upcoming blocks.
+Upon receiving a `discard` transaction from an account, an AMO blockchain node
+performs a validity check and remove record in `parcel` store.
 
-**NOTE:** Effective stake value is the sum of his/her own stake in the `stake` store and all items in the `delegate` store having the same `delegatee` field as the account address in question
+1. validity check
+	1. `sender.balance` &ge; `tx.fee`
+	1. `sender` == `tx.target.owner` or `sender` == `tx.target.proxy_account`
+	1. `tx.target` should exist in `parcel` store
+1. state change
+	1. remove record corresponding to `tx.target` in `parcel` store
+	1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
-**NOTE:** `n_val` is a global parameter fixed across nodes and blocks (and so the time). So, it shall be set at the genesis time.
+**NOTE:** `proxy_account` refers to an account which has a `owner`-equivalent
+permission to control over `tx.target` record.
 
-**TM:** New list of validator pubkeys shall be transferred to the Tendermint daemon via `EndBlock` response. Each validator has the voting power in proportion to the effective stake value.
+### Requesting data
+Upon receiving a `request` transaction from an account, an AMO blockchain node
+performs a validity check and add a new record with its extra information in
+`request` store.
 
-**TM:** According to the official documentation of tendermint and several experimental results, to maintain a blockchain network, it is mandatory for over 2/3 validator(MUST-ONLINE) nodes to be online. Also, the voting power of a validator node matters to the ratio of **MUST-ONLINE** nodes. That is, stopping validator nodes of which the sum of voting power is over 1/3 breaks the consensus algorithm of tendermint and results in the interruption of generating blocks on the chain.
+1. validity check
+	1. `sender.balance` &ge; `tx.fee` + `tx.payment`
+	1. `sender` &ne; `tx.target.owner`
+	1. `tx.target` should exist in `parcel` store
+	1. `tx.target` should NOT exist in `request` store
+1. state change
+	1. add new record with `payment`, `extra` in `request` store
+	1. `sender.balance` &larr; `sender.balance` - `tx.fee` - `tx.payment` 
+	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
-#### Voting power calculation
-**TM:** In tendermint, a **voting power** has a similar role as a stake in PoS or DPoS consensus mechanism. One limitation is that sum of voting powers of all validators must not exceed the value `MaxTotalVotingPower`, which is 2^60 - 1.
-When we use one-to-one relation between stake value and voting power, exceeding this max limit is not very likely, but possible anyway. So, the validator set update mechanism must adjust voting power of each validator, so that total sum of voting power does not exceed `MaxTotalVotingPower`:
-1. For each validator `Val_i`, set voting power `vp_i` to be `stake` of `Val_i`.
-1. Calculate `TotalVotingPower`, which is the sum of `vp_i`s of all validators in the new validator set.
+Upon receiving a `cancel` transaction from an account, an AMO blockchain node
+performs a validity check and remove record in `request` store.
+
+1. validity check
+	1. `sender.balance` &ge; `tx.fee`
+	1. `sender` == `tx.target.requester`
+	1. `tx.target` should exist in `parcel` store
+	1. `tx.target` should exist in `request` store
+1. state change
+	1. remove record corresponding to `tx.target` in `request` store
+	1. `sender.balance` &larr; `sender.balance` - `tx.fee` +
+	   `tx.target.payment` 
+	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+
+**NOTE:** `payment` refers to the amount of coins `sender` is willing to pay
+for `tx.target` to `tx.target.owner`.
+
+### Granting data
+Upon receiving a `grant` transaction from an account, an AMO blockchain node
+performs a validity check and add a new record with its extra information in
+`usage` store.
+
+1. validity check
+	1. `sender.balance` &ge; `tx.fee`
+	1. `sender` == `tx.target.owner` or `sender` == `tx.target.proxy_account`
+	1. `tx.target` should exist in `parcel` store
+	1. `tx.target` should exist in `request` store
+	1. `tx.target` should NOT exist in `usage` store
+1. state change
+	1. add new record with `custody`, `extra` in `usage` store
+	1. `tx.target.owner.balance` &larr; `tx.target.owner.balance` +
+	   `tx.target.payment`
+	1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+
+Upon receiving a `revoke` transaction from an account, an AMO blockchain node
+performs a validity check and remove record in `usage` store.
+
+1. validity check
+	1. `sender.balance` &ge; `tx.fee`
+	1. `sender` == `tx.target.owner` or `sender` == `tx.target.proxy_account`
+	1. `tx.target` should exist in `parcel` store
+	1. `tx.target` should exist in `request` store
+	1. `tx.target` should exist in `usage` store
+1. state change
+	1. remove record corresponding to `tx.target` in `usage` store
+	1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+
+### Completing Block
+After processing state changes triggered by users' transactions in
+`DeliverTx()`, the nodes complete a block in `EndBlock()` by applying
+additional state changes which are the artifacts of following operations.
+
+#### Distributing Incentive
+`tx.fee` is collected while transactions are processed and it gets included in
+`blk.incentive`. Then, `blk.incentive` is distributed among the stakers and the
+delegators at the end of block creation. The process is explained in [incentive
+distribution](#distribution) section, in more detail.
+
+#### Updating validator set
+If there is at least one of `stake`, `withdraw`, `delegate` or `retract`
+transaction in the last block, the top `n_val` accounts with the highest
+*effective stake* value shall be selected again. These accounts shall be new
+validators for the upcoming blocks.
+
+**NOTE:** Effective stake value is the sum of his/her own stake in the `stake`
+store and all items in the `delegate` store having the same `delegatee` field
+as the account address in question
+
+**NOTE:** `n_val` is a global parameter fixed across nodes and blocks (and so
+the time). So, it shall be set at the genesis time.
+
+**TM:** New list of validator pubkeys shall be transferred to the Tendermint
+daemon via `EndBlock` response. Each validator has the voting power in
+proportion to the effective stake value.
+
+**TM:** According to the official documentation of tendermint and several
+experimental results, to maintain a blockchain network, it is mandatory for
+over 2/3 validator(MUST-ONLINE) nodes to be online. Also, the voting power of a
+validator node matters to the ratio of **MUST-ONLINE** nodes. That is, stopping
+validator nodes of which the sum of voting power is over 1/3 breaks the
+consensus algorithm of tendermint and results in the interruption of generating
+blocks on the chain.
+
+##### Voting power calculation
+**TM:** In tendermint, a **voting power** has a similar role as a stake in PoS
+or DPoS consensus mechanism. One limitation is that sum of voting powers of all
+validators must not exceed the value `MaxTotalVotingPower`, which is 2^60 - 1.
+When we use one-to-one relation between stake value and voting power, exceeding
+this max limit is not very likely, but possible anyway. So, the validator set
+update mechanism must adjust voting power of each validator, so that total sum
+of voting power does not exceed `MaxTotalVotingPower`:
+1. For each validator `Val_i`, set voting power `vp_i` to be `stake` of
+   `Val_i`.
+1. Calculate `TotalVotingPower`, which is the sum of `vp_i`s of all validators
+   in the new validator set.
 1. `adjFactor` &larr; 0 (use this as a persistent factor)
 1. While `TotalVotingPower` > `MaxTotalVotingPower`
     1. `adjFactor` &larr; `adjFactor` + 1
@@ -637,47 +787,70 @@ When we use one-to-one relation between stake value and voting power, exceeding 
     1. For each validator `Val_i`, `vp_i` &larr; `vp_i` / 2
     <br/>(implemented as right-shift)
 
-**NOTE:** When `vp_i` reaches to zero, then `Val_i` shall be removed from the new validator set.
+**NOTE:** When `vp_i` reaches to zero, then `Val_i` shall be removed from the
+new validator set.
 
-### Registering data
-
-### Requesting data
-
-### Granting data
+#### Penalizing convicts
+At the beginning of block creation `BeginBlock()`, AMO ABCI app receives a list
+of convicts from tendermint. The convits get penalized in `EndBlock()` for its
+malicious attempts to harm the blockchain network. The detailed penalization
+process is explained in [penalty](#penalty) section.
 
 ## Incentive 
-**TM:** Tendermint provides a block information, in `BeginBlock()` method which is called at the beginning of a block creation, including a block proposer address. This address is derived from the validator pubkey who proposes the block. In AMO ABCI app, we can look up the original stake holder in the `stake` store having the same validator pubkey.
+**TM:** Tendermint provides a block information, in `BeginBlock()` method which
+is called at the beginning of a block creation, including a block proposer
+address. This address is derived from the validator pubkey who proposes the
+block. In AMO ABCI app, we can look up the original stake holder in the `stake`
+store having the same validator pubkey.
 
-Incentive refers to the sum of a block reward and transaction fees. The fees of transactions which are successfully verified(delivered) by the block proposer are accumulated and then transferred to the stake holder at the end of a block creation.
+Incentive refers to the sum of a block reward and transaction fees. The fees of
+transactions which are successfully verified(delivered) by the block proposer
+are accumulated and then transferred to the stake holder at the end of a block
+creation in `EndBlock()`.
 
 ### Calculation
-A stake holder who proposes a block receives an incentive. This is the only step in which there is a state change in `balance` store without involving any transaction:
+A stake holder who proposes a block receives an incentive. This is the only
+step in which there is a state change in `balance` store without involving any
+transaction:
 
 `R` &larr; `b_reward` + `n_delivered_txs` \* `tx_reward`<br/>
 `I` &larr; `R` + `acc_fee`
 
-where `R` is the final block reward, `b_reward` a block reward rate, `n_delivered_txs` the number of delivered transactions in the block, `tx_reward` a transaction reward rate, `I` the final incentive and `acc_fee` the accumulated fee.
+where `R` is the final block reward, `b_reward` a block reward rate,
+`n_delivered_txs` the number of delivered transactions in the block,
+`tx_reward` a transaction reward rate, `I` the final incentive and `acc_fee`
+the accumulated fee.
 
 ### Distribution
-When the incentive is `I`, this incentive shall be distributed among the stake holder and the delegated stake holders. The distribution mechanism is as the following:
+When the incentive is `I`, this incentive shall be distributed among the stake
+holder and the delegated stake holders. The distribution mechanism is as the
+following:
 
 1. `wStakes` &larr; `w_val` \* `stake_0` (stake of the proposer)
-1. For each delegated stake `stake_i`, `wStakes` &larr; `wStakes` + `w_ds` \* `stake_i`
-1. Calculate the incentive for the proposer
-`I_0` &larr; `I` \* `w_val` \* `stake_0` / `wStakes`.
-1. For each delegated stake holder, calculate the incentive for `i`-th delegated stake,
-`I_i` &larr; `I` \* `w_ds` \* `stake_i` / `wStakes`.
+1. For each delegated stake `stake_i`, `wStakes` &larr; `wStakes` + `w_ds` \*
+   `stake_i`
+1. Calculate the incentive for the proposer `I_0` &larr; `I` \* `w_val` \*
+   `stake_0` / `wStakes`.
+1. For each delegated stake holder, calculate the incentive for `i`-th
+   delegated stake, `I_i` &larr; `I` \* `w_ds` \* `stake_i` / `wStakes`.
 
-where `w_val` is the validator stake weight, and `w_ds` is the delegated stake weight.
+where `w_val` is the validator stake weight, and `w_ds` is the delegated stake
+weight.
 
 **TODO:** Eliminate ambiguity in float number arithmetic.
 
 **TODO:** Take care of overflow situation.
 
 ### History Record
-**NOTE:** The key and value of data are stored on the database in the type of byte array. To prevent unexpected collisions, derived from using the same key, such as overwriting or deleting data, hardcoded prefix value is attached to the key.
+**NOTE:** The key and value of data are stored on the database in the type of
+byte array. To prevent unexpected collisions, derived from using the same key,
+such as overwriting or deleting data, hardcoded prefix value is attached to the
+key.
 
-The information on incentives distributed to stake holders per block creation is recorded in the history database. The concerned data are stored in two different types, containing identical contents, as follows, to facilitate both `BlockHeight`-first and `Address`-first search.
+The information on incentives distributed to stake holders per block creation
+is recorded in the history database. The concerned data are stored in two
+different types, containing identical contents, as follows, to facilitate both
+`BlockHeight`-first and `Address`-first search.
 
 - BlockHeightAddressHistory
     - prefix: `"ba"`
@@ -688,10 +861,15 @@ The information on incentives distributed to stake holders per block creation is
 	- key: {prefix + `Address` + `BlockHeight`}
 	- value: `Amount`
 
-where `BlockHeight` is the height of a newly generated block, `Address` the address of a stake holder, `Amount` the amount of incentive distributed to a stake holder.
+where `BlockHeight` is the height of a newly generated block, `Address` the
+address of a stake holder, `Amount` the amount of incentive distributed to a
+stake holder.
 
 ## Penalty
-To maintain the DPoS blockchain as healthy as possible, it is essential to encourage block validators to participate in creating and verifying blocks with incentive, but also to impose responsibilites on their misbehavior with penalty.
+To maintain the DPoS blockchain as healthy as possible, it is essential to
+encourage block validators to participate in creating and verifying blocks with
+incentive, but also to impose responsibilites on their misbehavior with
+penalty.
 
 The types of abnormal behavior and parameters are defined as follows:
 
@@ -700,16 +878,27 @@ The types of abnormal behavior and parameters are defined as follows:
   - Lazy Validator: `PenaltyRatioL`
 
 ### Evidence
-**TM:** The evidence of validators' misbehavior is provided by Tendermint in `BeginBlock()` method which is called at the beginning of a block creation. Tendermint supports currently only a single type of evidence, the `DuplicateVoteEvidence`.
+**TM:** The evidence of validators' misbehavior is provided by Tendermint in
+`BeginBlock()` method which is called at the beginning of a block creation.
+Tendermint supports currently only a single type of evidence, the
+`DuplicateVoteEvidence`.
 
-The relevant validators pay the price for misbehavior by burning the specific amount of coins staked and delegated to them, immediately at the moment when their misbehaviors are caught. The penalty shall be distributed amont the stake holder and the delegated stake holders according to the distribution mechanism presented in [Incentive Distribution](#distribution). 
+The relevant validators pay the price for misbehavior by burning the specific
+amount of coins staked and delegated to them, immediately at the moment when
+their misbehaviors are caught. The penalty shall be distributed amont the stake
+holder and the delegated stake holders according to the distribution mechanism
+presented in [Incentive Distribution](#distribution). 
 
 #### parameters
 - `PenaltyRatioM`
 
 ### Downtime
-
-If the ratio of the validator's absence ratio, in the fixed height window `LazinessCounterWindow`, is over `LazinessThreshold`, the specfic amount of coins staked and delegated to the validator would be penalized. The penalty shall be distributed amont the stake holder and the delegated stake holders according to the distribution mechanism presented in [Incentive Distribution](#distribution).
+If the ratio of the validator's absence ratio, in the fixed height window
+`LazinessCounterWindow`, is over `LazinessThreshold`, the specfic amount of
+coins staked and delegated to the validator would be penalized. The penalty
+shall be distributed amont the stake holder and the delegated stake holders
+according to the distribution mechanism presented in [Incentive
+Distribution](#distribution).
 
 #### parameters
 - `LazinessCounterWindow`
@@ -717,7 +906,10 @@ If the ratio of the validator's absence ratio, in the fixed height window `Lazin
 - `PenaltyRatioL`
 
 ## Genesis App State
-Initial state of the app (_genesis app state_) is defined by genesis document (genesis.json file in tendermint config directory, typically $HOME/.tendermint/config/genesis.json). Initial app state is described in `app_state` field in a genesis document. For example:
+Initial state of the app (_genesis app state_) is defined by genesis document
+(genesis.json file in tendermint config directory, typically
+$HOME/.tendermint/config/genesis.json). Initial app state is described in
+`app_state` field in a genesis document. For example:
 ```json
 "app_state": {
     "balances": [
@@ -728,14 +920,34 @@ Initial state of the app (_genesis app state_) is defined by genesis document (g
     ]
 }
 ```
-**TM:** In order to reset and apply new genesis state, run the following command in command line:
+**TM:** In order to reset and apply new genesis state, run the following
+command in command line:
 ```bash
 tendermint unsafe_reset_all
 ```
-An AMO-compliant blockchain node should have some mechanisms to modify internal database for this operation.
+An AMO-compliant blockchain node should have some mechanisms to modify internal
+database for this operation.
 
 ## Further Notes
 ### Replay Attack
-In order to prevent [replay attack](https://en.wikipedia.org/wiki/Replay_attack) (in some sense, double-spending), every AMO transaction is checked for whether it is already introduced or processed in preveious blocks. Basic idea is that when a blockchain node sees a transaction that is already presented in the blockchain network, it immediately discards the transaction. Here, every transaction has a `tx hash` in Tendermint context. This `tx hash` is a hash of whole byte sequence representing the transaction. Since we incorporated ECDSA signature to authenticate the sender's identity, this gives randomness to the transaction, and it can prevent replay attacks. However, AMO blockchain protocol itself is independent of Tendermint. Moreover a future version AMO blockchain may not use Tendermint as a base platform. So, in order to provide some generic countermeasure against replay attacks, we use `ReplayPreventer`, a module which monitors every incoming transaction to prevent its replay attacks by checking its existence in the blockchain network.
+In order to prevent [replay
+attack](https://en.wikipedia.org/wiki/Replay_attack) (in some sense,
+double-spending), every AMO transaction is checked for whether it is already
+introduced or processed in preveious blocks. Basic idea is that when a
+blockchain node sees a transaction that is already presented in the blockchain
+network, it immediately discards the transaction. Here, every transaction has a
+`tx hash` in Tendermint context. This `tx hash` is a hash of whole byte
+sequence representing the transaction. Since we incorporated ECDSA signature to
+authenticate the sender's identity, this gives randomness to the transaction,
+and it can prevent replay attacks. However, AMO blockchain protocol itself is
+independent of Tendermint. Moreover a future version AMO blockchain may not use
+Tendermint as a base platform. So, in order to provide some generic
+countermeasure against replay attacks, we use `ReplayPreventer`, a module which
+monitors every incoming transaction to prevent its replay attacks by checking
+its existence in the blockchain network.
 
-If a user wants to send the same amount of coin to the same recipient again, then the user must put into the transaction a signature different from the one used for the previous transaction. If so, the transaction would have a different `tx hash` and be treated as a different one, passing the transaction check process of `ReplayPreventer` successfully.
+If a user wants to send the same amount of coin to the same recipient again,
+then the user must put into the transaction a signature different from the one
+used for the previous transaction. If so, the transaction would have a
+different `tx hash` and be treated as a different one, passing the transaction
+check process of `ReplayPreventer` successfully.
