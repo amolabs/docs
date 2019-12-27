@@ -614,10 +614,9 @@ decreases the account's balance when the transaction is valid.
 	1. `tx.amount` % `config.minimum_staking_unit` == `0` (check staking unit
 	   restriction)
 	1. `sender.balance` &ge; `tx.fee` + `tx.amount`
-	1. `to` address already has a positive stake in `stake` store
-	1. the account has no previous delegatee or `to` is the same as the
+	1. `tx.to` address already has a positive stake in `stake` store
+	1. the `sender` has no previous delegatee or `tx.to` is the same as the
 	   previous delegatee
-
 1. state change
 	1. `sender.balance` &larr; `sender.balance` - `tx.fee` - `tx.amount`
 	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
@@ -631,7 +630,6 @@ and increases the account's balance when the transaction is valid.
 	1. `tx.amount` > `0`
 	1. `sender.balance` &ge; `tx.fee`
 	1. `sender.delegate.amount` &ge; `tx.amount`
-
 1. state change
 	1. `sender.delegate.amount` &larr; `sender.delegate.amount` - `tx.amount`
 	1. `sender.balance` &larr; `sender.balance` - `tx.fee` + `tx.amount`
@@ -641,10 +639,97 @@ and increases the account's balance when the transaction is valid.
 the `address` is the sender account.
 
 ### Registering data
+Upon receiving a `register` transaction from an account, an AMO blockchain node
+performs a validity check and add a new record with its extra information in
+`parcel` store.
+
+1. validity check
+	1. `sender.balance` &ge; `tx.fee`
+	1. `tx.target` should NOT exist in `parcel` store
+1. state change
+	1. add new record with `owner`, `custody`, `proxy_account`, `extra` in
+	   `parcel` store
+	1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+
+Upon receiving a `discard` transaction from an account, an AMO blockchain node
+performs a validity check and remove record in `parcel` store.
+
+1. validity check
+	1. `sender.balance` &ge; `tx.fee`
+	1. `sender` == `tx.target.owner` or `sender` == `tx.target.proxy_account`
+	1. `tx.target` should exist in `parcel` store
+1. state change
+	1. remove record corresponding to `tx.target` in `parcel` store
+	1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+
+**NOTE:** `proxy_account` refers to an account which has a `owner`-equivalent
+permission to control over `tx.target` record.
 
 ### Requesting data
+Upon receiving a `request` transaction from an account, an AMO blockchain node
+performs a validity check and add a new record with its extra information in
+`request` store.
+
+1. validity check
+	1. `sender.balance` &ge; `tx.fee` + `tx.payment`
+	1. `sender` &ne; `tx.target.owner`
+	1. `tx.target` should exist in `parcel` store
+	1. `tx.target` should NOT exist in `request` store
+1. state change
+	1. add new record with `payment`, `extra` in `request` store
+	1. `sender.balance` &larr; `sender.balance` - `tx.fee` - `tx.payment` 
+	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+
+Upon receiving a `cancel` transaction from an account, an AMO blockchain node
+performs a validity check and remove record in `request` store.
+
+1. validity check
+	1. `sender.balance` &ge; `tx.fee`
+	1. `sender` == `tx.target.requester`
+	1. `tx.target` should exist in `parcel` store
+	1. `tx.target` should exist in `request` store
+1. state change
+	1. remove record corresponding to `tx.target` in `request` store
+	1. `sender.balance` &larr; `sender.balance` - `tx.fee` +
+	   `tx.target.payment` 
+	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+
+**NOTE:** `payment` refers to the amount of coins `sender` is willing to pay
+for `tx.target` to `tx.target.owner`.
 
 ### Granting data
+Upon receiving a `grant` transaction from an account, an AMO blockchain node
+performs a validity check and add a new record with its extra information in
+`usage` store.
+
+1. validity check
+	1. `sender.balance` &ge; `tx.fee`
+	1. `sender` == `tx.target.owner` or `sender` == `tx.target.proxy_account`
+	1. `tx.target` should exist in `parcel` store
+	1. `tx.target` should exist in `request` store
+	1. `tx.target` should NOT exist in `usage` store
+1. state change
+	1. add new record with `custody`, `extra` in `usage` store
+	1. `tx.target.owner.balance` &larr; `tx.target.owner.balance` +
+	   `tx.target.payment`
+	1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+
+Upon receiving a `revoke` transaction from an account, an AMO blockchain node
+performs a validity check and remove record in `usage` store.
+
+1. validity check
+	1. `sender.balance` &ge; `tx.fee`
+	1. `sender` == `tx.target.owner` or `sender` == `tx.target.proxy_account`
+	1. `tx.target` should exist in `parcel` store
+	1. `tx.target` should exist in `request` store
+	1. `tx.target` should exist in `usage` store
+1. state change
+	1. remove record corresponding to `tx.target` in `usage` store
+	1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
 ### Completing Block
 After processing state changes triggered by users' transactions in
