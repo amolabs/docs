@@ -35,8 +35,8 @@ The following types are used in this document.
 A signature field has the following form:
 ```json
 {
-    "pubkey": "_HEX_encoded_public_key_bytes_",
-    "sig_bytes": "_HEX_encoded_signature_bytes_"
+  "pubkey": "_HEX_encoded_public_key_bytes_",
+  "sig_bytes": "_HEX_encoded_signature_bytes_"
 }
 ```
 `pubkey` is the signer's public key, and `sig_bytes` is HEX-encoded ECDSA
@@ -86,6 +86,7 @@ and reasons.
 The following types are used in this document.
 - `_account_address_` = `addr_bin`
 - `_HEX_encoded_account_address_` = HEX encoding of `_account_address_`
+- `"_HEX_encoded_account_address_"` as a JSON object
 
 ### Currency
 Amount of AMO coin or user-defined coin must be expressed as a decimal number
@@ -102,10 +103,12 @@ See [AMO Storage Specification](storage.md) for more detail.
 The following types are used in this document.
 - `_parcel_id_`
 - `_HEX_encoded_parcel_id_` = HEX encoding of `_parcel_id_`
+- `"_HEX_encoded_parcel_id_"` as a JSON object
 
 ### User-defined coin ID
 The following types are used in this document.
 - `_udc_id_`
+- `"_udc_id_"` as a JSON object
 
 ### Extra info
 `register`, `request` and `grant` tx may carry extra information. It must be a
@@ -117,22 +120,22 @@ and grant tx.
 parcel store extra
 ```json
 {
-    "register": {} // application-specific JSON object
+  "register": {} // application-specific JSON object
 }
 ```
 request store extra
 ```json
 {
-    "register": {}, // application-specific JSON object
-    "request": {} // application-specific JSON object
+  "register": {}, // application-specific JSON object
+  "request": {} // application-specific JSON object
 }
 ```
 usage store extra
 ```json
 {
-    "register": {}, // application-specific JSON object
-    "request": {}, // application-specific JSON object
-    "grant": {} // application-specific JSON object
+  "register": {}, // application-specific JSON object
+  "request": {}, // application-specific JSON object
+  "grant": {} // application-specific JSON object
 }
 ```
 
@@ -145,20 +148,21 @@ state. When a transaction is received by a node and eventually included in a
 *block*, a blockchain node shall modify the internal database according to each
 transaction type.
 
-A transaction is represented by a JSON document which has the following format:
+A transaction is represented by a JSON document which has the following context:
 ```json
 {
-    "type": "_tx_type_",
-    "sender": "_HEX_encoded_account_address_",
-    "fee": "_currency_",
-    "last_height": "_decimal_number",
-    "payload": {}, /* tx-specific json object */
-    "signature": {
-        "pubkey": "_HEX_encoded_public_key_bytes_",
-        "sig_bytes": "_HEX_encoded_signature_bytes_"
-    }
+  "type": "_tx_type_",
+  "sender": "_HEX_encoded_account_address_",
+  "fee": "_currency_",
+  "last_height": "_decimal_number",
+  "payload": {}, // tx-specific JSON object
+  "signature": {
+    "pubkey": "_HEX_encoded_public_key_bytes_",
+    "sig_bytes": "_HEX_encoded_signature_bytes_"
+  }
 }
 ```
+It is irrelevant whether it is in compact or pretty form.
 
 `type` identifies a transaction type. The value `_tx_type_` is one of the
 following:
@@ -186,7 +190,7 @@ transaction is committed to a block. `last_height` is the last height of AMO
 blockchain at the time creating the transaction. `payload` is a JSON object,
 which is specific for each transaction type.
 
-`signature` is an ECDSA signature of the sender on the compact JSON
+`signature` is an ECDSA signature of the sender on the _compact_ JSON
 representation of a transaction with all the HEX-encoded string in **upper
 case** as the following:
 
@@ -203,12 +207,12 @@ An example RPC message to send the previous transaction is as the following (in
 pretty format):
 ```json
 {
+  "jsonrpc": "2.0",
+  "id": 0,
   "method": "broadcast_tx_sync",
   "params": {
     "tx": "eyJ0eXBlIjoidHJhbnNmZXIiLCJzZW5kZXIiOiI2NjJFM0REMUM2NDcwQ0ZFMTJDOEVEQkNFNUY0NEMwOEUyNzYzNzUzIiwiZmVlIjoiMCIsImxhc3RfaGVpZ2h0IjoiNDA1MiIsInBheWxvYWQiOnsidG8iOiI2MTRBOUYyRkM0RTZCMTE5RDc2MTJDMzVCQzE1MEUzM0NCMzhCQjQwIiwiYW1vdW50IjoiMTAwIn0sInNpZ25hdHVyZSI6eyJwdWJrZXkiOiIwNGRiY2VjMmMwZjUyMDE4NjA2ZjU4ODcxMzMwNWUxZGE0OTM2NzAzNzI4MWI5NjBmNTFjNDZiZTY0ZTMxNDQ5NzcwMDlhODExYTg2NWIzY2IzMzMxYjc4ODE0N2MwMzg1M2M3OTIwYzRjOGZiNmZmYjViMGQ0MzVkYWViM2Y1OWE0Iiwic2lnX2J5dGVzIjoiNTBhODMwN2FhZmY2NjExYWU2N2FkZDA5ZWE4MTNmMzc2NjgwNzJhMjE0MjMwZGYzNzVjZmEyNWZiMzY4YjBlYmQ4NjE5NDM2NjFlYzY5MGFlMGU1ZDc4OWU3MzhiM2M0NTE4Zjc4ZDc2OGU1ZTAwNmM5ZWI1M2U4MTgyMTY3MWQifX0="
-  },
-  "id": 0,
-  "jsonrpc": "2.0"
+  }
 }
 ```
 Note that the `tx` field is a Base64 encoding of a signed transaction. Line
@@ -225,9 +229,9 @@ A payload format for each transaction type is as the following.
 - `transfer` payload:
 ```json
 {
-    "udc": "_udc_id_", // optional
-    "to": "_HEX_encoded_account_address_",
-    "amount": "_currency_"
+  "udc": "_udc_id_", // optional
+  "to": "_HEX_encoded_account_address_",
+  "amount": "_currency_"
 }
 ```
 where `udc` is an optional identifier of a user-defined coin, `to` is recipient
@@ -239,8 +243,8 @@ representation of a decimal number.
 - `stake` payload:
 ```json
 {
-    "validator": "_HEX_encoded_ed25519_pubkey_",
-    "amount": "_currency_"
+  "validator": "_HEX_encoded_ed25519_pubkey_",
+  "amount": "_currency_"
 }
 ```
 where `validator` is the only public key tyep other than P256 public key used
@@ -251,7 +255,7 @@ to be locked as stake.
 - `withdraw` payload:
 ```json
 {
-    "amount": "_currency_"
+  "amount": "_currency_"
 }
 ```
 where `amount` is amount of AMO coin to be withdrawn from stake.
@@ -259,8 +263,8 @@ where `amount` is amount of AMO coin to be withdrawn from stake.
 - `delegate` payload:
 ```json
 {
-    "to": "_HEX_encoded_account_address_",
-    "amount": "_currency_"
+  "to": "_HEX_encoded_account_address_",
+  "amount": "_currency_"
 }
 ```
 where `to` is an address of an account which has stakes already and `amount` is
@@ -269,7 +273,7 @@ amount of AMO coin to be delegated.
 - `retract` payload:
 ```json
 {
-    "amount": "_currency_"
+  "amount": "_currency_"
 }
 ```
 where `amount` is amount of AMO coin to be retracted from delegated stake.
@@ -277,10 +281,10 @@ where `amount` is amount of AMO coin to be retracted from delegated stake.
 - `register` payload:
 ```json
 {
-    "target": "_HEX_encoded_parcel_id_",
-    "custody": "_HEX_encoded_key_custody_",
-    "proxy_account": "_HEX_encoded_account_address_",
-    "extra": {} // application-specific JSON object
+  "target": "_HEX_encoded_parcel_id_",
+  "custody": "_HEX_encoded_key_custody_",
+  "proxy_account": "_HEX_encoded_account_address_",
+  "extra": {} // application-specific JSON object
 }
 ```
 where `target` is the id of a parcel currently being registered, `custody` is
@@ -290,9 +294,9 @@ material is encrypted by the owner(seller)'s public key.
 - `request` payload:
 ```json
 {
-    "target": "_HEX_encoded_parcel_id_",
-    "payment": "_currency_",
-    "extra": {} // application-specific JSON object
+  "target": "_HEX_encoded_parcel_id_",
+  "payment": "_currency_",
+  "extra": {} // application-specific JSON object
 }
 ```
 where `target` is the id of a parcel for which the sender wants usage grant,
@@ -301,10 +305,10 @@ where `target` is the id of a parcel for which the sender wants usage grant,
 - `grant` payload
 ```json
 {
-    "target": "_HEX_encoded_parcel_id_",
-    "grantee": "_HEX_encoded_account_address_",
-    "custody": "_HEX_encoded_key_custody_",
-    "extra": {} // application-specific JSON object
+  "target": "_HEX_encoded_parcel_id_",
+  "grantee": "_HEX_encoded_account_address_",
+  "custody": "_HEX_encoded_key_custody_",
+  "extra": {} // application-specific JSON object
 }
 ```
 where `target` is the id of a parcel currently being granted, `grantee` is the
@@ -314,7 +318,7 @@ data parcel body, and the key material is encrypted by the buyer's public key.
 - `discard` payload
 ```json
 {
-    "target": "_HEX_encoded_parcel_id_"
+  "target": "_HEX_encoded_parcel_id_"
 }
 ```
 where `target` is the id of a parcel currently being discarded.
@@ -322,7 +326,7 @@ where `target` is the id of a parcel currently being discarded.
 - `cancel` payload
 ```json
 {
-    "target": "_HEX_encoded_parcel_id_"
+  "target": "_HEX_encoded_parcel_id_"
 }
 ```
 where `target` is the id of a parcel which the sender requested previously.
@@ -330,8 +334,8 @@ where `target` is the id of a parcel which the sender requested previously.
 - `revoke` payload
 ```json
 {
-    "target": "_HEX_encoded_parcel_id_",
-    "grantee": "_HEX_encoded_account_address_"
+  "target": "_HEX_encoded_parcel_id_",
+  "grantee": "_HEX_encoded_account_address_"
 }
 ```
 where `target` is the id of a parcel currently being revoked, and `grantee` is
@@ -340,10 +344,13 @@ the address of a buyer which is previously granted a usage on the parcel.
 - `issue` payload
 ```json
 {
-    "id": "_udc_id_",
-    "desc": "human-readable string describing this user-defined coin",
-    "operators": ["_HEX_encoded_account_address_", ...],
-    "amount": "_currency_"
+  "id": "_udc_id_",
+  "desc": "human-readable string describing this user-defined coin",
+  "operators": [
+    "_HEX_encoded_account_address_",
+    ...
+  ],
+  "amount": "_currency_"
 }
 ```
 where `operators` is an optional list of operator addresses, and `amount` is the
@@ -398,8 +405,8 @@ stores.
     - value: compact representation of a JSON object
     ```json
     {
-        "validator": "_HEX_encoded_ed25519_pubkey_",
-        "amount": "_currency"
+      "validator": "_HEX_encoded_ed25519_pubkey_",
+      "amount": "_currency"
     }
     ```
     - key is the sender of a stake tx
@@ -408,8 +415,8 @@ stores.
     - value: compact representation of a JSON object
     ```json
     {
-        "delegatee": "_HEX_encoded_accont_address_",
-        "amount": "_currency_"
+      "delegatee": "_HEX_encoded_accont_address_",
+      "amount": "_currency_"
     }
     ```
     - key is the sender of a delegate tx
@@ -427,10 +434,10 @@ stores.
     - value: compact representation of a JSON object
     ```json
     {
-        "owner": "_HEX_encoded_account_address_",
-        "custody": "_HEX_encoded_key_custody_",
-        "proxy_account": "_HEX_encoded_account_address_",
-        "extra": {} // application-specific JSON object
+      "owner": "_HEX_encoded_account_address_",
+      "custody": "_HEX_encoded_key_custody_",
+      "proxy_account": "_HEX_encoded_account_address_",
+      "extra": {} // application-specific JSON object
     }
     ```
     - key is the `target` of a register tx
@@ -440,8 +447,8 @@ stores.
     - value: compact representation of a JSON object
     ```json
     {
-        "payment": "_currency_",
-        "extra": {} // application-specific JSON object
+      "payment": "_currency_",
+      "extra": {} // application-specific JSON object
     }
     ```
     - key is a concatenation of the sender and `target` of a request tx
@@ -450,8 +457,8 @@ stores.
     - value: compact representation of a JSON object
     ```json
     {
-        "custody": "_HEX_encoded_key_custody_",
-        "extra": {} // application-specific JSON object
+      "custody": "_HEX_encoded_key_custody_",
+      "extra": {} // application-specific JSON object
     }
     ```
     - key is a concatenation of `grantee` and `target` of a grant tx
@@ -460,10 +467,13 @@ stores.
     - value: compact representation of a JSON object
     ```json
     {
-        "owner": "_HEX_encoded_account_address_",
-        "desc": "human-readable string describing this user-defined coin",
-        "operators": ["_HEX_encoded_account_address_", ...],
-        "total": "_currency_"
+      "owner": "_HEX_encoded_account_address_",
+      "desc": "human-readable string describing this user-defined coin",
+      "operators": [
+        "_HEX_encoded_account_address_",
+        ...
+      ],
+      "total": "_currency_"
     }
     ```
     - key is `id` of an issue tx
@@ -912,12 +922,12 @@ $HOME/.tendermint/config/genesis.json). Initial app state is described in
 `app_state` field in a genesis document. For example:
 ```json
 "app_state": {
-    "balances": [
-        {
-            "owner": "7CECB223B976F27D77B0E03E95602DABCC28D876",
-            "amount": "100"
-        }
-    ]
+  "balances": [
+    {
+      "owner": "7CECB223B976F27D77B0E03E95602DABCC28D876",
+      "amount": "100"
+    }
+  ]
 }
 ```
 **TM:** In order to reset and apply new genesis state, run the following
