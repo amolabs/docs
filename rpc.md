@@ -58,7 +58,7 @@ Tendermint terms, `params` contains two fields, `path` and `data`.
 
 Blockchain data are stored in several logical data stores. `path` decides which
 data store to look for:
-- `/app_config`: config of AMO abci app
+- `/config`: config of AMO abci app
 - `/balance`: account's AMO coin balance
 - `/stake`: account's stake
 - `/delegate`: account's delegated stake
@@ -118,7 +118,7 @@ query message, it would be `6e756c6c`. The resulting query message is as the fol
   "id": 0,
   "method": "abci_query",
   "params": {
-    "path": "/app_config",
+    "path": "/config",
     "data": "6e756c6c",
   }
 }
