@@ -670,6 +670,7 @@ performs a validity check and add a new record with its extra information in
 	1. `sender` &ne; `tx.target.owner`
 	1. `tx.target` should exist in `parcel` store
 	1. `tx.target` should NOT exist in `request` store
+	1. `tx.target` should NOT exist in `usage` store
 1. state change
 	1. add new record with `payment`, `extra` in `request` store
 	1. `sender.balance` &larr; `sender.balance` - `tx.fee` - `tx.payment` 
@@ -683,6 +684,7 @@ performs a validity check and remove record in `request` store.
 	1. `sender` == `tx.target.requester`
 	1. `tx.target` should exist in `parcel` store
 	1. `tx.target` should exist in `request` store
+	1. `tx.target` should NOT exist in `usage` store
 1. state change
 	1. remove record corresponding to `tx.target` in `request` store
 	1. `sender.balance` &larr; `sender.balance` - `tx.fee` +
@@ -704,6 +706,7 @@ performs a validity check and add a new record with its extra information in
 	1. `tx.target` should exist in `request` store
 	1. `tx.target` should NOT exist in `usage` store
 1. state change
+	1. delete record corresponding to `tx.target` in `request` store
 	1. add new record with `custody`, `extra` in `usage` store
 	1. `tx.target.owner.balance` &larr; `tx.target.owner.balance` +
 	   `tx.target.payment`
@@ -717,7 +720,6 @@ performs a validity check and remove record in `usage` store.
 	1. `sender.balance` &ge; `tx.fee`
 	1. `sender` == `tx.target.owner` or `sender` == `tx.target.proxy_account`
 	1. `tx.target` should exist in `parcel` store
-	1. `tx.target` should exist in `request` store
 	1. `tx.target` should exist in `usage` store
 1. state change
 	1. remove record corresponding to `tx.target` in `usage` store
