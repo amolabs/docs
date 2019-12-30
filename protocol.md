@@ -1,4 +1,5 @@
 # AMO Blockchain Protocol Specification
+[/]: # " vim: set sw=2 ts=2 expandtab: "
 
 ## Introduction
 Although the current implementation of AMO blockchain depends ***heavily*** on
