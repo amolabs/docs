@@ -210,13 +210,13 @@ For the exact RPC message format, see [AMO Client RPC Specification](rpc.md).
 A payload format for each transaction type is as the following.
 
 - `transfer` payload:
-```json
-{
-  "udc": "_udc_id_", // optional
-  "to": "_HEX_encoded_account_address_",
-  "amount": "_currency_"
-}
-```
+  ```json
+  {
+    "udc": "_udc_id_", // optional
+    "to": "_HEX_encoded_account_address_",
+    "amount": "_currency_"
+  }
+  ```
 where `udc` is an optional identifier of a user-defined coin, `to` is recipient
 of the transfer, and `amount` is amount AMO coin or user-defined coin.
 `_udc_id_` must be one of registered user-defined coin ID. If `udc` is
@@ -224,118 +224,118 @@ ommitted, transfer AMO coin, which is the default. `_currency_` is a string
 representation of a decimal number.
 
 - `stake` payload:
-```json
-{
-  "validator": "_HEX_encoded_ed25519_pubkey_",
-  "amount": "_currency_"
-}
-```
+  ```json
+  {
+    "validator": "_HEX_encoded_ed25519_pubkey_",
+    "amount": "_currency_"
+  }
+  ```
 where `validator` is the only public key tyep other than P256 public key used
 in AMO blockchain protocol. It must be obtained from underlying Tendermint
 node, but in HEX encoding, not Base64 encoding. `amount` is amount of AMO coin
 to be locked as stake.
 
 - `withdraw` payload:
-```json
-{
-  "amount": "_currency_"
-}
-```
+  ```json
+  {
+    "amount": "_currency_"
+  }
+  ```
 where `amount` is amount of AMO coin to be withdrawn from stake.
 
 - `delegate` payload:
-```json
-{
-  "to": "_HEX_encoded_account_address_",
-  "amount": "_currency_"
-}
-```
+  ```json
+  {
+    "to": "_HEX_encoded_account_address_",
+    "amount": "_currency_"
+  }
+  ```
 where `to` is an address of an account which has stakes already and `amount` is
 amount of AMO coin to be delegated.
 
 - `retract` payload:
-```json
-{
-  "amount": "_currency_"
-}
-```
+  ```json
+  {
+    "amount": "_currency_"
+  }
+  ```
 where `amount` is amount of AMO coin to be retracted from delegated stake.
 
 - `register` payload:
-```json
-{
-  "target": "_HEX_encoded_parcel_id_",
-  "custody": "_HEX_encoded_key_custody_",
-  "proxy_account": "_HEX_encoded_account_address_",
-  "extra": {} // application-specific JSON object
-}
-```
+  ```json
+  {
+    "target": "_HEX_encoded_parcel_id_",
+    "custody": "_HEX_encoded_key_custody_",
+    "proxy_account": "_HEX_encoded_account_address_",
+    "extra": {} // application-specific JSON object
+  }
+  ```
 where `target` is the id of a parcel currently being registered, `custody` is
 a encrypted key material used to encrypt the data parcel body, and the key
 material is encrypted by the owner(seller)'s public key.
 
 - `request` payload:
-```json
-{
-  "target": "_HEX_encoded_parcel_id_",
-  "payment": "_currency_",
-  "extra": {} // application-specific JSON object
-}
-```
+  ```json
+  {
+    "target": "_HEX_encoded_parcel_id_",
+    "payment": "_currency_",
+    "extra": {} // application-specific JSON object
+  }
+  ```
 where `target` is the id of a parcel for which the sender wants usage grant,
 `payment` is amount of AMO coin to be collected by the seller.
 
 - `grant` payload
-```json
-{
-  "target": "_HEX_encoded_parcel_id_",
-  "grantee": "_HEX_encoded_account_address_",
-  "custody": "_HEX_encoded_key_custody_",
-  "extra": {} // application-specific JSON object
-}
-```
+  ```json
+  {
+    "target": "_HEX_encoded_parcel_id_",
+    "grantee": "_HEX_encoded_account_address_",
+    "custody": "_HEX_encoded_key_custody_",
+    "extra": {} // application-specific JSON object
+  }
+  ```
 where `target` is the id of a parcel currently being granted, `grantee` is the
 address of a buyer, `custody` is a encrypted key material used to encrypt the
 data parcel body, and the key material is encrypted by the buyer's public key.
 
 - `discard` payload
-```json
-{
-  "target": "_HEX_encoded_parcel_id_"
-}
-```
+  ```json
+  {
+    "target": "_HEX_encoded_parcel_id_"
+  }
+  ```
 where `target` is the id of a parcel currently being discarded.
 
 - `cancel` payload
-```json
-{
-  "target": "_HEX_encoded_parcel_id_"
-}
-```
+  ```json
+  {
+    "target": "_HEX_encoded_parcel_id_"
+  }
+  ```
 where `target` is the id of a parcel which the sender requested previously.
 
 - `revoke` payload
-```json
-{
-  "target": "_HEX_encoded_parcel_id_",
-  "grantee": "_HEX_encoded_account_address_"
-}
-```
+  ```json
+  {
+    "target": "_HEX_encoded_parcel_id_",
+    "grantee": "_HEX_encoded_account_address_"
+  }
+  ```
 where `target` is the id of a parcel currently being revoked, and `grantee` is
 the address of a buyer which is previously granted a usage on the parcel.
 
 - `issue` payload
-```json
-{
-  "id": "_udc_id_",
-  "desc": "human-readable string describing this user-defined coin",
-  "operators": [
-    "_HEX_encoded_account_address_",
-    ...
-  ],
-  "amount": "_currency_"
-}
-```
+  ```json
+  {
+    "id": "_udc_id_",
+    "desc": "human-readable string describing this user-defined coin",
+    "operators": [
+      "_HEX_encoded_account_address_",
+      ...
+    ],
+    "amount": "_currency_"
+  }
+  ```
 where `operators` is an optional list of operator addresses, and `amount` is the
 amount of UDC balance to be created.
 
@@ -386,22 +386,22 @@ stores.
 - stake
     - key: `_account_address_`
     - value: compact representation of a JSON object
-    ```json
-    {
-      "validator": "_HEX_encoded_ed25519_pubkey_",
-      "amount": "_currency"
-    }
-    ```
+      ```json
+      {
+        "validator": "_HEX_encoded_ed25519_pubkey_",
+        "amount": "_currency"
+      }
+      ```
     - key is the sender of a stake tx
 - delegate
     - key: `_account_address_`
     - value: compact representation of a JSON object
-    ```json
-    {
-      "delegatee": "_HEX_encoded_accont_address_",
-      "amount": "_currency_"
-    }
-    ```
+      ```json
+      {
+        "delegatee": "_HEX_encoded_accont_address_",
+        "amount": "_currency_"
+      }
+      ```
     - key is the sender of a delegate tx
     - **NOTE:** For delegate store, a key to the database is just
       `_account_address_`, instead of a concatenation of holder address and
@@ -415,50 +415,50 @@ stores.
 - parcel
     - key: `_parcel_id_`
     - value: compact representation of a JSON object
-    ```json
-    {
-      "owner": "_HEX_encoded_account_address_",
-      "custody": "_HEX_encoded_key_custody_",
-      "proxy_account": "_HEX_encoded_account_address_",
-      "extra": {} // application-specific JSON object
-    }
-    ```
+      ```json
+      {
+        "owner": "_HEX_encoded_account_address_",
+        "custody": "_HEX_encoded_key_custody_",
+        "proxy_account": "_HEX_encoded_account_address_",
+        "extra": {} // application-specific JSON object
+      }
+      ```
     - key is the `target` of a register tx
     - `owner` is the sender of a register tx
 - request
     - key: `_account_address_` + `_parcel_id_`
     - value: compact representation of a JSON object
-    ```json
-    {
-      "payment": "_currency_",
-      "extra": {} // application-specific JSON object
-    }
-    ```
+      ```json
+      {
+        "payment": "_currency_",
+        "extra": {} // application-specific JSON object
+      }
+      ```
     - key is a concatenation of the sender and `target` of a request tx
 - usage
     - key: `_account_address_` + `_parcel_id_`
     - value: compact representation of a JSON object
-    ```json
-    {
-      "custody": "_HEX_encoded_key_custody_",
-      "extra": {} // application-specific JSON object
-    }
-    ```
+      ```json
+      {
+        "custody": "_HEX_encoded_key_custody_",
+        "extra": {} // application-specific JSON object
+      }
+      ```
     - key is a concatenation of `grantee` and `target` of a grant tx
 - user-defined coin
     - key: `_udc_id_`
     - value: compact representation of a JSON object
-    ```json
-    {
-      "owner": "_HEX_encoded_account_address_",
-      "desc": "human-readable string describing this user-defined coin",
-      "operators": [
-        "_HEX_encoded_account_address_",
-        ...
-      ],
-      "total": "_currency_"
-    }
-    ```
+      ```json
+      {
+        "owner": "_HEX_encoded_account_address_",
+        "desc": "human-readable string describing this user-defined coin",
+        "operators": [
+          "_HEX_encoded_account_address_",
+          ...
+        ],
+        "total": "_currency_"
+      }
+      ```
     - key is `id` of an issue tx
     - `owner` is the sender of an *initial* issue tx
 
