@@ -97,7 +97,15 @@ node's *internal* memory.
 The following types are used in this document.
 - `_currency_`
 
-### ParcelID
+### Draft ID
+A draft ID is a 64-bit unsigned integer. It is represented as double-quoted
+decimal number when used in JSON, e.g. in protocol messages.
+
+The following types are used in this document.
+- `_draft_id_`
+- `"_draft_id_"`
+
+### Parcel ID
 See [AMO Storage Specification](storage.md) for more detail.
 
 The following types are used in this document.
@@ -261,6 +269,10 @@ amount of AMO coin to be delegated.
   ```
 where `amount` is amount of AMO coin to be retracted from delegated stake.
 
+- `propose` payload
+
+- `vote` payload
+
 - `register` payload:
   ```json
   {
@@ -360,19 +372,40 @@ has unique prefix for the database key. A prefix is a human-readable ascii
 string, but it is treated as a byte array when concatenating with the in-store
 data item key.
 
-There is also a top-level data item not associated with any logical data store.
-This item has the key as `config` and the value is a JSON marshaled blockchain
+### Top-level data
+There is a top-level data item not associated with any logical data store. This
+item has the key as `config` and the value is a JSON marshaled blockchain
 configuration.
+```json
+{
+  "max_validators": 100,
+  "weight_validator": 2,
+  "weight_delegator": 1,
+  "min_staking_unit", "_currency_",
+  "blk_reward": 0,
+  "tx_reward": 1,
+  "penalty_ratio_m": 0.1,
+  "penalty_ratio_l": 0.01,
+  "laziness_counter_window": 100,
+  "laziness_threshold": 0.9,
+  "block_bound_tx_grace_period": 100,
+  "lockup_period": 3600,
+  "draft_vote_open": 500000,
+  "draft_vote_close": 100000,
+  "draft_apply": 500000
+}
+```
 
 ### Data stores
-There are 7 default data stores and optional UDC(user-defined coin) balance
-stores. 
+There are 8 default data stores and optional UDC(user-defined coin) balance
+stores.
 
 | store | prefix |
 |-|-|
 | default coin balance (AMO coin) | `balance:` |
 | stake | `stake:` |
 | delegate | `delegate:` |
+| draft | `draft:` |
 | parcel | `parcel:` |
 | request | `request:` |
 | usage | `usage:` |
@@ -412,6 +445,43 @@ stores.
       any way. An implementor may choose to keep this `_account_address_` as a
       unique key, or use more loose database implementation with an application
       code or a wrapper layer to keep this constraint on top of it.
+- draft
+    - key: `_draft_id_`
+    - value: compact representation of a JSON object
+      ```json
+      {
+        "proposer": "_HEX_encoded_account_address_",
+        "config": {},
+        "draft_vote_open": "_decimal_number_",
+        "draft_vote_close": "_decimal_number_",
+        "draft_apply": "_decimal_number_",
+        "tally_approve": "_decimal_number_",
+        "tally_reject": "_decimal_number_",
+        "voters": [_voter_, ...]
+      }
+      ```
+    - `config` keys should be a subset of the top-level `config` item. The
+      values may be ommitted if they should remain the same. There should be no
+      multiple live drafts having config change items conflicting with each
+      other.
+    - `draft_*` fields controls overall voting process until the draft being
+      passed and applied to the blockchain configuration. They are initialized
+      according to the configuration at the time of being proposed.
+      `draft_vote_open` is decremented at each block progress, and when it
+      reaches zero `draft_vote_close` is decremented afterwards. When
+      `draft_vote_close` reaches zero and the vote summary is _approval_, then
+      `draft_apply` is decremented until the new configuration is applied.
+    - `tally_*` fields count votes cast upon this draft. `tally_approve` and
+      `tally_reject` are as the names imply.
+    - `voters` field is set to the voter list according to the stakes and
+      delegated stakes statistics at the time of this draft being proposed.
+      `_voter_` is as the following:
+      ```json
+      {
+        "voter": "_HEX_encoded_account_address_",
+        "power": "_currency_"
+      }
+      ```
 - parcel
     - key: `_parcel_id_`
     - value: compact representation of a JSON object
@@ -630,6 +700,8 @@ and increases the account's balance when the transaction is valid.
 
 **NOTE:** `sender.delegate` is a `stake` value in the `delegate` store where
 the `address` is the sender account.
+
+### Proposing and voting
 
 ### Registering data
 Upon receiving a `register` transaction from an account, an AMO blockchain node

@@ -138,7 +138,10 @@ The response value for this query has the following form:
   "laziness_counter_window": 100,
   "laziness_threshold": 0.9,
   "block_bound_tx_grace_period": 100,
-  "lockup_period": 3600
+  "lockup_period": 3600,
+  "draft_vote_open": 500000,
+  "draft_vote_close": 100000,
+  "draft_apply": 500000
 }
 ```
 
@@ -174,6 +177,12 @@ When querying a validator's holder and list of appointed delegated stakes,
 ```
 
 TODO: reference to validator address
+
+### Query draft
+When querying a draft detail and voting progress, `data` is a HEX conversion of a JSON representation of a draft ID.
+```json
+"_draft_id_"
+```
 
 ### Query parcel
 When querying a parcel, `data` is a HEX conversion of a JSON representation of
