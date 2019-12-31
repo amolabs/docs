@@ -98,7 +98,7 @@ The following types are used in this document.
 - `_currency_`
 
 ### Draft ID
-A draft ID is a 64-bit unsigned integer. It is represented as double-quoted
+A draft ID is a 32-bit unsigned integer. It is represented as double-quoted
 decimal number when used in JSON, e.g. in protocol messages.
 
 The following types are used in this document.
@@ -385,6 +385,10 @@ amount of UDC balance to be created.
 
 - `lock` payload
 
+- `propose` payload
+
+- `vote` payload
+
 ## Blockchain Data
 
 ### State DB
@@ -411,7 +415,7 @@ configuration.
   "max_validators": 100,
   "weight_validator": 2,
   "weight_delegator": 1,
-  "min_staking_unit", "_currency_",
+  "min_staking_unit": "_currency_",
   "blk_reward": 0,
   "tx_reward": 1,
   "penalty_ratio_m": 0.1,
@@ -422,7 +426,10 @@ configuration.
   "lockup_period": 3600,
   "draft_vote_open": 500000,
   "draft_vote_close": 100000,
-  "draft_apply": 500000
+  "draft_apply": 500000,
+  "draft_quorum_rate": 0.1,
+  "draft_pass_rate": 0.7,
+  "draft_refund_rate": 0.2
 }
 ```
 
@@ -437,6 +444,7 @@ stores.
 | delegate | `delegate:` |
 | draft | `draft:` |
 | storage | `storage:` |
+| vote | `vote:` |
 | parcel | `parcel:` |
 | request | `request:` |
 | usage | `usage:` |
@@ -486,30 +494,36 @@ stores.
         "draft_vote_open": "_decimal_number_",
         "draft_vote_close": "_decimal_number_",
         "draft_apply": "_decimal_number_",
-        "tally_approve": "_decimal_number_",
-        "tally_reject": "_decimal_number_",
-        "voters": [_voter_, ...]
+        "draft_quorum": "_currency_",
+        "tally_approve": "_currency_",
+        "tally_reject": "_currency_",
+		"description": "_string_"
       }
       ```
     - `config` keys should be a subset of the top-level `config` item. The
       values may be ommitted if they should remain the same. There should be no
       multiple live drafts having config change items conflicting with each
       other.
-    - `draft_*` fields controls overall voting process until the draft being
-      passed and applied to the blockchain configuration. They are initialized
-      according to the configuration at the time of being proposed.
-      `draft_vote_open` is decremented at each block progress, and when it
-      reaches zero `draft_vote_close` is decremented afterwards. When
+    - `draft_vote_*`, `draft_apply` fields control overall voting process until
+      the draft being passed and applied to the blockchain configuration. They
+      are initialized according to the configuration at the time of being
+      proposed. `draft_vote_open` is decremented at each block progress, and
+      when it reaches zero `draft_vote_close` is decremented afterwards. When
       `draft_vote_close` reaches zero and the vote summary is _approval_, then
       `draft_apply` is decremented until the new configuration is applied.
+	- `draft_quorum` field is the minimum amount of effective stakes which the
+	  sum of `tally_*` fields' values is forced to exceed for the draft to get
+	  processed regardless of its approval or rejection after
+	  `draft_vote_close` reaches zero. It is initialized with the total amount
+	  of validators' effective stakes multiplied by `draft_quorum_rate` at the
+	  time of this draft being proposed.
     - `tally_*` fields count votes cast upon this draft. `tally_approve` and
       `tally_reject` are as the names imply.
-    - `voters` field is set to the voter list according to the stakes and
-      delegated stakes statistics at the time of this draft being proposed.
-      `_voter_` is as the following:
+- vote
+    - key: `_draft_id_` + `_account_address_`
+    - value: compact representation of a JSON object
       ```json
       {
-        "voter": "_HEX_encoded_account_address_",
         "power": "_currency_"
       }
       ```
@@ -621,24 +635,24 @@ performs a validity check and transfers coins from sender's balance to
 recipient's balance when the transaction is valid.
 
 1. validity check
-	1. `tx.amount` > `0`
-	1. `sender.balance` &ge; `tx.amount` + `tx.fee`
+    1. `tx.amount` > `0`
+    1. `sender.balance` &ge; `tx.amount` + `tx.fee`
 1. state change
-	1. `sender.balance` &larr; `sender.balance` - `tx.amount` - `tx.fee`
-	1. `to.balance` &larr; `to.balance` + `tx.amount`
-	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+    1. `sender.balance` &larr; `sender.balance` - `tx.amount` - `tx.fee`
+    1. `to.balance` &larr; `to.balance` + `tx.amount`
+    1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
 When optional parameter `udc` is given, the operation is changed as follows.
 1. validity check
-	1. UDC id `<udc>` is registered
-	1. `tx.amount` > `0`
-	1. `<udc>.sender.balance` &ge; `tx.amount`
-	1. `sender.balance` &ge; `tx.fee`
+    1. UDC id `<udc>` is registered
+    1. `tx.amount` > `0`
+    1. `<udc>.sender.balance` &ge; `tx.amount`
+    1. `sender.balance` &ge; `tx.fee`
 1. state change
-	1. `<udc>.sender.balance` &larr; `<udc>.sender.balance` - `tx.amount`
-	1. `<udc>.to.balance` &larr; `<udc>.to.balance` + `tx.amount`
-	1. `sender.balance` &larr; `sender.balance` - `tx.fee`
-	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+    1. `<udc>.sender.balance` &larr; `<udc>.sender.balance` - `tx.amount`
+    1. `<udc>.to.balance` &larr; `<udc>.to.balance` + `tx.amount`
+    1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+    1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
 ### Staking coin
 Upon receiving a `stake` transaction from an account, an AMO blockchain node
@@ -646,35 +660,35 @@ performs a validity check and locks requested coins to stake store and
 decreases the sender's balance when the transaction is valid.
 
 1. validity check
-	1. `tx.amount` > `0`
-	1. `tx.amount % config.minimum_staking_unit` == `0` (check staking unit 
-	   restriction)
-	1. `sender.balance` &ge; `tx.amount` + `tx.fee`
-	1. There is no other account `holder` having `holder.stake.validator` ==
-	   `tx.validator`
-	1. `sender.stake.validator` == `tx.validator` if `sender.stake` exists
+    1. `tx.amount` > `0`
+    1. `tx.amount % config.minimum_staking_unit` == `0` (check staking unit 
+       restriction)
+    1. `sender.balance` &ge; `tx.amount` + `tx.fee`
+    1. There is no other account `holder` having `holder.stake.validator` ==
+       `tx.validator`
+    1. `sender.stake.validator` == `tx.validator` if `sender.stake` exists
 1. state change
-	1. `sender.balance` &larr; `sender.balance` - `tx.amount` - `tx.fee`
-	1. `sender.stake.amount` &larr; `sender.stake.amount` + `tx.amount`
+    1. `sender.balance` &larr; `sender.balance` - `tx.amount` - `tx.fee`
+    1. `sender.stake.amount` &larr; `sender.stake.amount` + `tx.amount`
     1. `sender.stake.locked_height` &larr; `config.lockup_period`
-	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+    1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
 Upon receiving a `withdraw` transaction from an account, an AMO blockchain node
 performs a validity check and relieves requested coins from `stake` store and
 increases the account's balance when the transaction is valid.
 
 1. validity check
-	1. `tx.amount` > `0`
-	1. `sender.balance` &ge; `tx.fee`
-	1. `sender.stake.unlocked` == `true`
-	1. `sender.stake.amount` &ge; `tx.amount`
-	1. `sender.stake.amount` &gt; `tx.amount` if this account is a delegatee
-	   for any of delegated stakes
-	1. `sender.stake.delegate` is empty
+    1. `tx.amount` > `0`
+    1. `sender.balance` &ge; `tx.fee`
+    1. `sender.stake.unlocked` == `true`
+    1. `sender.stake.amount` &ge; `tx.amount`
+    1. `sender.stake.amount` &gt; `tx.amount` if this account is a delegatee
+       for any of delegated stakes
+    1. `sender.stake.delegate` is empty
 1. state change
-	1. `sender.stake.amount` &larr; `sender.stake.amount` - `tx.amount`
-	1. `sender.balance` &larr; `sender.balance` - `tx.fee` + `tx.amount`
-	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+    1. `sender.stake.amount` &larr; `sender.stake.amount` - `tx.amount`
+    1. `sender.balance` &larr; `sender.balance` - `tx.fee` + `tx.amount`
+    1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
 **TODO:** need rounding? or currency to stake ratio?
 
@@ -715,30 +729,30 @@ performs a validity check and locks requested coins to `delegate` store and
 decreases the account's balance when the transaction is valid.
 
 1. validity check
-	1. `tx.amount` > `0`
-	1. `tx.amount` % `config.minimum_staking_unit` == `0` (check staking unit
-	   restriction)
-	1. `sender.balance` &ge; `tx.fee` + `tx.amount`
-	1. `tx.to` address already has a positive stake in `stake` store
-	1. the `sender` has no previous delegatee or `tx.to` is the same as the
-	   previous delegatee
+    1. `tx.amount` > `0`
+    1. `tx.amount` % `config.minimum_staking_unit` == `0` (check staking unit
+       restriction)
+    1. `sender.balance` &ge; `tx.fee` + `tx.amount`
+    1. `tx.to` address already has a positive stake in `stake` store
+    1. the `sender` has no previous delegatee or `tx.to` is the same as the
+       previous delegatee
 1. state change
-	1. `sender.balance` &larr; `sender.balance` - `tx.fee` - `tx.amount`
-	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
-	1. `sender.delegate.amount` &larr; `sender.delegate.amount` + `tx.amount`
+    1. `sender.balance` &larr; `sender.balance` - `tx.fee` - `tx.amount`
+    1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+    1. `sender.delegate.amount` &larr; `sender.delegate.amount` + `tx.amount`
 
 Upon receiving a `retract` transaction from an account, an AMO blockchain node
 performs a validity check and relieves requested coins from `delegate` store
 and increases the account's balance when the transaction is valid.
 
 1. validity check
-	1. `tx.amount` > `0`
-	1. `sender.balance` &ge; `tx.fee`
-	1. `sender.delegate.amount` &ge; `tx.amount`
+    1. `tx.amount` > `0`
+    1. `sender.balance` &ge; `tx.fee`
+    1. `sender.delegate.amount` &ge; `tx.amount`
 1. state change
-	1. `sender.delegate.amount` &larr; `sender.delegate.amount` - `tx.amount`
-	1. `sender.balance` &larr; `sender.balance` - `tx.fee` + `tx.amount`
-	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+    1. `sender.delegate.amount` &larr; `sender.delegate.amount` - `tx.amount`
+    1. `sender.balance` &larr; `sender.balance` - `tx.fee` + `tx.amount`
+    1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
 **NOTE:** `sender.delegate` is a `stake` value in the `delegate` store where
 the `address` is the sender account.
@@ -810,11 +824,11 @@ performs a validity check and add a new record with its extra information in
 `request` store.
 
 1. validity check
-	1. `sender.balance` &ge; `tx.fee` + `tx.payment`
-	1. `sender` &ne; `tx.target.owner`
-	1. `tx.target` should exist in `parcel` store
-	1. `tx.target` should NOT exist in `request` store
-	1. `tx.target` should NOT exist in `usage` store
+    1. `sender.balance` &ge; `tx.fee` + `tx.payment`
+    1. `sender` &ne; `tx.target.owner`
+    1. `tx.target` should exist in `parcel` store
+    1. `tx.target` should NOT exist in `request` store
+    1. `tx.target` should NOT exist in `usage` store
 1. state change
     1. add new record having `sender.address`+`tx.target` as a key in `request`
        store
@@ -825,16 +839,16 @@ Upon receiving a `cancel` transaction from an account, an AMO blockchain node
 performs a validity check and remove record in `request` store.
 
 1. validity check
-	1. `sender.balance` &ge; `tx.fee`
-	1. `sender` == `tx.target.requester`
-	1. `tx.target` should exist in `parcel` store
-	1. `tx.target` should exist in `request` store
-	1. `tx.target` should NOT exist in `usage` store
+    1. `sender.balance` &ge; `tx.fee`
+    1. `sender` == `tx.target.requester`
+    1. `tx.target` should exist in `parcel` store
+    1. `tx.target` should exist in `request` store
+    1. `tx.target` should NOT exist in `usage` store
 1. state change
-	1. remove record corresponding to `tx.target` in `request` store
-	1. `sender.balance` &larr; `sender.balance` - `tx.fee` +
-	   `tx.target.payment` 
-	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+    1. remove record corresponding to `tx.target` in `request` store
+    1. `sender.balance` &larr; `sender.balance` - `tx.fee` +
+       `tx.target.payment` 
+    1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
 **NOTE:** `payment` refers to the amount of coins `sender` is willing to pay
 for `tx.target` to `tx.target.owner`.
@@ -862,14 +876,14 @@ Upon receiving a `revoke` transaction from an account, an AMO blockchain node
 performs a validity check and remove record in `usage` store.
 
 1. validity check
-	1. `sender.balance` &ge; `tx.fee`
-	1. `sender` == `tx.target.owner` or `sender` == `tx.target.proxy_account`
-	1. `tx.target` should exist in `parcel` store
-	1. `tx.target` should exist in `usage` store
+    1. `sender.balance` &ge; `tx.fee`
+    1. `sender` == `tx.target.owner` or `sender` == `tx.target.proxy_account`
+    1. `tx.target` should exist in `parcel` store
+    1. `tx.target` should exist in `usage` store
 1. state change
-	1. remove record corresponding to `tx.target` in `usage` store
-	1. `sender.balance` &larr; `sender.balance` - `tx.fee`
-	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+    1. remove record corresponding to `tx.target` in `usage` store
+    1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+    1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
 ### Completing Block
 After processing state changes triggered by users' transactions in
@@ -994,12 +1008,12 @@ different types, containing identical contents, as follows, to facilitate both
 
 - BlockHeightAddressHistory
     - prefix: `"ba"`
-	- key: {prefix + `BlockHeight` + `Address`}
-	- value: `Amount`
+    - key: {prefix + `BlockHeight` + `Address`}
+    - value: `Amount`
 - AddressBlockHeightHistory
     - prefix: `"ab"`
-	- key: {prefix + `Address` + `BlockHeight`}
-	- value: `Amount`
+    - key: {prefix + `Address` + `BlockHeight`}
+    - value: `Amount`
 
 where `BlockHeight` is the height of a newly generated block, `Address` the
 address of a stake holder, `Amount` the amount of incentive distributed to a
