@@ -105,8 +105,18 @@ The following types are used in this document.
 - `_draft_id_`
 - `"_draft_id_"`
 
+### Storage ID
+A storage ID is a four-byte binary sequence, and can be interpreted as a 32-bit
+integer.
+
+The following types are used in this document.
+- `_storage_id_`
+- `"_storage_id_"`
+
 ### Parcel ID
-See [AMO Storage Specification](storage.md) for more detail.
+A parcel ID is a concatenation of a storage ID and in-storage ID. In-storage ID
+is a 32-byte(256-bit) binary sequence. See [AMO Storage
+Specification](storage.md) for more detail.
 
 The following types are used in this document.
 - `_parcel_id_`
@@ -180,6 +190,9 @@ following:
     - `withdraw`
     - `delegate`
     - `retract`
+- storage
+	- `setup`
+	- `close`
 - parcels
     - `register`
     - `request`
@@ -272,6 +285,23 @@ where `amount` is amount of AMO coin to be retracted from delegated stake.
 - `propose` payload
 
 - `vote` payload
+
+- `setup` payload
+  ```json
+  {
+    "storage_id": "_storage_id_",
+    "url": "_url_",
+    "registration_fee": "_currency_",
+    "hosting_fee": "_currency_"
+  }
+  ```
+
+- `close` payload
+  ```json
+  {
+    "storage_id": "_storage_id_"
+  }
+  ```
 
 - `register` payload:
   ```json
@@ -397,7 +427,7 @@ configuration.
 ```
 
 ### Data stores
-There are 8 default data stores and optional UDC(user-defined coin) balance
+There are 9 default data stores and optional UDC(user-defined coin) balance
 stores.
 
 | store | prefix |
@@ -406,6 +436,7 @@ stores.
 | stake | `stake:` |
 | delegate | `delegate:` |
 | draft | `draft:` |
+| storage | `storage:` |
 | parcel | `parcel:` |
 | request | `request:` |
 | usage | `usage:` |
@@ -480,6 +511,17 @@ stores.
       {
         "voter": "_HEX_encoded_account_address_",
         "power": "_currency_"
+      }
+      ```
+- storage
+    - key: `_storage_id_`
+    - value: compact representation of a JSON object
+      ```json
+      {
+        "owner": "_HEX_encoded_account_address_",
+        "url": "_url_",
+        "registration_fee": "_currency_",
+        "hosting_fee": "_currency_"
       }
       ```
 - parcel
@@ -703,31 +745,61 @@ the `address` is the sender account.
 
 ### Proposing and voting
 
+### Registering storage
+In order to register a data parcel in AMO blockchain, there must be an already
+registered data storage in the blockchain.
+
+Upon receiving a `setup` transaction from an account, an AMO blockchain node
+performs a validity check and add or update an item in `storage` store.
+
+1. validity check
+    1. `sender.balance` &ge; `tx.fee`
+    1. `prev.owner` == `tx.sender` if `prev` with `prev.id` == `tx.storage_id`
+       exists in `storage` store
+1. state change
+    1. add new record or update existing record having `tx.storage_id` as a key
+       in `storage` store
+    1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+    1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+
+Upon receiving a `close` transaction from an account, an AMO blockchain node
+performs a validity check and remove a record from `store` store.
+
+1. valitidy check
+    1. `sender.balance` &ge; `tx.fee`
+    1. `prev` with `prev.id` == `tx.storage_id` exists in `storage` store
+    1. `prev.owner` == `tx.sender`
+1. state change
+    1. remove record having `tx.storage_id` as a key from `storage` store
+    1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+    1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+
 ### Registering data
 Upon receiving a `register` transaction from an account, an AMO blockchain node
 performs a validity check and add a new record with its extra information in
 `parcel` store.
 
 1. validity check
-	1. `sender.balance` &ge; `tx.fee`
-	1. `tx.target` should NOT exist in `parcel` store
+    1. `sender.balance` &ge; `tx.fee`
+    1. extract storage ID `tx.storage_id` from `tx.target`
+    1. `tx.storage_id` should exist in `storage` store
+    1. `tx.target` should NOT exist in `parcel` store
 1. state change
-	1. add new record with `owner`, `custody`, `proxy_account`, `extra` in
-	   `parcel` store
-	1. `sender.balance` &larr; `sender.balance` - `tx.fee`
-	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+    1. add new record having `tx.target` as a key in `parcel` store
+    1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+    1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
 Upon receiving a `discard` transaction from an account, an AMO blockchain node
 performs a validity check and remove record in `parcel` store.
 
 1. validity check
-	1. `sender.balance` &ge; `tx.fee`
-	1. `sender` == `tx.target.owner` or `sender` == `tx.target.proxy_account`
-	1. `tx.target` should exist in `parcel` store
+    1. `sender.balance` &ge; `tx.fee`
+    1. `sender` == `tx.target.owner` or `sender` == `tx.target.proxy_account`
+    1. `tx.target` should exist in `parcel` store
 1. state change
-	1. remove record corresponding to `tx.target` in `parcel` store
-	1. `sender.balance` &larr; `sender.balance` - `tx.fee`
-	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+    1. remove record having `tx.target` as a key in `parcel` store
+    1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+    1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
 **NOTE:** `proxy_account` refers to an account which has a `owner`-equivalent
 permission to control over `tx.target` record.
@@ -744,9 +816,10 @@ performs a validity check and add a new record with its extra information in
 	1. `tx.target` should NOT exist in `request` store
 	1. `tx.target` should NOT exist in `usage` store
 1. state change
-	1. add new record with `payment`, `extra` in `request` store
-	1. `sender.balance` &larr; `sender.balance` - `tx.fee` - `tx.payment` 
-	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+    1. add new record having `sender.address`+`tx.target` as a key in `request`
+       store
+    1. `sender.balance` &larr; `sender.balance` - `tx.fee` - `tx.payment` 
+    1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
 Upon receiving a `cancel` transaction from an account, an AMO blockchain node
 performs a validity check and remove record in `request` store.
@@ -772,18 +845,18 @@ performs a validity check and add a new record with its extra information in
 `usage` store.
 
 1. validity check
-	1. `sender.balance` &ge; `tx.fee`
-	1. `sender` == `tx.target.owner` or `sender` == `tx.target.proxy_account`
-	1. `tx.target` should exist in `parcel` store
-	1. `tx.target` should exist in `request` store
-	1. `tx.target` should NOT exist in `usage` store
+    1. `sender.balance` &ge; `tx.fee`
+    1. `sender` == `tx.target.owner` or `sender` == `tx.target.proxy_account`
+    1. `tx.target` should exist in `parcel` store
+    1. `tx.target` should exist in `request` store
+    1. `tx.target` should NOT exist in `usage` store
 1. state change
-	1. delete record corresponding to `tx.target` in `request` store
-	1. add new record with `custody`, `extra` in `usage` store
-	1. `tx.target.owner.balance` &larr; `tx.target.owner.balance` +
-	   `tx.target.payment`
-	1. `sender.balance` &larr; `sender.balance` - `tx.fee`
-	1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+    1. delete record having `tx.grantee` + `tx.target` in `request` store
+    1. add new record having `tx.grantee` + `tx.target` in `usage` store
+    1. `tx.target.owner.balance` &larr; `tx.target.owner.balance` +
+       `tx.target.payment`
+    1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+    1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
 Upon receiving a `revoke` transaction from an account, an AMO blockchain node
 performs a validity check and remove record in `usage` store.
