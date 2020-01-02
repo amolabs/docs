@@ -89,6 +89,12 @@ The following types are used in this document.
 - `"_HEX_encoded_account_address_"` as a JSON object
 
 ### Currency
+As in other popular blockchain systems, AMO coin amount is expressed as an
+integer value, which is a multiple of the smallest transferable unit. In AMO
+blockchain the unit is called a *mote*. And *one AMO* is 10<sup>18</sup>
+*motes*, where the number 18 is often called a *decimals* in the cryptocurrency
+community. In all protocol messages, AMO coin amount is expressed in mote unit.
+
 Amount of AMO coin or user-defined coin must be expressed as a decimal number
 enclosed in double-quotes when included in a JSON-format message, i.e. all
 protocol messages. However it may be expressed in other formats in blockchain
@@ -96,6 +102,7 @@ node's *internal* memory.
 
 The following types are used in this document.
 - `_currency_`
+- `"_currency_"` as a JSON object
 
 ### Draft ID
 A draft ID is a 32-bit unsigned integer. It is represented as double-quoted
