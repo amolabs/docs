@@ -451,22 +451,27 @@ configuration.
 ```
 
 ### Data stores
-There are 9 default data stores and optional UDC(user-defined coin) balance
+There are 10 default data stores and optional UDC(user-defined coin) balance
 stores.
 
-| store | prefix |
-|-|-|
-| default coin balance (AMO coin) | `balance:` |
-| stake | `stake:` |
-| delegate | `delegate:` |
-| draft | `draft:` |
-| storage | `storage:` |
-| vote | `vote:` |
-| parcel | `parcel:` |
-| request | `request:` |
-| usage | `usage:` |
-| user-defined coin | `udc:` |
-| optional coin balance (user-defined coin) | `balance:<udc_id>:` |
+| tier | category | store | prefix |
+|-|-|-|-|
+| 0 | fungible asset | AMO coin balance | `balance:` |
+| 0 | fungible asset | stake | `stake:` |
+| 0 | fungible asset | delegate | `delegate:` |
+| 1 | governance | draft | `draft:` |
+| 1 | governance | vote | `vote:` |
+| 2 | non-asset | storage | `storage:` |
+| 2 | non-fungible indirect asset | parcel | `parcel:` |
+| 2 | non-fungible asset | request | `request:` |
+| 2 | non-fungible asset | usage | `usage:` |
+| 3 | non-asset | user-defined coin | `udc:` |
+| 3 | fungible asset | user-defined coin balance | `balance:<udc_id>:` |
+
+Tier 0 items are essential for the operations of a DPoS-based blockchain. Tier
+1 items are important as much as the tier 0 items, but the chain may be still
+called a functional blockchain without them. Tier 2 items defines the core
+business data items, while tier 3 items are pretty much optional.
 
 - default coin balance
     - key: `_account_address_`
