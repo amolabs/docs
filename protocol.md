@@ -190,9 +190,12 @@ following:
     - `withdraw`
     - `delegate`
     - `retract`
+- draft
+    - `propose`
+    - `vote`
 - storage
-	- `setup`
-	- `close`
+    - `setup`
+    - `close`
 - parcels
     - `register`
     - `request`
@@ -283,8 +286,26 @@ amount of AMO coin to be delegated.
 where `amount` is amount of AMO coin to be retracted from delegated stake.
 
 - `propose` payload
+  ```json
+  {
+    "id": "_HEX_encoded_draft_id_",
+    "proposer": "_HEX_encoded_account_address_",
+    "config": {}, // application-specific JSON object
+    "desc": "human-readable string describing this draft"
+  }
+  ```
+where `config` is an optional field which is necessary for a proposal of
+applying of new configuration on-chain. 
 
 - `vote` payload
+  ```json
+  {
+    "draft_id": "_HEX_encoded_draft_id_",
+    "approve": true // boolean
+  }
+  ```
+where `approve` indicates `sender`'s opinion on `draft_id`; `true` for approval
+or `false` for rejection.
 
 - `setup` payload
   ```json
@@ -378,16 +399,12 @@ the address of a buyer which is previously granted a usage on the parcel.
     "amount": "_currency_"
   }
   ```
-where `operators` is an optional list of operator addresses, and `amount` is the
-amount of UDC balance to be created.
+where `operators` is an optional list of operator addresses, and `amount` is
+the amount of UDC balance to be created.
 
 - `burn` payload
 
 - `lock` payload
-
-- `propose` payload
-
-- `vote` payload
 
 ## Blockchain Data
 
@@ -491,13 +508,13 @@ stores.
       {
         "proposer": "_HEX_encoded_account_address_",
         "config": {},
+        "desc": "_human_readable_string_describing_this_draft_",
         "draft_vote_open": "_decimal_number_",
         "draft_vote_close": "_decimal_number_",
         "draft_apply": "_decimal_number_",
         "draft_quorum": "_currency_",
         "tally_approve": "_currency_",
-        "tally_reject": "_currency_",
-		"description": "_string_"
+        "tally_reject": "_currency_"
       }
       ```
     - `config` keys should be a subset of the top-level `config` item. The
@@ -511,12 +528,12 @@ stores.
       when it reaches zero `draft_vote_close` is decremented afterwards. When
       `draft_vote_close` reaches zero and the vote summary is _approval_, then
       `draft_apply` is decremented until the new configuration is applied.
-	- `draft_quorum` field is the minimum amount of effective stakes which the
-	  sum of `tally_*` fields' values is forced to exceed for the draft to get
-	  processed regardless of its approval or rejection after
-	  `draft_vote_close` reaches zero. It is initialized with the total amount
-	  of validators' effective stakes multiplied by `draft_quorum_rate` at the
-	  time of this draft being proposed.
+    - `draft_quorum` field is the minimum amount of effective stakes which the
+      sum of `tally_*` fields' values is forced to exceed for the draft to get
+      processed regardless of its approval or rejection after
+      `draft_vote_close` reaches zero. It is initialized with the total amount
+      of validators' effective stakes multiplied by `draft_quorum_rate` at the
+      time of this draft being proposed.
     - `tally_*` fields count votes cast upon this draft. `tally_approve` and
       `tally_reject` are as the names imply.
 - vote
