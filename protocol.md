@@ -295,8 +295,7 @@ where `amount` is amount of AMO coin to be retracted from delegated stake.
 - `propose` payload
   ```json
   {
-    "id": "_HEX_encoded_draft_id_",
-    "proposer": "_HEX_encoded_account_address_",
+    "draft_id": "_HEX_encoded_draft_id_",
     "config": {}, // application-specific JSON object
     "desc": "human-readable string describing this draft"
   }
@@ -451,6 +450,7 @@ configuration.
   "draft_vote_open": 500000,
   "draft_vote_close": 100000,
   "draft_apply": 500000,
+  "draft_deposit": 300000,
   "draft_quorum_rate": 0.1,
   "draft_pass_rate": 0.7,
   "draft_refund_rate": 0.2
@@ -524,6 +524,7 @@ business data items, while tier 3 items are pretty much optional.
         "draft_vote_open": "_decimal_number_",
         "draft_vote_close": "_decimal_number_",
         "draft_apply": "_decimal_number_",
+		"draft_deposit": "_currency_",
         "draft_quorum": "_currency_",
         "tally_approve": "_currency_",
         "tally_reject": "_currency_"
@@ -787,6 +788,50 @@ and increases the account's balance when the transaction is valid.
 the `address` is the sender account.
 
 ### Proposing and voting
+When it is necessary to modify the configuration of AMO blockchain without
+hard-forking the chain, one of the validators can propose a draft containing
+the configuration to get applied and its description, with deposit. Then, the
+validators vote for or against it. For the draft to get processed further after
+the vote is closed, the draft must have a quorum for voting. If not, the votes
+for draft are ignored no matter what the final result of votes is. On the other
+hand, if quorum is met, the draft would get applied or not according to its
+final result. Also, if turnout of voters is below refund rate, the draft
+deposit is distributed among the validators who participate in voting.
+Otherwise, it is returned to the proposer.
+
+Upon receiving a `propose` transaction from an account, an AMO blockchain node
+performs a validity check and add a record in `draft` store.
+
+1. validity check
+    1. there is no other draft in progress
+    1. there is no record having `tx.draft_id` as a key in `draft` store
+    1. `sender` is one of `blk.validators`
+    1. `sender.balance` &ge; `config.draft_deposit` + `tx.fee`
+    1. `tx.draft_id` == `state.latest_draft_id` + 1
+    1. the number of elements in `tx.config` should be 1
+1. state change
+    1. add new record having `tx.draft_id` as a key in `draft` store
+    1. `sender.balance` &larr; `sender.balance` - `config.draft_deposit` -
+       `tx.fee`
+    1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+
+Upon receiving a `vote` transaction from an account, an AMO blockchain node
+performs a validity check and add a record in `vote` store.
+
+1. validity check
+    1. `tx.draft_id` is in progress
+    1. there is no record having `tx.draft_id`+`sender` as a key in `vote`
+       store
+    1. `sender` is one of `blk.validators`
+    1. `sender.balance` &ge; `tx.fee`
+1. state change
+    1. add new record having `tx.draft_id`+`sender` as a key in `vote` store 
+	1. `draft.tally_approve` &larr; `draft.tally_approve` +
+	   `sender.effective_stake`, if `tx.approve` is `true`
+	1. `draft.tally_reject` &larr; `draft.tally_reject` +
+	   `sender.effective_stake`, if `tx.approve` is `false`
+    1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+    1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
 ### Registering storage
 In order to register a data parcel in AMO blockchain, there must be an already
