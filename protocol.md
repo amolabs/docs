@@ -317,7 +317,7 @@ or `false` for rejection.
 - `setup` payload
   ```json
   {
-    "storage_id": "_storage_id_",
+    "storage": "_storage_id_",
     "url": "_url_",
     "registration_fee": "_currency_",
     "hosting_fee": "_currency_"
@@ -327,7 +327,7 @@ or `false` for rejection.
 - `close` payload
   ```json
   {
-    "storage_id": "_storage_id_"
+    "storage": "_storage_id_"
   }
   ```
 
@@ -844,10 +844,10 @@ performs a validity check and add or update an item in `storage` store.
 
 1. validity check
     1. `sender.balance` &ge; `tx.fee`
-    1. `prev.owner` == `tx.sender` if `prev` with `prev.id` == `tx.storage_id`
+    1. `prev.owner` == `tx.sender` if `prev` with `prev.id` == `tx.storage`
        exists in `storage` store
 1. state change
-    1. add new record or update existing record having `tx.storage_id` as a key
+    1. add new record or update existing record having `tx.storage` as a key
        in `storage` store
     1. `sender.balance` &larr; `sender.balance` - `tx.fee`
     1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
@@ -857,10 +857,10 @@ performs a validity check and remove a record from `store` store.
 
 1. validity check
     1. `sender.balance` &ge; `tx.fee`
-    1. `prev` with `prev.id` == `tx.storage_id` exists in `storage` store
+    1. `prev` with `prev.id` == `tx.storage` exists in `storage` store
     1. `prev.owner` == `tx.sender`
 1. state change
-    1. remove record having `tx.storage_id` as a key from `storage` store
+    1. remove record having `tx.storage` as a key from `storage` store
     1. `sender.balance` &larr; `sender.balance` - `tx.fee`
     1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
@@ -871,8 +871,8 @@ performs a validity check and add a new record with its extra information in
 
 1. validity check
     1. `sender.balance` &ge; `tx.fee`
-    1. extract storage ID `tx.storage_id` from `tx.target`
-    1. `tx.storage_id` should exist in `storage` store
+    1. extract storage ID `tx.storage` from `tx.target`
+    1. `tx.storage` should exist in `storage` store
     1. `tx.target` should NOT exist in `parcel` store
 1. state change
     1. add new record having `tx.target` as a key in `parcel` store
