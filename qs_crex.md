@@ -1,5 +1,5 @@
 # Quick Start Guide for CryptoExchange
-[//]: # "This docuemtn is available in [Korean](qs_crex.ko.md) also."
+[//]: # "This document is available in [Korean](qs_crex.ko.md) also."
 
 ## Introduction
 This quick start guide describes how to prepare AMO client program and connect
@@ -31,7 +31,7 @@ func main() {
 ```
 
 ### Setup Connection
-You need to set a pakcage-global `rpc.RpcRemote` variable to setup connections. Currently, there is a testnet running. So you may connect to one of the testnet RPC nodes:
+You need to set a package-global `rpc.RpcRemote` variable to setup connections. Currently, there is a testnet running. So you may connect to one of the testnet RPC nodes:
 - `172.104.88.12:26657`
 - `139.162.116.176:26657`
 - `96.126.125.11:26657`

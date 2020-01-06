@@ -15,8 +15,8 @@ Some notes related to Tendermint will be tagged with **TM**.
 ## Data Format
 ### Account Key
 AMO blockchain uses ECDSA key pair to sign and verify various transactions and
-messages. AMO blockchain uses NIST P256 curve(aka. secp256r1) and SHA256 as
-its default ECDSA domain parameter.
+messages. AMO blockchain uses NIST P256 curve(aka. secp256r1) and SHA256 as its
+default ECDSA domain parameter.
 
 A key pair in AMO blockchain is a pair of a private key and a public key. A
 private key is a sequence 32 bytes, and a public key is a sequence of 65
@@ -138,8 +138,8 @@ The following types are used in this document.
 ### Extra info
 `register`, `request` and `grant` tx may carry extra information. It must be a
 JSON object, but its internal structure is application-specific. Internal DB of
-a blockchain node must store extra informations from the previous steps also,
-i.e. `parcel` stores extra from reigster tx, `request` stores extra from
+a blockchain node must store extra information from the previous steps also,
+i.e. `parcel` stores extra from register tx, `request` stores extra from
 register tx and request tx, `usage` stores extra from register tx, request tx
 and grant tx.
 parcel store extra
@@ -173,7 +173,8 @@ state. When a transaction is received by a node and eventually included in a
 *block*, a blockchain node shall modify the internal database according to each
 transaction type.
 
-A transaction is represented by a JSON document which has the following context:
+A transaction is represented by a JSON document which has the following
+context:
 ```json
 {
   "type": "_tx_type_",
@@ -250,8 +251,8 @@ A payload format for each transaction type is as the following.
   ```
 where `udc` is an optional identifier of a user-defined coin, `to` is recipient
 of the transfer, and `amount` is amount AMO coin or user-defined coin.
-`_udc_id_` must be one of registered user-defined coin ID. If `udc` is
-ommitted, transfer AMO coin, which is the default. `_currency_` is a string
+`_udc_id_` must be one of registered user-defined coin ID. If `udc` is omitted,
+transfer AMO coin, which is the default. `_currency_` is a string
 representation of a decimal number.
 
 - `stake` payload:
@@ -261,7 +262,7 @@ representation of a decimal number.
     "amount": "_currency_"
   }
   ```
-where `validator` is the only public key tyep other than P256 public key used
+where `validator` is the only public key type other than P256 public key used
 in AMO blockchain protocol. It must be obtained from underlying Tendermint
 node, but in HEX encoding, not Base64 encoding. `amount` is amount of AMO coin
 to be locked as stake.
@@ -339,8 +340,8 @@ or `false` for rejection.
     "extra": {} // application-specific JSON object
   }
   ```
-where `target` is the id of a parcel currently being registered, `custody` is
-a encrypted key material used to encrypt the data parcel body, and the key
+where `target` is the id of a parcel currently being registered, `custody` is a
+encrypted key material used to encrypt the data parcel body, and the key
 material is encrypted by the owner(seller)'s public key.
 
 - `request` payload:
@@ -425,7 +426,7 @@ calculating `app_hash`.
 
 The state database stores data items in separate logical *stores* according to
 the data type. To separate each logical store from the others, each data store
-has unique prefix for the database key. A prefix is a human-readable ascii
+has unique prefix for the database key. A prefix is a human-readable ASCII
 string, but it is treated as a byte array when concatenating with the in-store
 data item key.
 
@@ -504,15 +505,15 @@ business data items, while tier 3 items are pretty much optional.
       }
       ```
     - key is the sender of a delegate tx
-    - **NOTE:** For delegate store, a key to the database is just
-      `_account_address_`, instead of a concatenation of holder address and
-      delegatee address. This means that a user can have only one delegated
-      stake. In other words, a user cannot delegate his/her stakes to
-      **multiple** delegatees. While an AMO-compliant node can freely choose
-      the actual database implementation, this constraint must be enforced in
-      any way. An implementor may choose to keep this `_account_address_` as a
-      unique key, or use more loose database implementation with an application
-      code or a wrapper layer to keep this constraint on top of it.
+	- **NOTE:** For delegate store, a key to the database is just
+	  `_account_address_`, instead of a concatenation of holder address and
+	  delegatee address. This means that a user can have only one delegated
+	  stake. In other words, a user cannot delegate his/her stakes to
+	  **multiple** delegatees. While an AMO-compliant node can freely choose
+	  the actual database implementation, this constraint must be enforced in
+	  any way. An implementor may choose to keep this `_account_address_` as a
+	  unique key, or use more loose database implementation with an application
+	  code or a wrapper layer to keep this constraint on top of it.
 - draft
     - key: `_draft_id_`
     - value: compact representation of a JSON object
@@ -530,25 +531,25 @@ business data items, while tier 3 items are pretty much optional.
         "tally_reject": "_currency_"
       }
       ```
-    - `config` keys should be a subset of the top-level `config` item. The
-      values may be ommitted if they should remain the same. There should be no
-      multiple live drafts having config change items conflicting with each
-      other.
-    - `draft_vote_*`, `draft_apply` fields control overall voting process until
-      the draft being passed and applied to the blockchain configuration. They
-      are initialized according to the configuration at the time of being
-      proposed. `draft_vote_open` is decremented at each block progress, and
-      when it reaches zero `draft_vote_close` is decremented afterwards. When
-      `draft_vote_close` reaches zero and the vote summary is _approval_, then
-      `draft_apply` is decremented until the new configuration is applied.
-    - `draft_quorum` field is the minimum amount of effective stakes which the
-      sum of `tally_*` fields' values is forced to exceed for the draft to get
-      processed regardless of its approval or rejection after
-      `draft_vote_close` reaches zero. It is initialized with the total amount
-      of validators' effective stakes multiplied by `draft_quorum_rate` at the
-      time of this draft being proposed.
-    - `tally_*` fields count votes cast upon this draft. `tally_approve` and
-      `tally_reject` are as the names imply.
+	- `config` keys should be a subset of the top-level `config` item. The
+	  values may be omitted if they should remain the same. There should be no
+	  multiple live drafts having config change items conflicting with each
+	  other.
+	- `draft_vote_*`, `draft_apply` fields control overall voting process until
+	  the draft being passed and applied to the blockchain configuration. They
+	  are initialized according to the configuration at the time of being
+	  proposed. `draft_vote_open` is decremented at each block progress, and
+	  when it reaches zero `draft_vote_close` is decremented afterwards. When
+	  `draft_vote_close` reaches zero and the vote summary is _approval_, then
+	  `draft_apply` is decremented until the new configuration is applied.
+	- `draft_quorum` field is the minimum amount of effective stakes which the
+	  sum of `tally_*` fields' values is forced to exceed for the draft to get
+	  processed regardless of its approval or rejection after
+	  `draft_vote_close` reaches zero. It is initialized with the total amount
+	  of validators' effective stakes multiplied by `draft_quorum_rate` at the
+	  time of this draft being proposed.
+	- `tally_*` fields count votes cast upon this draft. `tally_approve` and
+	  `tally_reject` are as the names imply.
 - vote
     - key: `_draft_id_` + `_account_address_`
     - value: compact representation of a JSON object
@@ -621,7 +622,7 @@ business data items, while tier 3 items are pretty much optional.
 An optional UDC balance store has the same internal data type as the default
 coin balance.
 
-### Merke tree and app hash
+### Merkle tree and app hash
 Although the internal state DB is composed of top-level data items and several
 logical data stores, its actual form is a linear key-value database. In
 viewpoint of state management, it suffices to manage this database in any form
@@ -633,8 +634,8 @@ assume that the database is stored as a Merkle tree.
 
 Every data item in the database is stored as a leaf node in a Merkle tree with
 the key as the concatenation of the prefix and in-store key. The leaf nodes are
-sorted by the key and they are labelled with a hash derived from `hash(key +
-value)`. A pair of leaf nodes generates a one-level higher inner node labelled
+sorted by the key and they are labeled with a hash derived from `hash(key +
+value)`. A pair of leaf nodes generates a one-level higher inner node labeled
 with `hash(ln1_hash + ln2_hash)`. In the similar way, another one-level higher
 inner node is added to the merkle tree with the label of `hash(in1_hash +
 in2_hash)`. The above process is repeated until only one single root node
@@ -734,7 +735,7 @@ records the stake in `LockedStake` with `l`. Then, the stake's `l` decreases by
 1 block height per block creation. When `l` becomes `0`, the stake gets removed
 from `LockedStake` and put into `UnlockedStake`.
 
-**Block Progress(Creation) Conditon**
+**Block Progress(Creation) Condition**
 
 As tendermint's `create_empty_blocks` config is set to `false` on an AMO
 blockchain node, the block is progressed only if there is a change of
@@ -853,7 +854,7 @@ performs a validity check and add or update an item in `storage` store.
 Upon receiving a `close` transaction from an account, an AMO blockchain node
 performs a validity check and remove a record from `store` store.
 
-1. valitidy check
+1. validity check
     1. `sender.balance` &ge; `tx.fee`
     1. `prev` with `prev.id` == `tx.storage_id` exists in `storage` store
     1. `prev.owner` == `tx.sender`
@@ -1020,7 +1021,7 @@ new validator set.
 
 #### Penalizing convicts
 At the beginning of block creation `BeginBlock()`, AMO ABCI app receives a list
-of convicts from tendermint. The convits get penalized in `EndBlock()` for its
+of convicts from tendermint. The convicts get penalized in `EndBlock()` for its
 malicious attempts to harm the blockchain network. The detailed penalization
 process is explained in [penalty](#penalty) section.
 
@@ -1072,7 +1073,7 @@ weight.
 ### History Record
 **NOTE:** The key and value of data are stored on the database in the type of
 byte array. To prevent unexpected collisions, derived from using the same key,
-such as overwriting or deleting data, hardcoded prefix value is attached to the
+such as overwriting or deleting data, hard-coded prefix value is attached to the
 key.
 
 The information on incentives distributed to stake holders per block creation
@@ -1096,7 +1097,7 @@ stake holder.
 ## Penalty
 To maintain the DPoS blockchain as healthy as possible, it is essential to
 encourage block validators to participate in creating and verifying blocks with
-incentive, but also to impose responsibilites on their misbehavior with
+incentive, but also to impose responsibilities on their misbehavior with
 penalty.
 
 The types of abnormal behavior and parameters are defined as follows:
@@ -1113,7 +1114,7 @@ Tendermint supports currently only a single type of evidence, the
 
 The relevant validators pay the price for misbehavior by burning the specific
 amount of coins staked and delegated to them, immediately at the moment when
-their misbehaviors are caught. The penalty shall be distributed amont the stake
+their misbehavior is caught. The penalty shall be distributed amount the stake
 holder and the delegated stake holders according to the distribution mechanism
 presented in [Incentive Distribution](#distribution). 
 
@@ -1122,9 +1123,9 @@ presented in [Incentive Distribution](#distribution).
 
 ### Downtime
 If the ratio of the validator's absence ratio, in the fixed height window
-`LazinessCounterWindow`, is over `LazinessThreshold`, the specfic amount of
+`LazinessCounterWindow`, is over `LazinessThreshold`, the specific amount of
 coins staked and delegated to the validator would be penalized. The penalty
-shall be distributed amont the stake holder and the delegated stake holders
+shall be distributed amount the stake holder and the delegated stake holders
 according to the distribution mechanism presented in [Incentive
 Distribution](#distribution).
 
@@ -1161,7 +1162,7 @@ database for this operation.
 In order to prevent [replay
 attack](https://en.wikipedia.org/wiki/Replay_attack) (in some sense,
 double-spending), every AMO transaction is checked for whether it is already
-introduced or processed in preveious blocks. Basic idea is that when a
+introduced or processed in previous blocks. Basic idea is that when a
 blockchain node sees a transaction that is already presented in the blockchain
 network, it immediately discards the transaction. Here, every transaction has a
 `tx hash` in Tendermint context. This `tx hash` is a hash of whole byte

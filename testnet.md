@@ -41,7 +41,7 @@ node as follows:
 ```bash
 amocli --rpc <rpc_node_ip:port> <command> <args>
 ```
-You can ommit `--rpc` option in order to connect to a node on a localhost. For
+You can omit `--rpc` option in order to connect to a node on a localhost. For
 more information about how to use `amocli`, see
 [README.md](https://github.com/amolabs/amo-client-go/blob/master/README.md).
 
@@ -51,7 +51,7 @@ node. You may see a separate [quick start
 guide](https://github.com/amolabs/docs/blob/master/qs_val.md).
 
 ### Launching non-validator node
-In order to participage as a non-validator, you may see
+In order to participate as a non-validator, you may see
 [README.md](https://github.com/amolabs/testnet/blob/master/README.md).
 
 ## Network information

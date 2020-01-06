@@ -1,5 +1,5 @@
 # Quick Start Guide for Validator Node
-This docuemtn is available in [Korean](qs_val.ko.md) also.
+This document is available in [Korean](qs_val.ko.md) also.
 
 ## Introduction
 This quick start guide describes how to prepare and launch validator node in
@@ -20,7 +20,7 @@ before you send a `stake` transaction (the last step in this guide).
 In order to run a validator node, you need a physical server with a stable
 internet connection or a virtual machine on a cloud service(Amazon AWS, Google
 cloud, Microsoft Azure or similar services). In this guide, we assume typical
-Ubuntu Linux or MacOS is instlalled on the host machine.
+Ubuntu Linux or MacOS is installed on the host machine.
 
 ### Install necessary packages
 Connect to a terminal of the server machine and install Docker and git as root:
@@ -42,7 +42,7 @@ cd testnet
 ```
 
 ### Backup key
-Backcup `/testnet/mynode/tendermint/config/priv_validator_key.json` file to a
+Backup `/testnet/mynode/tendermint/config/priv_validator_key.json` file to a
 safe location.
 
 ### 실행
@@ -143,7 +143,7 @@ some kind of automated script, you may do this:
 docker exec -it <container_name> tendermint show_validator | python -c "import sys, json; print json.load(sys.stdin)['value']"
 ```
 
-Now, you have a validator public key to annouce. To stake 100 AMO along with
+Now, you have a validator public key to announce. To stake 100 AMO along with
 the public key, run the following command:
 ```bash
 amocli tx stake --user myval '+4jvv6ZCP+TxC0CwBQRr31ieZzj7KMZL3iwribL3czM=' 100000000000000000000
