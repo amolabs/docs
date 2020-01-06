@@ -505,15 +505,15 @@ business data items, while tier 3 items are pretty much optional.
       }
       ```
     - key is the sender of a delegate tx
-	- **NOTE:** For delegate store, a key to the database is just
-	  `_account_address_`, instead of a concatenation of holder address and
-	  delegatee address. This means that a user can have only one delegated
-	  stake. In other words, a user cannot delegate his/her stakes to
-	  **multiple** delegatees. While an AMO-compliant node can freely choose
-	  the actual database implementation, this constraint must be enforced in
-	  any way. An implementor may choose to keep this `_account_address_` as a
-	  unique key, or use more loose database implementation with an application
-	  code or a wrapper layer to keep this constraint on top of it.
+    - **NOTE:** For delegate store, a key to the database is just
+      `_account_address_`, instead of a concatenation of holder address and
+      delegatee address. This means that a user can have only one delegated
+      stake. In other words, a user cannot delegate his/her stakes to
+      **multiple** delegatees. While an AMO-compliant node can freely choose
+      the actual database implementation, this constraint must be enforced in
+      any way. An implementor may choose to keep this `_account_address_` as a
+      unique key, or use more loose database implementation with an application
+      code or a wrapper layer to keep this constraint on top of it.
 - draft
     - key: `_draft_id_`
     - value: compact representation of a JSON object
@@ -525,31 +525,31 @@ business data items, while tier 3 items are pretty much optional.
         "draft_vote_open": "_decimal_number_",
         "draft_vote_close": "_decimal_number_",
         "draft_apply": "_decimal_number_",
-		"draft_deposit": "_currency_",
+    	"draft_deposit": "_currency_",
         "draft_quorum": "_currency_",
         "tally_approve": "_currency_",
         "tally_reject": "_currency_"
       }
       ```
-	- `config` keys should be a subset of the top-level `config` item. The
-	  values may be omitted if they should remain the same. There should be no
-	  multiple live drafts having config change items conflicting with each
-	  other.
-	- `draft_vote_*`, `draft_apply` fields control overall voting process until
-	  the draft being passed and applied to the blockchain configuration. They
-	  are initialized according to the configuration at the time of being
-	  proposed. `draft_vote_open` is decremented at each block progress, and
-	  when it reaches zero `draft_vote_close` is decremented afterwards. When
-	  `draft_vote_close` reaches zero and the vote summary is _approval_, then
-	  `draft_apply` is decremented until the new configuration is applied.
-	- `draft_quorum` field is the minimum amount of effective stakes which the
-	  sum of `tally_*` fields' values is forced to exceed for the draft to get
-	  processed regardless of its approval or rejection after
-	  `draft_vote_close` reaches zero. It is initialized with the total amount
-	  of validators' effective stakes multiplied by `draft_quorum_rate` at the
-	  time of this draft being proposed.
-	- `tally_*` fields count votes cast upon this draft. `tally_approve` and
-	  `tally_reject` are as the names imply.
+    - `config` keys should be a subset of the top-level `config` item. The
+      values may be omitted if they should remain the same. There should be no
+      multiple live drafts having config change items conflicting with each
+      other.
+    - `draft_vote_*`, `draft_apply` fields control overall voting process until
+      the draft being passed and applied to the blockchain configuration. They
+      are initialized according to the configuration at the time of being
+      proposed. `draft_vote_open` is decremented at each block progress, and
+      when it reaches zero `draft_vote_close` is decremented afterwards. When
+      `draft_vote_close` reaches zero and the vote summary is _approval_, then
+      `draft_apply` is decremented until the new configuration is applied.
+    - `draft_quorum` field is the minimum amount of effective stakes which the
+      sum of `tally_*` fields' values is forced to exceed for the draft to get
+      processed regardless of its approval or rejection after
+      `draft_vote_close` reaches zero. It is initialized with the total amount
+      of validators' effective stakes multiplied by `draft_quorum_rate` at the
+      time of this draft being proposed.
+    - `tally_*` fields count votes cast upon this draft. `tally_approve` and
+      `tally_reject` are as the names imply.
 - vote
     - key: `_draft_id_` + `_account_address_`
     - value: compact representation of a JSON object
@@ -821,16 +821,17 @@ performs a validity check and add a record in `vote` store.
 
 1. validity check
     1. `tx.draft_id` is in progress
+    1. `sender` != `draft.proposer`
     1. there is no record having `tx.draft_id`+`sender` as a key in `vote`
        store
     1. `sender` is one of `blk.validators`
     1. `sender.balance` &ge; `tx.fee`
 1. state change
     1. add new record having `tx.draft_id`+`sender` as a key in `vote` store 
-	1. `draft.tally_approve` &larr; `draft.tally_approve` +
-	   `sender.effective_stake`, if `tx.approve` is `true`
-	1. `draft.tally_reject` &larr; `draft.tally_reject` +
-	   `sender.effective_stake`, if `tx.approve` is `false`
+    1. `draft.tally_approve` &larr; `draft.tally_approve` +
+       `sender.effective_stake`, if `tx.approve` is `true`
+    1. `draft.tally_reject` &larr; `draft.tally_reject` +
+       `sender.effective_stake`, if `tx.approve` is `false`
     1. `sender.balance` &larr; `sender.balance` - `tx.fee`
     1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
