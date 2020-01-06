@@ -812,6 +812,8 @@ performs a validity check and add a record in `draft` store.
     1. the number of elements in `tx.config` should be 1
 1. state change
     1. add new record having `tx.draft_id` as a key in `draft` store
+    1. `draft.tally_approve` &larr; `draft.tally_approve` +
+       `sender.effective_stake`
     1. `sender.balance` &larr; `sender.balance` - `config.draft_deposit` -
        `tx.fee`
     1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
