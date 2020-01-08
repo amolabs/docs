@@ -555,7 +555,6 @@ business data items, while tier 3 items are pretty much optional.
         "draft_close_count": "_decimal_number_",
         "draft_apply_count": "_decimal_number_",
         "draft_deposit": "_currency_",
-        "draft_quorum": "_currency_",
         "tally_approve": "_currency_",
         "tally_reject": "_currency_"
       }
@@ -571,12 +570,6 @@ business data items, while tier 3 items are pretty much optional.
       reaches zero `draft_close_count` is decremented afterwards. When
       `draft_close_count` reaches zero and the vote summary is _approval_, then
       `draft_apply_count` is decremented until the new configuration is applied.
-    - `draft_quorum` field is the minimum amount of effective stakes which the
-      sum of `tally_*` fields' values is forced to exceed for the draft to get
-      processed regardless of its approval or rejection after
-      `draft_vote_close` reaches zero. It is initialized with the total amount
-      of validators' effective stakes multiplied by `draft_quorum_rate` at the
-      time of this draft vote being closed.
     - `tally_*` fields count votes cast upon this draft. `tally_approve` and
       `tally_reject` are as the names imply.
 - vote
