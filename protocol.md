@@ -547,7 +547,7 @@ business data items, while tier 3 items are pretty much optional.
       processed regardless of its approval or rejection after
       `draft_vote_close` reaches zero. It is initialized with the total amount
       of validators' effective stakes multiplied by `draft_quorum_rate` at the
-      time of this draft being proposed.
+      time of this draft vote being closed.
     - `tally_*` fields count votes cast upon this draft. `tally_approve` and
       `tally_reject` are as the names imply.
 - vote
