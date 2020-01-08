@@ -63,6 +63,7 @@ data store to look for:
 - `/stake`: account's stake
 - `/delegate`: account's delegated stake
 - `/validator`: validator's holder and list of appointed delegated stakes
+- `/storage`: data storage registration
 - `/parcel`: data parcel registration
 - `/request`: data parcel request
 - `/usage`: granted data parcel usage
@@ -182,6 +183,12 @@ TODO: reference to validator address
 When querying a draft detail and voting progress, `data` is a HEX conversion of a JSON representation of a draft ID.
 ```json
 "_draft_id_"
+```
+
+### Query storage
+When querying a storage detail, `data` is a HEX conversion of a JSON representation of a storage ID.
+```json
+"_storage_id_"
 ```
 
 ### Query parcel
