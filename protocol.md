@@ -448,15 +448,44 @@ configuration.
   "laziness_threshold": 0.9,
   "block_bound_tx_grace_period": 100,
   "lockup_period": 3600,
-  "draft_vote_open": 500000,
-  "draft_vote_close": 100000,
-  "draft_apply": 500000,
+  "draft_open_count": 500000,
+  "draft_close_count": 100000,
+  "draft_apply_count": 500000,
   "draft_deposit": 300000,
   "draft_quorum_rate": 0.1,
   "draft_pass_rate": 0.7,
   "draft_refund_rate": 0.2
 }
 ```
+#### Data type and value restrictions 
+| config | type | `> 0` | `>= 0` |
+|-|-|:-:|:-:|
+| `max_validators` | uint64 | V | |
+| `weight_validator` | uint64 | V | | 
+| `min_staking_unit` | string | V | |
+| `blk_reward` | string | | V |
+| `tx_reward` | string | | V |
+| `penalty_ratio_m` | float64 | V | |
+| `penalty_ratio_l` | float64 | V | |
+| `laziness_counter_window` | int64 | V | |
+| `laziness_threshold` | float64 | V | |
+| `block_bound_tx_grace_period` | uint64 | V | |
+| `lockup_period` | uint64 | | V |
+| `draft_open_count` | uint64 | | V |
+| `draft_close_count` | uint64 | | V |
+| `draft_apply_count` | uint64 | | V |
+| `draft_deposit` | string | | V |
+| `draft_quorum_rate` | float64 | V | |
+| `draft_pass_rate` | float64 | V | |
+| `draft_refund_rate` | float64 | V | |
+
+It is mandatory to restrict proper type and value of configurations in order to
+make AMO blockchain protocol keep operating as it has to, even after modifying
+their values since genesis block. The currency-related configurations' type is
+restricted to `string` as it can store values without limit. Even though it is
+highly recommended to use `uint64` on configurations for its better space
+availability than `int64`, `laziness_counter_window` has to use `int64` as it
+is an tendermint-dependant configuration.
 
 ### Data stores
 There are 10 default data stores and optional UDC(user-defined coin) balance
@@ -522,10 +551,10 @@ business data items, while tier 3 items are pretty much optional.
         "proposer": "_HEX_encoded_account_address_",
         "config": {},
         "desc": "_human_readable_string_describing_this_draft_",
-        "draft_vote_open": "_decimal_number_",
-        "draft_vote_close": "_decimal_number_",
-        "draft_apply": "_decimal_number_",
-    	"draft_deposit": "_currency_",
+        "draft_open_count": "_decimal_number_",
+        "draft_close_count": "_decimal_number_",
+        "draft_apply_count": "_decimal_number_",
+        "draft_deposit": "_currency_",
         "draft_quorum": "_currency_",
         "tally_approve": "_currency_",
         "tally_reject": "_currency_"
@@ -535,13 +564,13 @@ business data items, while tier 3 items are pretty much optional.
       values may be omitted if they should remain the same. There should be no
       multiple live drafts having config change items conflicting with each
       other.
-    - `draft_vote_*`, `draft_apply` fields control overall voting process until
-      the draft being passed and applied to the blockchain configuration. They
-      are initialized according to the configuration at the time of being
-      proposed. `draft_vote_open` is decremented at each block progress, and
-      when it reaches zero `draft_vote_close` is decremented afterwards. When
-      `draft_vote_close` reaches zero and the vote summary is _approval_, then
-      `draft_apply` is decremented until the new configuration is applied.
+    - `draft_*_count` control overall voting process until the draft being
+      passed and applied to the blockchain configuration. They are initialized
+      according to the configuration at the time of being proposed.
+      `draft_open_count` is decremented at each block progress, and when it
+      reaches zero `draft_close_count` is decremented afterwards. When
+      `draft_close_count` reaches zero and the vote summary is _approval_, then
+      `draft_apply_count` is decremented until the new configuration is applied.
     - `draft_quorum` field is the minimum amount of effective stakes which the
       sum of `tally_*` fields' values is forced to exceed for the draft to get
       processed regardless of its approval or rejection after
