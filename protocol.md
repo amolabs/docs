@@ -457,27 +457,27 @@ configuration.
   "draft_refund_rate": 0.2
 }
 ```
-#### Data type and value restrictions 
-| config | type | `> 0` | `>= 0` |
-|-|-|:-:|:-:|
-| `max_validators` | uint64 | V | |
-| `weight_validator` | uint64 | V | | 
-| `min_staking_unit` | string | V | |
-| `blk_reward` | string | | V |
-| `tx_reward` | string | | V |
-| `penalty_ratio_m` | float64 | V | |
-| `penalty_ratio_l` | float64 | V | |
-| `laziness_counter_window` | int64 | V | |
-| `laziness_threshold` | float64 | V | |
-| `block_bound_tx_grace_period` | uint64 | V | |
-| `lockup_period` | uint64 | | V |
-| `draft_open_count` | uint64 | | V |
-| `draft_close_count` | uint64 | | V |
-| `draft_apply_count` | uint64 | | V |
-| `draft_deposit` | string | | V |
-| `draft_quorum_rate` | float64 | V | |
-| `draft_pass_rate` | float64 | V | |
-| `draft_refund_rate` | float64 | V | |
+#### Key's value type and constraint 
+| key | value type | value constraint |
+|-|-|:-:|
+| `max_validators` | uint64 | `> 0` |
+| `weight_validator` | uint64 | `> 0` | 
+| `min_staking_unit` | string | `> 0` |
+| `blk_reward` | string | `>= 0` |
+| `tx_reward` | string | `>= 0` |
+| `penalty_ratio_m` | float64 | `> 0` |
+| `penalty_ratio_l` | float64 | `> 0` |
+| `laziness_counter_window` | int64 | `>= 10000` |
+| `laziness_threshold` | float64 | `> 0` |
+| `block_bound_tx_grace_period` | uint64 | `>= 10000` |
+| `lockup_period` | uint64 | `>= 10000` |
+| `draft_open_count` | uint64 | `>= 10000` |
+| `draft_close_count` | uint64 | `>= 10000` |
+| `draft_apply_count` | uint64 | `>= 10000` |
+| `draft_deposit` | string | `>= 0` |
+| `draft_quorum_rate` | float64 | `> 0` |
+| `draft_pass_rate` | float64 | `> 0` |
+| `draft_refund_rate` | float64 | `> 0` |
 
 It is mandatory to restrict proper type and value of configurations in order to
 make AMO blockchain protocol keep operating as it has to, even after modifying
