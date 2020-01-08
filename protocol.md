@@ -118,7 +118,7 @@ integer.
 
 The following types are used in this document.
 - `_storage_id_`
-- `"_storage_id_"`
+- `"_storage_id_"` as a JSON object
 
 ### Parcel ID
 A parcel ID is a concatenation of a storage ID and in-storage ID. In-storage ID
@@ -595,7 +595,8 @@ business data items, while tier 3 items are pretty much optional.
         "owner": "_HEX_encoded_account_address_",
         "url": "_url_",
         "registration_fee": "_currency_",
-        "hosting_fee": "_currency_"
+        "hosting_fee": "_currency_",
+        "active": _bool_
       }
       ```
 - parcel
