@@ -132,7 +132,8 @@ is a 32-bit unsigned integer. But when forming a parcel ID, this storage ID is
 converted as a four-byte binary sequence (big-endian integer). For example,
 suppose a parcel in a storage with the id of `123456789` has the in-storage id
 of `12ABEF23...`. This parcel has a parcel id `075BCD1512ABEF23...` in a HEX
-encoding, where `075BCD15` is a HEX encoding of the integer `123456789`.
+encoding, where `075BCD15` is a HEX encoding of the integer `123456789` using
+big-endian byte order.
 
 The following types are used in this document.
 - `_parcel_id_`
@@ -305,7 +306,7 @@ where `amount` is amount of AMO coin to be retracted from delegated stake.
 - `propose` payload
   ```json
   {
-    "draft_id": "_HEX_encoded_draft_id_",
+    "draft_id": "_draft_id_",
     "config": {}, // application-specific JSON object
     "desc": "human-readable string describing this draft"
   }
@@ -316,7 +317,7 @@ applying of new configuration on-chain.
 - `vote` payload
   ```json
   {
-    "draft_id": "_HEX_encoded_draft_id_",
+    "draft_id": "_draft_id_",
     "approve": true // boolean
   }
   ```
@@ -553,7 +554,7 @@ business data items, while tier 3 items are pretty much optional.
       unique key, or use more loose database implementation with an application
       code or a wrapper layer to keep this constraint on top of it.
 - draft
-    - key: `_draft_id_`
+    - key: `_draft_id_`(big-endian)
     - value: compact representation of a JSON object
       ```json
       {
@@ -582,7 +583,7 @@ business data items, while tier 3 items are pretty much optional.
     - `tally_*` fields count votes cast upon this draft. `tally_approve` and
       `tally_reject` are as the names imply.
 - vote
-    - key: `_draft_id_` + `_account_address_`
+    - key: `_draft_id_`(big-endian) + `_account_address_`
     - value: compact representation of a JSON object
       ```json
       {
@@ -590,7 +591,7 @@ business data items, while tier 3 items are pretty much optional.
       }
       ```
 - storage
-    - key: `_storage_id_`
+    - key: `_storage_id_`(big-endian)
     - value: compact representation of a JSON object
       ```json
       {
