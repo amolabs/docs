@@ -208,7 +208,7 @@ following:
     - `withdraw`
     - `delegate`
     - `retract`
-- draft
+- governance
     - `propose`
     - `vote`
 - storage
