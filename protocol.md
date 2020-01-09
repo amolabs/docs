@@ -105,25 +105,34 @@ The following types are used in this document.
 - `"_currency_"` as a JSON object
 
 ### Draft ID
-A draft ID is a 32-bit unsigned integer. It is represented as double-quoted
-decimal number when used in JSON, e.g. in protocol messages.
+A draft ID is a 32-bit unsigned integer. It is represented as a double-quoted
+decimal number when used in JSON, e.g. in protocol messages. However, it is
+represented as a big-endian integer when it is used to composite another
+identifier.
 
 The following types are used in this document.
-- `_draft_id_`
-- `"_draft_id_"`
+- `_draft_id_` = alias of `_decimal_number_`
+- `"_draft_id_"` as a JSON object
 
 ### Storage ID
-A storage ID is a four-byte binary sequence, and can be interpreted as a 32-bit
-integer.
+A storage ID is a 32-bit unsigned integer. It is represented as a double-quoted
+decimal number when used in JSON, e.g. in protocol messages. However, it is
+represented as a big-endian integer when it is used to composite another
+identifier.
 
 The following types are used in this document.
-- `_storage_id_`
+- `_storage_id_` = alias of `_decimal_number_`
 - `"_storage_id_"` as a JSON object
 
 ### Parcel ID
 A parcel ID is a concatenation of a storage ID and in-storage ID. In-storage ID
 is a 32-byte(256-bit) binary sequence. See [AMO Storage
-Specification](storage.md) for more detail.
+Specification](storage.md) for more detail. Be aware that a storage ID itself
+is a 32-bit unsigned integer. But when forming a parcel ID, this storage ID is
+converted as a four-byte binary sequence (big-endian integer). For example,
+suppose a parcel in a storage with the id of `123456789` has the in-storage id
+of `12ABEF23...`. This parcel has a parcel id `075BCD1512ABEF23...` in a HEX
+encoding, where `075BCD15` is a HEX encoding of the integer `123456789`.
 
 The following types are used in this document.
 - `_parcel_id_`
