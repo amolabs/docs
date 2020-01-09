@@ -359,11 +359,14 @@ material is encrypted by the owner(seller)'s public key.
   {
     "target": "_HEX_encoded_parcel_id_",
     "payment": "_currency_",
+    "dealer": "_HEX_encoded_account_address_", // optional
+    "dealer_fee": "_currency_", // optional
     "extra": {} // application-specific JSON object
   }
   ```
 where `target` is the id of a parcel for which the sender wants usage grant,
-`payment` is amount of AMO coin to be collected by the seller.
+`payment` is amount of AMO coin to be collected by the seller. In order for
+`dealer_fee` to work, both of `dealer` and `dealer_fee` must be valid.
 
 - `grant` payload
   ```json
@@ -622,6 +625,8 @@ business data items, while tier 3 items are pretty much optional.
       ```json
       {
         "payment": "_currency_",
+        "dealer": "_HEX_encoded_account_address_", // optional
+        "dealer_fee": "_currency_", // optional
         "extra": {} // application-specific JSON object
       }
       ```
@@ -906,22 +911,26 @@ performs a validity check and add a new record with its extra information in
 `parcel` store.
 
 1. validity check
-    1. `sender.balance` &ge; `tx.fee`
-    1. extract storage ID `tx.storage` from `tx.target`
-    1. `tx.storage` should exist in `storage` store
+    1. extract storage ID `storage` from `tx.target`
+    1. `storage` should exist in storage store and `storage.active` should be
+       true
     1. `tx.target` should NOT exist in `parcel` store
+    1. `sender.balance` &ge; `storage.registration_fee` + `tx.fee`
 1. state change
     1. add new record having `tx.target` as a key in `parcel` store
-    1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+    1. `sender.balance` &larr; `sender.balance` - `storage.registration_fee` -
+       `tx.fee`
+    1. `storage.owner.balance` &larr; `storage.owner.balance` +
+       `storage.registration_fee`
     1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
 Upon receiving a `discard` transaction from an account, an AMO blockchain node
 performs a validity check and remove record in `parcel` store.
 
 1. validity check
+    1. `tx.target` should exist in `parcel` store
     1. `sender.balance` &ge; `tx.fee`
     1. `sender` == `tx.target.owner` or `sender` == `tx.target.proxy_account`
-    1. `tx.target` should exist in `parcel` store
 1. state change
     1. remove record having `tx.target` as a key in `parcel` store
     1. `sender.balance` &larr; `sender.balance` - `tx.fee`
@@ -936,30 +945,40 @@ performs a validity check and add a new record with its extra information in
 `request` store.
 
 1. validity check
-    1. `sender.balance` &ge; `tx.fee` + `tx.payment`
-    1. `sender` &ne; `tx.target.owner`
     1. `tx.target` should exist in `parcel` store
-    1. `tx.target` should NOT exist in `request` store
-    1. `tx.target` should NOT exist in `usage` store
+    1. form request ID `request` from `sender.address`+`tx.target`
+    1. `request` should NOT exist in `request` store
+    1. `request` should NOT exist in `usage` store
+    1. `sender` &ne; `tx.target.owner`
+    1. if `tx.dealer` and `tx.dealer_fee` is valid, then<br/>
+       `sender.balance` &ge; `tx.fee` + `tx.payment` + `tx.dealer_fee`
+    1. else<br/>
+       `sender.balance` &ge; `tx.fee` + `tx.payment`
 1. state change
     1. add new record having `sender.address`+`tx.target` as a key in `request`
        store
-    1. `sender.balance` &larr; `sender.balance` - `tx.fee` - `tx.payment` 
+    1. if `tx.dealer` and `tx.dealer_fee` is valid, then<br/>
+       `sender.balance` &larr; `sender.balance` - `tx.fee` - `tx.payment` -
+       `tx.dealer_fee`
+    1. else<br/>
+       `sender.balance` &larr; `sender.balance` - `tx.fee` - `tx.payment` 
     1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
 Upon receiving a `cancel` transaction from an account, an AMO blockchain node
 performs a validity check and remove record in `request` store.
 
 1. validity check
-    1. `sender.balance` &ge; `tx.fee`
-    1. `sender` == `tx.target.requester`
     1. `tx.target` should exist in `parcel` store
-    1. `tx.target` should exist in `request` store
-    1. `tx.target` should NOT exist in `usage` store
+    1. form request ID `request` from `sender.address`+`tx.target`
+    1. `request` should exist in `request` store
+    1. `sender.balance` &ge; `tx.fee`
 1. state change
     1. remove record corresponding to `tx.target` in `request` store
-    1. `sender.balance` &larr; `sender.balance` - `tx.fee` +
-       `tx.target.payment` 
+    1. if `tx.dealer` and `tx.dealer_fee` is valid, then<br/>
+       `sender.balance` &larr; `sender.balance` - `tx.fee` + `request.payment` +
+       `request.dealer_fee`
+    1. else<br/>
+       `sender.balance` &larr; `sender.balance` - `tx.fee` + `tx.target.payment`
     1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
 **NOTE:** `payment` refers to the amount of coins `sender` is willing to pay
@@ -971,16 +990,30 @@ performs a validity check and add a new record with its extra information in
 `usage` store.
 
 1. validity check
-    1. `sender.balance` &ge; `tx.fee`
-    1. `sender` == `tx.target.owner` or `sender` == `tx.target.proxy_account`
     1. `tx.target` should exist in `parcel` store
     1. `tx.target` should exist in `request` store
     1. `tx.target` should NOT exist in `usage` store
+    1. `sender` == `tx.target.owner` or `sender` == `tx.target.proxy_account`
+    1. extract storage ID `storage` from `tx.target`
+    1. `storage` should exist in storage store and `storage.active` should be
+       true
+    1. find `request` having id as `tx.grantee` + `tx.target` in `request`
+       store
+    1. if `sender` == `tx.target.owner`, then <br/>
+       `sender.balance` + `request.payment` &ge; `storage.hosting_fee` +
+       `tx.fee`
+    1. if `sender` &ne; `tx.target.owner`, then <br/>
+       `sender.balance` &ge; `tx.fee` and <br/>
+       `tx.target.owner.balance` + `request.payment` &ge; `storage.hosting_fee`
 1. state change
-    1. delete record having `tx.grantee` + `tx.target` in `request` store
-    1. add new record having `tx.grantee` + `tx.target` in `usage` store
+    1. delete record having id as `tx.grantee` + `tx.target` in `request` store
+    1. add new record having id as `tx.grantee` + `tx.target` in `usage` store
     1. `tx.target.owner.balance` &larr; `tx.target.owner.balance` +
-       `tx.target.payment`
+       `tx.target.payment` - `storage.hosting_fee`
+    1. `storage.owner.balance` &larr; `storage.owner.balance` +
+       `storage.hosting_fee`
+    1. `request.dealer.balance` &larr; `request.dealer.balance` +
+       `request.dealer_fee`
     1. `sender.balance` &larr; `sender.balance` - `tx.fee`
     1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
@@ -988,10 +1021,10 @@ Upon receiving a `revoke` transaction from an account, an AMO blockchain node
 performs a validity check and remove record in `usage` store.
 
 1. validity check
-    1. `sender.balance` &ge; `tx.fee`
-    1. `sender` == `tx.target.owner` or `sender` == `tx.target.proxy_account`
     1. `tx.target` should exist in `parcel` store
     1. `tx.target` should exist in `usage` store
+    1. `sender` == `tx.target.owner` or `sender` == `tx.target.proxy_account`
+    1. `sender.balance` &ge; `tx.fee`
 1. state change
     1. remove record corresponding to `tx.target` in `usage` store
     1. `sender.balance` &larr; `sender.balance` - `tx.fee`
