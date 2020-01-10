@@ -472,6 +472,7 @@ configuration.
 |-|-|:-:|
 | `max_validators` | uint64 | `> 0` |
 | `weight_validator` | uint64 | `> 0` | 
+| `weight_delegator` | uint64 | `> 0` | 
 | `min_staking_unit` | string | `> 0` |
 | `blk_reward` | string | `>= 0` |
 | `tx_reward` | string | `>= 0` |
