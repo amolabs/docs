@@ -259,11 +259,11 @@ A payload format for each transaction type is as the following.
     "amount": "_currency_"
   }
   ```
-where `udc` is an optional identifier of a user-defined coin, `to` is recipient
-of the transfer, and `amount` is amount AMO coin or user-defined coin.
-`_udc_id_` must be one of registered user-defined coin ID. If `udc` is omitted,
-transfer AMO coin, which is the default. `_currency_` is a string
-representation of a decimal number.
+  where `udc` is an optional identifier of a user-defined coin, `to` is
+  recipient of the transfer, and `amount` is amount AMO coin or user-defined
+  coin. `_udc_id_` must be one of registered user-defined coin ID. If `udc` is
+  omitted, transfer AMO coin, which is the default. `_currency_` is a string
+  representation of a decimal number.
 
 - `stake` payload:
   ```json
@@ -272,10 +272,10 @@ representation of a decimal number.
     "amount": "_currency_"
   }
   ```
-where `validator` is the only public key type other than P256 public key used
-in AMO blockchain protocol. It must be obtained from underlying Tendermint
-node, but in HEX encoding, not Base64 encoding. `amount` is amount of AMO coin
-to be locked as stake.
+  where `validator` is the only public key type other than P256 public key used
+  in AMO blockchain protocol. It must be obtained from underlying Tendermint
+  node, but in HEX encoding, not Base64 encoding. `amount` is amount of AMO
+  coin to be locked as stake.
 
 - `withdraw` payload:
   ```json
@@ -283,7 +283,7 @@ to be locked as stake.
     "amount": "_currency_"
   }
   ```
-where `amount` is amount of AMO coin to be withdrawn from stake.
+  where `amount` is amount of AMO coin to be withdrawn from stake.
 
 - `delegate` payload:
   ```json
@@ -292,8 +292,8 @@ where `amount` is amount of AMO coin to be withdrawn from stake.
     "amount": "_currency_"
   }
   ```
-where `to` is an address of an account which has stakes already and `amount` is
-amount of AMO coin to be delegated.
+  where `to` is an address of an account which has stakes already and `amount`
+  is amount of AMO coin to be delegated.
 
 - `retract` payload:
   ```json
@@ -301,7 +301,7 @@ amount of AMO coin to be delegated.
     "amount": "_currency_"
   }
   ```
-where `amount` is amount of AMO coin to be retracted from delegated stake.
+  where `amount` is amount of AMO coin to be retracted from delegated stake.
 
 - `propose` payload
   ```json
@@ -311,8 +311,8 @@ where `amount` is amount of AMO coin to be retracted from delegated stake.
     "desc": "human-readable string describing this draft"
   }
   ```
-where `config` is an optional field which is necessary for a proposal of
-applying of new configuration on-chain. 
+  where `config` is an optional field which is necessary for a proposal of
+  applying of new configuration on-chain. 
 
 - `vote` payload
   ```json
@@ -321,8 +321,8 @@ applying of new configuration on-chain.
     "approve": true // boolean
   }
   ```
-where `approve` indicates `sender`'s opinion on `draft_id`; `true` for approval
-or `false` for rejection.
+  where `approve` indicates `sender`'s opinion on `draft_id`; `true` for
+  approval or `false` for rejection.
 
 - `setup` payload
   ```json
@@ -350,9 +350,9 @@ or `false` for rejection.
     "extra": {} // application-specific JSON object
   }
   ```
-where `target` is the id of a parcel currently being registered, `custody` is a
-encrypted key material used to encrypt the data parcel body, and the key
-material is encrypted by the owner(seller)'s public key.
+  where `target` is the id of a parcel currently being registered, `custody` is
+  a encrypted key material used to encrypt the data parcel body, and the key
+  material is encrypted by the owner(seller)'s public key.
 
 - `request` payload:
   ```json
@@ -364,9 +364,9 @@ material is encrypted by the owner(seller)'s public key.
     "extra": {} // application-specific JSON object
   }
   ```
-where `target` is the id of a parcel for which the sender wants usage grant,
-`payment` is amount of AMO coin to be collected by the seller. In order for
-`dealer_fee` to work, both of `dealer` and `dealer_fee` must be valid.
+  where `target` is the id of a parcel for which the sender wants usage grant,
+  `payment` is amount of AMO coin to be collected by the seller. In order for
+  `dealer_fee` to work, both of `dealer` and `dealer_fee` must be valid.
 
 - `grant` payload
   ```json
@@ -377,9 +377,10 @@ where `target` is the id of a parcel for which the sender wants usage grant,
     "extra": {} // application-specific JSON object
   }
   ```
-where `target` is the id of a parcel currently being granted, `grantee` is the
-address of a buyer, `custody` is a encrypted key material used to encrypt the
-data parcel body, and the key material is encrypted by the buyer's public key.
+  where `target` is the id of a parcel currently being granted, `grantee` is
+  the address of a buyer, `custody` is a encrypted key material used to encrypt
+  the data parcel body, and the key material is encrypted by the buyer's public
+  key.
 
 - `discard` payload
   ```json
@@ -387,7 +388,7 @@ data parcel body, and the key material is encrypted by the buyer's public key.
     "target": "_HEX_encoded_parcel_id_"
   }
   ```
-where `target` is the id of a parcel currently being discarded.
+  where `target` is the id of a parcel currently being discarded.
 
 - `cancel` payload
   ```json
@@ -395,7 +396,7 @@ where `target` is the id of a parcel currently being discarded.
     "target": "_HEX_encoded_parcel_id_"
   }
   ```
-where `target` is the id of a parcel which the sender requested previously.
+  where `target` is the id of a parcel which the sender requested previously.
 
 - `revoke` payload
   ```json
@@ -404,8 +405,8 @@ where `target` is the id of a parcel which the sender requested previously.
     "grantee": "_HEX_encoded_account_address_"
   }
   ```
-where `target` is the id of a parcel currently being revoked, and `grantee` is
-the address of a buyer which is previously granted a usage on the parcel.
+  where `target` is the id of a parcel currently being revoked, and `grantee`
+  is the address of a buyer which is previously granted a usage on the parcel.
 
 - `issue` payload
   ```json
@@ -419,8 +420,8 @@ the address of a buyer which is previously granted a usage on the parcel.
     "amount": "_currency_"
   }
   ```
-where `operators` is an optional list of operator addresses, and `amount` is
-the amount of UDC balance to be created.
+  where `operators` is an optional list of operator addresses, and `amount` is
+  the amount of UDC balance to be created.
 
 - `burn` payload
 
@@ -513,7 +514,7 @@ stores.
 | 1 | governance | draft | `draft:` |
 | 1 | governance | vote | `vote:` |
 | 2 | non-asset | storage | `storage:` |
-| 2 | non-fungible indirect asset | parcel | `parcel:` |
+| 2 | non-fungible asset | parcel | `parcel:` |
 | 2 | non-fungible asset | request | `request:` |
 | 2 | non-fungible asset | usage | `usage:` |
 | 3 | non-asset | user-defined coin | `udc:` |
