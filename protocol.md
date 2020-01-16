@@ -411,7 +411,7 @@ A payload format for each transaction type is as the following.
 - `issue` payload
   ```json
   {
-    "id": "_udc_id_",
+    "udc": "_udc_id_",
     "desc": "human-readable string describing this user-defined coin",
     "operators": [
       "_HEX_encoded_account_address_",
