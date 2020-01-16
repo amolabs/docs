@@ -140,7 +140,7 @@ The following types are used in this document.
 - `_HEX_encoded_parcel_id_` = HEX encoding of `_parcel_id_`
 - `"_HEX_encoded_parcel_id_"` as a JSON object
 
-### User-defined coin ID
+### UDC(User-Defined Coin) ID
 The following types are used in this document.
 - `_udc_id_`
 - `"_udc_id_"` as a JSON object
@@ -424,6 +424,14 @@ A payload format for each transaction type is as the following.
   the amount of UDC balance to be created.
 
 - `burn` payload
+  ```json
+  {
+    "udc": "_udc_id_",
+    "amount": "_currency_"
+  }
+  ```
+  where `udc` is an identifier of a user-defined coin, and `amount` is the
+  amount of UDC balance to burn.
 
 - `lock` payload
 
@@ -642,7 +650,7 @@ business data items, while tier 3 items are pretty much optional.
       }
       ```
     - key is a concatenation of `grantee` and `target` of a grant tx
-- user-defined coin
+- udc(user-defined coin)
     - key: `_udc_id_`
     - value: compact representation of a JSON object
       ```json
@@ -658,9 +666,9 @@ business data items, while tier 3 items are pretty much optional.
       ```
     - key is `id` of an issue tx
     - `owner` is the sender of an *initial* issue tx
-
-An optional UDC balance store has the same internal data type as the default
-coin balance.
+- udc balance
+    - key: `_account_address_`
+    - value: JSON string `"_currency_"`
 
 ### Merkle tree and app hash
 Although the internal state DB is composed of top-level data items and several
