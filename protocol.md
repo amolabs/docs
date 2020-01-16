@@ -565,10 +565,10 @@ business data items, while tier 3 items are pretty much optional.
         "proposer": "_HEX_encoded_account_address_",
         "config": {},
         "desc": "_human_readable_string_describing_this_draft_",
-        "draft_open_count": "_decimal_number_",
-        "draft_close_count": "_decimal_number_",
-        "draft_apply_count": "_decimal_number_",
-        "draft_deposit": "_currency_",
+        "open_count": "_decimal_number_",
+        "close_count": "_decimal_number_",
+        "apply_count": "_decimal_number_",
+        "deposit": "_currency_",
         "tally_approve": "_currency_",
         "tally_reject": "_currency_"
       }
@@ -577,13 +577,13 @@ business data items, while tier 3 items are pretty much optional.
       values may be omitted if they should remain the same. There should be no
       multiple live drafts having config change items conflicting with each
       other.
-    - `draft_*_count` control overall voting process until the draft being
-      passed and applied to the blockchain configuration. They are initialized
-      according to the configuration at the time of being proposed.
-      `draft_open_count` is decremented at each block progress, and when it
-      reaches zero `draft_close_count` is decremented afterwards. When
-      `draft_close_count` reaches zero and the vote summary is _approval_, then
-      `draft_apply_count` is decremented until the new configuration is applied.
+    - `*_count` control overall voting process until the draft being passed and
+      applied to the blockchain configuration. They are initialized according
+      to the configuration at the time of being proposed. `open_count` is
+      decremented at each block progress, and when it reaches zero
+      `close_count` is decremented afterwards. When `close_count` reaches zero
+      and the vote summary is _approval_, then `apply_count` is decremented
+      until the new configuration is applied.
     - `tally_*` fields count votes cast upon this draft. `tally_approve` and
       `tally_reject` are as the names imply.
 - vote
@@ -591,7 +591,7 @@ business data items, while tier 3 items are pretty much optional.
     - value: compact representation of a JSON object
       ```json
       {
-        "power": "_currency_"
+        "approve": true // boolean 
       }
       ```
 - storage
@@ -848,7 +848,6 @@ performs a validity check and add a record in `draft` store.
     1. `sender` is one of `blk.validators`
     1. `sender.balance` &ge; `config.draft_deposit` + `tx.fee`
     1. `tx.draft_id` == `state.latest_draft_id` + 1
-    1. the number of elements in `tx.config` should be 1
 1. state change
     1. add new record having `tx.draft_id` as a key in `draft` store
     1. `draft.tally_approve` &larr; `draft.tally_approve` +
