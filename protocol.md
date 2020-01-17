@@ -1054,6 +1054,63 @@ performs a validity check and remove record in `usage` store.
     1. `sender.balance` &larr; `sender.balance` - `tx.fee`
     1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
+### Managing user-defined coin
+In order to transfer user-defined coin balance in AMO blockchain, there must be
+an user-defined coin registry in the blockchain.
+
+Upon receiving an `issue` transaction from an account, an AMO blockchain node
+performs a validity check and add a new record in `udc` store.
+
+1. validity check
+    1. if `udc` exists having `tx.udc` as a key in udc store, then
+        1. `sender` == `udc.owner` or `sender` should be one of `udc.operators`
+    1. else
+        1. `sender` is one of `blk.validators`
+    1. `sender.balance` &ge; `tx.fee`
+1. state change
+    1. if `udc` exists in udc store, then
+        1. `udc.operators` &larr; `tx.operators`
+        1. `udc.desc` &larr; `tx.desc`
+        1. `udc.total` &larr; `udc.total` + `tx.amount`
+    1. else add a new record `udc` with the following
+        1. `udc.owner` &larr; `sender`
+        1. `udc.operators` &larr; `tx.operators`
+        1. `udc.desc` &larr; `tx.desc`
+        1. `udc.total` &larr; `tx.amount`
+    1. `<udc>.sender.balance` &larr; `<udc>.sender.balance` + `tx.amount`
+    1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+    1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+
+Upon receiving a `lock` transaction from an account, an AMO blockchain node
+performs a validity check and add or update a record in udc balance lock store.
+
+1. validity check
+    1. `udc` exists having `tx.udc` as a key in udc store
+    1. `sender` == `udc.owner` or `sender` should be one of `udc.operators`
+    1. `tx.amount` > 0
+    1. `sender.balance` &ge; `tx.fee`
+1. state change
+    1. if `tx.amount` > 0, then<br/>
+       add new `<udc>.holder.lock` or update existing `<udc>.holder.lock` in
+       udc balance lock store
+    1. else<br/>
+       delete  existing `<udc>.holder.lock` from udc balance lock store
+    1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+    1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+
+Upon receiving a `burn` transaction from an account, an AMO blockchain node
+performs a validity check and reduce sender's designated UDC balance.
+
+1. validity check
+    1. `udc` exists having `tx.udc` as a key in udc store
+    1. `tx.amount` > 0
+    1. `<udc>.sender.balance` &ge; `tx.amount`
+    1. `sender.balance` &ge; `tx.fee`
+1. state change
+    1. `<udc>.sender.balance` &larr; `<udc>.sender.balance` - `tx.amount`
+    1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+    1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+
 ### Completing Block
 After processing state changes triggered by users' transactions in
 `DeliverTx()`, the nodes complete a block in `EndBlock()` by applying
