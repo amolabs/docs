@@ -741,7 +741,7 @@ When optional parameter `udc` is given, the operation is changed as follows.
 1. validity check
     1. UDC id `<udc>` is registered
     1. `tx.amount` > `0`
-    1. `<udc>.sender.balance` &ge; `tx.amount`
+    1. `<udc>.sender.balance` &ge; `<udc>.sender.lock` + `tx.amount`
     1. `sender.balance` &ge; `tx.fee`
 1. state change
     1. `<udc>.sender.balance` &larr; `<udc>.sender.balance` - `tx.amount`
