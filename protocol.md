@@ -520,8 +520,8 @@ availability than `int64`, `laziness_counter_window` has to use `int64` as it
 is an tendermint-dependant configuration.
 
 ### Data stores
-There are 10 default data stores and optional UDC(user-defined coin) balance
-stores.
+There are 12 default data stores and optional UDC(user-defined coin) balance
+and balance lock stores.
 
 | tier | category | store | prefix |
 |-|-|-|-|
@@ -530,13 +530,13 @@ stores.
 | 0 | fungible asset | delegate | `delegate:` |
 | 1 | governance | draft | `draft:` |
 | 1 | governance | vote | `vote:` |
-| 2 | non-asset | storage | `storage:` |
+| 2 | maintenance | storage | `storage:` |
 | 2 | non-fungible asset | parcel | `parcel:` |
 | 2 | non-fungible asset | request | `request:` |
 | 2 | non-fungible asset | usage | `usage:` |
-| 3 | non-asset | user-defined coin | `udc:` |
-| 3 | fungible asset | user-defined coin balance | `balance:<udc_id>:` |
-| 3 | non-asset | user-defined coin balance lock | `balance_lock:<udc_id>:` |
+| 3 | maintenance | UDC | `udc:` |
+| 3 | fungible asset | UDC balance | `balance:<udc_id>:` |
+| 3 | maintenance | UDC balance lock | `balance_lock:<udc_id>:` |
 
 Tier 0 items are essential for the operations of a DPoS-based blockchain. Tier
 1 items are important as much as the tier 0 items, but the chain may be still
