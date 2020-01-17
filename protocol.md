@@ -434,6 +434,15 @@ A payload format for each transaction type is as the following.
   amount of UDC balance to burn.
 
 - `lock` payload
+  ```json
+  {
+    "udc": "_udc_id_",
+    "holder": "_HEX_encoded_account_address_",
+    "amount": "_currency_"
+  }
+  ```
+  where `udc` is an identifier of a user-defined coin, and `amount` is the
+  amount of UDC coin to be locked.
 
 ## Blockchain Data
 
@@ -527,6 +536,7 @@ stores.
 | 2 | non-fungible asset | usage | `usage:` |
 | 3 | non-asset | user-defined coin | `udc:` |
 | 3 | fungible asset | user-defined coin balance | `balance:<udc_id>:` |
+| 3 | non-asset | user-defined coin balance lock | `balance_lock:<udc_id>:` |
 
 Tier 0 items are essential for the operations of a DPoS-based blockchain. Tier
 1 items are important as much as the tier 0 items, but the chain may be still
@@ -669,6 +679,12 @@ business data items, while tier 3 items are pretty much optional.
 - udc balance
     - key: `_account_address_`
     - value: JSON string `"_currency_"`
+- udc balance lock
+    - key: `_account_address_`
+    - value: JSON string `"_currency_"`
+    - UDC balance of an account cannot be lowered under this value via transfer
+      tx. This lock value may be higher than the UDC balance of an account at
+      the time of processing lock tx
 
 ### Merkle tree and app hash
 Although the internal state DB is composed of top-level data items and several
