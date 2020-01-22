@@ -541,7 +541,7 @@ and balance lock stores.
 | 2 | non-fungible asset | usage | `usage:` |
 | 3 | maintenance | UDC | `udc:` |
 | 3 | fungible asset | UDC balance | `balance:<udc_id>:` |
-| 3 | maintenance | UDC balance lock | `balance_lock:<udc_id>:` |
+| 3 | maintenance | UDC balance lock | `udclock:<udc_id>:` |
 
 Tier 0 items are essential for the operations of a DPoS-based blockchain. Tier
 1 items are important as much as the tier 0 items, but the chain may be still
