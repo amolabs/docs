@@ -428,16 +428,6 @@ A payload format for each transaction type is as the following.
   where `operators` is an optional list of operator addresses, and `amount` is
   the amount of UDC balance to be created.
 
-- `burn` payload
-  ```json
-  {
-    "udc": "_udc_id_",
-    "amount": "_currency_"
-  }
-  ```
-  where `udc` is an identifier of a user-defined coin, and `amount` is the
-  amount of UDC balance to burn.
-
 - `lock` payload
   ```json
   {
@@ -448,6 +438,16 @@ A payload format for each transaction type is as the following.
   ```
   where `udc` is an identifier of a user-defined coin, and `amount` is the
   amount of UDC coin to be locked.
+
+- `burn` payload
+  ```json
+  {
+    "udc": "_udc_id_",
+    "amount": "_currency_"
+  }
+  ```
+  where `udc` is an identifier of a user-defined coin, and `amount` is the
+  amount of UDC balance to burn.
 
 ## Blockchain Data
 
@@ -1109,7 +1109,7 @@ performs a validity check and reduce sender's designated UDC balance.
 1. validity check
     1. `udc` exists having `tx.udc` as a key in udc store
     1. `tx.amount` > 0
-    1. `<udc>.sender.balance` &ge; `tx.amount`
+    1. `<udc>.sender.balance` &ge; `<udc>.sender.lock` + `tx.amount`
     1. `sender.balance` &ge; `tx.fee`
 1. state change
     1. `<udc>.sender.balance` &larr; `<udc>.sender.balance` - `tx.amount`
