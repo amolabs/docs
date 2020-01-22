@@ -141,8 +141,13 @@ The following types are used in this document.
 - `"_HEX_encoded_parcel_id_"` as a JSON object
 
 ### UDC(User-Defined Coin) ID
+A UDC ID is a 32-bit unsigned integer. It is represented as a double-quoted
+decimal number when used in JSON, e.g. in protocol messages. However, it is
+represented as a big-endian integer when it is used to composite another
+identifier.
+
 The following types are used in this document.
-- `_udc_id_`
+- `_udc_id_` = alias of `_decimal_number_`
 - `"_udc_id_"` as a JSON object
 
 ### Extra info
