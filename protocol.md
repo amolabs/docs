@@ -106,9 +106,9 @@ The following types are used in this document.
 
 ### Draft ID
 A draft ID is a 32-bit unsigned integer. It is represented as a double-quoted
-decimal number when used in JSON, e.g. in protocol messages. However, it is
-represented as a big-endian integer when it is used to composite another
-identifier.
+decimal number without redundant leading zeroes when used in JSON, e.g. in
+protocol messages. However, it is represented as a 4-byte big-endian integer
+including leading zeroes when it is used to composite another identifier.
 
 The following types are used in this document.
 - `_draft_id_` = alias of `_decimal_number_`
@@ -116,9 +116,9 @@ The following types are used in this document.
 
 ### Storage ID
 A storage ID is a 32-bit unsigned integer. It is represented as a double-quoted
-decimal number when used in JSON, e.g. in protocol messages. However, it is
-represented as a big-endian integer when it is used to composite another
-identifier.
+decimal number without redundant leading zeroes when used in JSON, e.g. in
+protocol messages. However, it is represented as a 4-byte big-endian integer
+when it is used to composite another identifier.
 
 The following types are used in this document.
 - `_storage_id_` = alias of `_decimal_number_`
@@ -142,9 +142,9 @@ The following types are used in this document.
 
 ### UDC(User-Defined Coin) ID
 A UDC ID is a 32-bit unsigned integer. It is represented as a double-quoted
-decimal number when used in JSON, e.g. in protocol messages. However, it is
-represented as a big-endian integer when it is used to composite another
-identifier.
+decimal number without redundant leading zeroes when used in JSON, e.g. in
+protocol messages. However, it is represented as a 4-byte big-endian integer
+when it is used to composite another identifier.
 
 The following types are used in this document.
 - `_udc_id_` = alias of `_decimal_number_`
