@@ -482,7 +482,7 @@ configuration.
   "penalty_ratio_l": 0.01,
   "laziness_counter_window": 100,
   "laziness_threshold": 0.9,
-  "block_bound_tx_grace_period": 100,
+  "block_binding_window": 100,
   "lockup_period": 3600,
   "draft_open_count": 500000,
   "draft_close_count": 100000,
@@ -506,7 +506,7 @@ configuration.
 | `penalty_ratio_l` | float64 | `> 0` |
 | `laziness_counter_window` | int64 | `>= 10000` |
 | `laziness_threshold` | float64 | `> 0` |
-| `block_bound_tx_grace_period` | uint64 | `>= 10000` |
+| `block_binding_window` | int64 | `>= 10000` |
 | `lockup_period` | uint64 | `>= 10000` |
 | `draft_open_count` | uint64 | `>= 10000` |
 | `draft_close_count` | uint64 | `>= 10000` |
