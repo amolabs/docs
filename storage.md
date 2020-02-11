@@ -1,17 +1,35 @@
 # AMO Storage Service
-DRAFT
 
-Any storage service must meet the following requirements in order to
-participate in AMO environment as an AMO storage service.
+Although it is possible to use AMO blockchain as a data trade medium for any
+data stored in arbitrary storage, it is a good idea to follow the AMO storage
+specification to utilize a granting scheme used in AMO blockchain. Any storage
+service which meets the following requirements is called an AMO storage
+service.
 
-There is a default AMO storage service, and its availability is guaranteed by
-AMO Labs. See [Default AMO Storage Service](ceph.md) for more information.
+**NOTE:** There is a default AMO storage service, and its availability is
+guaranteed by AMO Labs. See [Default AMO Storage Service](ceph.md) for more
+information.
 
 ## General Requirements
-* object storage
-* high availability
-* long-term persistent storage
-* updatable data body
+### Object storage
+AMO blockchain intermediates data trades with the unit called a data parcel.
+Since there is no restriction in the internal structure of the data, a data
+parcel can be anything. However, a data parcel is identified by a *parcel id*
+without any hierarchical structure. So, it is natural to use an object storage
+as a physical medium. A hierarchical data storage such as directory-based file
+system can be transformed into an object storage by using a dedicated
+directory. In that case, the absolute path to the dedicated directory would be
+the fixed prefix of a parcel id.
+
+### High availability
+An AMO storage service needs to provide high availability.
+
+### Long-term persistent storage
+We do not consider any volatile storages. A data parcel may reside in a storage
+indefinitely.
+
+### Updatable data body
+Body of a data parcel may be updated along the course of the lifetime. 
 
 ## Data Parcel
 A _data parcel_ is a generic term used to call any data item for sale in AMO
@@ -27,20 +45,11 @@ with a given data parcel ID._
 ## Identifiers
 
 ### Storage Service ID
-A storage service ID is used to identify a specific storage service and its
-access point. It is a natural requirement that this ID should be globally
-unique one. Since AMO blockchain is a decentralized service, there is no single
-authority to announce storage IDs for various AMO-compatible storage services.
-In AMO infrastructure, this storage service ID is decided by community. There
-shall be a single logical repository in the internet and anyone can contribute
-to this repository.  
-
-A storage service ID is a four-byte binary sequence, represented by 8
-hexadecimal digits.
-
-| service ID | canonical name | access point |
-|------------|----------------|--------------|
-| 00000001   | AMO default    | TBA          |
+An AMO storage service ID is used to identify a specific storage service and
+its access point. It is a natural requirement that this ID should be globally
+unique. For this matter, AMO blockchain provide a method to register a storage
+service by transmitting `register` transaction. According to AMO blockchain
+protocol spec, this id is a 32-bit unsigned integer.
 
 ### Data Parcel ID
 A data parcel ID is used to identify a single *data parcel* in AMO
@@ -51,19 +60,15 @@ service is also unique in whole AMO ecosystem. To solve this problem, a data
 parcel ID in AMO infrastructure is composed of a storage service ID and an
 internal ID or index. In a human readable form or in a protocol message, this
 data parcel ID is represented by concatenation of an 8-digit hexadecimal
-sequence, a colon character(':'), and a binary sequence represented by a
-hexadecimal sequence with the maximum length of 256-byte.
+sequence and a 64-digit hexadecimal sequence, which is a hexadecimal
+representation of 36-byte binary sequence.
 
 One possible strategy to generate an internal ID for a data parcel is to take a
-SHA-256 hash of the (metadata, payload), or just the payload. In that case, a
-data parcel ID would have the form like the following (every zero-byte(0x00)
-counts):
+SHA-256 hash of the (metadata, payload), or just the payload. When the storage
+id is an integer 1, a data parcel ID would have the form like the following
+(every zero-byte(0x00) counts):
 
-	00000001:0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF
-
-## AMO Storage Adapter
-TODO:
-define common API outfit
+	000000010123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF
 
 ## Protocol Messages
 ### User Identity
@@ -77,8 +82,8 @@ define common API outfit
 ### Signature Appendix
 ```json
 {
-	"pubkey": "_hex-encoded_ECDSA_public_key_",
-	"sig_bytes": "_hex-encoded_ECDSA_signature_"
+	"pubkey": "_HEX-encoded_ECDSA_public_key_",
+	"sig_bytes": "_HEX-encoded_ECDSA_signature_"
 }
 ```
 * _pubkey_ is a hexadecimal representation of a compressed elliptic curve
@@ -101,7 +106,9 @@ define common API outfit
 	"data": _hex-encoded_binary_sequence_
 }
 ```
-* *id* may be omitted.
+* *id* may be omitted when uploading a new data to a storage service. If this
+  is the case, a new data parcel id is generated by the storage service and
+  then returned to the client.
 * *metadata* is any JSON object with a mandatory field `owner`.
 
 ### Initiation Message Type 1
@@ -149,9 +156,33 @@ define common API outfit
 ```
 
 ## API Operations
-list of tier 1 operations
+There three tiers in API operations
+* tier 0: download-only without authentication
+* tier 1: upload, inspect, download, remove opertions with authentication
+* tier 2: append, replace operations plus all the tier 1 operations with
+  authentication
 
-### Upload
+Tier 0 operations should only be used in a simple type of storage. Since it
+does not support authentication or access control, such a service may not be
+considered as fully compatible AMO storage. However, this type of storage may
+be essential in the early stages of the AMO business.
+
+Tier 0 operations are processed with a simple HTTP GET request and response.
+Unlike tier 1 and 2 operations, the request is sent to the URL pointing to the
+data parcel in question.
+
+All of tier 1 and tier 2 API operations are processed with a series of protocol
+messages. It is assumed that all protocol messages are sent to the same API
+endpoint. Each protocol step is distinguished by the operation description transferred by the first client message, and the order of subsequent messages.
+
+### (Tier 0) Simple download
+Operation steps are as follows:
+* client &rArr; storage: HTTP GET with no request body
+* client &lArr; storage: data parcel body or fail
+
+The tier 0 simple download could be supported by any standard web server.
+
+### (Tier 1) Upload
 Operation description is as follows:
 ```json
 {
@@ -174,7 +205,7 @@ access control than this.
 Result data is a *data parcel ID*.
 **need discussion**
 
-### Inspect
+### (Tier 1) Inspect
 Operation description is as follows:
 ```json
 {
@@ -191,7 +222,7 @@ No access control at this operation.
 
 Result data is a data parcel metadata.
 
-### Download
+### (Tier 1) Download
 Operation description is as follows:
 ```json
 {
@@ -212,7 +243,7 @@ perform AMO-based access control.
 Result data is either empty or a *data parcel* depending on the access control
 result.
 
-### Remove
+### (Tier 1) Remove
 Operation description is as follows:
 ```json
 {
@@ -232,9 +263,14 @@ matching.
 
 Result data is empty.
 
-### *Append*
+### (Tier 2) Append
+TBA
+
 optional. tier 2 oepration
-### *Replace*
+
+### (Tier 2) Replace
+TBA
+
 optional. tier 2 oepration
 
 ## Access Control
