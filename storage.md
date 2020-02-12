@@ -173,16 +173,19 @@ data parcel in question.
 
 All of tier 1 and tier 2 API operations are processed with a series of protocol
 messages. It is assumed that all protocol messages are sent to the same API
-endpoint. Each protocol step is distinguished by the operation description transferred by the first client message, and the order of subsequent messages.
+endpoint. Each protocol step is distinguished by the operation description
+transferred by the first client message, and the order of subsequent messages.
 
 ### (Tier 0) Simple download
 Operation steps are as follows:
 * client &rArr; storage: HTTP GET with no request body
 * client &lArr; storage: data parcel body or fail
 
-The tier 0 simple download could be supported by any standard web server. This operation can be considered as a wide-accepted RESTful API. So the URL pointing to each data parcel should look like the following form:
+The tier 0 simple download could be supported by any standard web server. This
+operation can be considered as a wide-accepted RESTful API. So the URL pointing
+to each data parcel should look like the following form:
 
-    https://serveraddress:port/prefix/to/path/<parcel id in hexadecimal form>
+    https://serveraddress:port/prefix/to/path/<data parcel id in hexadecimal form>
 
 In this case, all of the data parcels should be accessible under the same URL
 prefix.
