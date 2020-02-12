@@ -180,7 +180,12 @@ Operation steps are as follows:
 * client &rArr; storage: HTTP GET with no request body
 * client &lArr; storage: data parcel body or fail
 
-The tier 0 simple download could be supported by any standard web server.
+The tier 0 simple download could be supported by any standard web server. This operation can be considered as a wide-accepted RESTful API. So the URL pointing to each data parcel should look like the following form:
+
+    https://serveraddress:port/prefix/to/path/<parcel id in hexadecimal form>
+
+In this case, all of the data parcels should be accessible under the same URL
+prefix.
 
 ### (Tier 1) Upload
 Operation description is as follows:
