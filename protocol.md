@@ -86,7 +86,7 @@ and reasons.
 The following types are used in this document.
 - `_account_address_` = `addr_bin`
 - `_HEX_encoded_account_address_` = HEX encoding of `_account_address_`
-- `"_HEX_encoded_account_address_"` as a JSON object
+- `"_HEX_encoded_account_address_"` as a JSON string
 
 ### Currency
 As in other popular blockchain systems, AMO coin amount is expressed as an
@@ -102,7 +102,7 @@ node's *internal* memory.
 
 The following types are used in this document.
 - `_currency_`
-- `"_currency_"` as a JSON object
+- `"_currency_"` as a JSON string
 
 ### Draft ID
 A draft ID is a 32-bit unsigned integer. It is represented as a double-quoted
@@ -112,7 +112,7 @@ including leading zeroes when it is used to composite another identifier.
 
 The following types are used in this document.
 - `_draft_id_` = alias of `_decimal_number_`
-- `"_draft_id_"` as a JSON object
+- `_draft_id_` as a JSON number, e.g. `1234` not `"1234"`
 
 ### Storage ID
 A storage ID is a 32-bit unsigned integer. It is represented as a double-quoted
@@ -122,7 +122,7 @@ when it is used to composite another identifier.
 
 The following types are used in this document.
 - `_storage_id_` = alias of `_decimal_number_`
-- `"_storage_id_"` as a JSON object
+- `_storage_id_` as a JSON number, e.g. `1234` not `"1234"`
 
 ### Parcel ID
 A parcel ID is a concatenation of a storage ID and in-storage ID. In-storage ID
@@ -138,7 +138,7 @@ big-endian byte order.
 The following types are used in this document.
 - `_parcel_id_`
 - `_HEX_encoded_parcel_id_` = HEX encoding of `_parcel_id_`
-- `"_HEX_encoded_parcel_id_"` as a JSON object
+- `"_HEX_encoded_parcel_id_"` as a JSON string
 
 ### UDC(User-Defined Coin) ID
 A UDC ID is a 32-bit unsigned integer. It is represented as a double-quoted
@@ -148,7 +148,7 @@ when it is used to composite another identifier.
 
 The following types are used in this document.
 - `_udc_id_` = alias of `_decimal_number_`
-- `"_udc_id_"` as a JSON object
+- `_udc_id_` as a JSON number, e.g. `1234` not `"1234"`
 
 ### Extra info
 `register`, `request` and `grant` tx may carry extra information. It must be a
@@ -157,27 +157,40 @@ a blockchain node must store extra information from the previous steps also,
 i.e. `parcel` stores extra from register tx, `request` stores extra from
 register tx and request tx, `usage` stores extra from register tx, request tx
 and grant tx.
+
 parcel store extra
 ```json
 {
-  "register": {} // application-specific JSON object
+  "register": {} // application-specific JSON object, optional
 }
 ```
 request store extra
 ```json
 {
-  "register": {}, // application-specific JSON object
-  "request": {} // application-specific JSON object
+  "register": {}, // application-specific JSON object, optional
+  "request": {} // application-specific JSON object, optional
 }
 ```
 usage store extra
 ```json
 {
-  "register": {}, // application-specific JSON object
-  "request": {}, // application-specific JSON object
-  "grant": {} // application-specific JSON object
+  "register": {}, // application-specific JSON object, optional
+  "request": {}, // application-specific JSON object, optional
+  "grant": {} // application-specific JSON object, optional
 }
 ```
+Since a JSON object must be enclosed by braces(`{` and `}`), it cannot be a
+single JSON value. Each extra info must be an empty object(`{}`) or a proper
+JSON object with members.
+```json
+{
+  "register": "boo", // wrong
+  "request": {"some":"value"}, // ok
+  "grant": {} // ok
+}
+```
+Each member is marked as *optional*, so an empty object(`{}`) is valid extra
+information for all of three stores.
 
 ## Message Format
 ### Transaction
@@ -352,7 +365,7 @@ A payload format for each transaction type is as the following.
     "target": "_HEX_encoded_parcel_id_",
     "custody": "_HEX_encoded_key_custody_",
     "proxy_account": "_HEX_encoded_account_address_",
-    "extra": {} // application-specific JSON object
+    "extra": {} // application-specific JSON object, optional
   }
   ```
   where `target` is the id of a parcel currently being registered, `custody` is
@@ -366,7 +379,7 @@ A payload format for each transaction type is as the following.
     "payment": "_currency_",
     "dealer": "_HEX_encoded_account_address_", // optional
     "dealer_fee": "_currency_", // optional
-    "extra": {} // application-specific JSON object
+    "extra": {} // application-specific JSON object, optional
   }
   ```
   where `target` is the id of a parcel for which the sender wants usage grant,
@@ -379,7 +392,7 @@ A payload format for each transaction type is as the following.
     "target": "_HEX_encoded_parcel_id_",
     "grantee": "_HEX_encoded_account_address_",
     "custody": "_HEX_encoded_key_custody_",
-    "extra": {} // application-specific JSON object
+    "extra": {} // application-specific JSON object, optional
   }
   ```
   where `target` is the id of a parcel currently being granted, `grantee` is
