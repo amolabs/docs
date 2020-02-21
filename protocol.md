@@ -364,7 +364,7 @@ A payload format for each transaction type is as the following.
   {
     "target": "_HEX_encoded_parcel_id_",
     "custody": "_HEX_encoded_key_custody_",
-    "proxy_account": "_HEX_encoded_account_address_",
+    "proxy_account": "_HEX_encoded_account_address_", // optional
     "extra": {} // application-specific JSON object, optional
   }
   ```
