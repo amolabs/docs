@@ -503,7 +503,9 @@ configuration.
   "draft_deposit": "_currency_",
   "draft_quorum_rate": 0.1,
   "draft_pass_rate": 0.7,
-  "draft_refund_rate": 0.2
+  "draft_refund_rate": 0.2,
+  "upgrade_protocol_height": 1,
+  "upgrade_protocol_version": 1
 }
 ```
 #### Key's value type and constraint 
@@ -528,6 +530,8 @@ configuration.
 | `draft_quorum_rate` | float64 | `> 0` |
 | `draft_pass_rate` | float64 | `> 0` |
 | `draft_refund_rate` | float64 | `> 0` |
+| `upgrade_protocol_height` | int64 | `> 0` |
+| `upgrade_protocol_version` | uint64 | `> 0` |
 
 It is mandatory to restrict proper type and value of configurations in order to
 make AMO blockchain protocol keep operating as it has to, even after modifying
@@ -1325,6 +1329,41 @@ tendermint unsafe_reset_all
 ```
 An AMO-compliant blockchain node should have some mechanisms to modify internal
 database for this operation.
+
+## On-line Protocol Upgrade
+To enhance the stability of AMO's overall system, it is required to upgrade its
+application protocol consistently. To apply a new protocol on alive blockchain,
+'hard-fork' is an inevitable process necessary to be done externally. AMO
+provides a feature which helps 'hard-fork' get processed more smoothly.  
+
+### Node startup
+
+### Marking version
+AMO ABCI app's protocol version is recorded as `ProtocolVersion` in app's
+`state`. `ProtocolVersion` gets initiated with the value of `genesis.json`. If
+not specified, it is set with current app's hard-coded protocol version.
+
+### Upgrade decision
+The specific time when a new protocol gets applied and its version is decided
+among validators through [proposing and voting](#proposing-and-voting) draft.
+The time is recorded as `UpgradeProtocolHeight` and the version as
+`UpgradeProtocolVersion` in app's `config`.
+
+### Upgrade execution
+At the beginning of block creation `BeginBlock()`, AMO ABCI app checks
+conditions and processes operations as follows:
+
+#### Protocol version update
+- if `blk.height` == `app.config.UpgradeProtocolHeight`
+  - `app.state.ProtocolVersion` &larr; `app.config.UpgradeProtocolVersion` 
+
+#### Block process 
+- if `sw.ProtocolVersion` != `app.state.ProtocolVersion`
+  - abort and exit current sw
+
+#### State migration
+- if `blk.height` == `app.config.UpgradeProtocolHeight`
+  - execute `app.MigrateToX()` (`X` refers to `sw.ProtocolVersion`)
 
 ## Further Notes
 ### Replay Attack
