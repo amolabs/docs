@@ -530,8 +530,8 @@ configuration.
 | `draft_quorum_rate` | float64 | `> 0` |
 | `draft_pass_rate` | float64 | `> 0` |
 | `draft_refund_rate` | float64 | `> 0` |
-| `upgrade_protocol_height` | int64 | `> app.state.Height` |
-| `upgrade_protocol_version` | uint64 | `> app.state.ProtocolVersion` |
+| `upgrade_protocol_height` | int64 | `> app.state.Height + draft_open_count + draft_close_count + draft_apply_count` |
+| `upgrade_protocol_version` | uint64 | `== app.state.ProtocolVersion + 1` |
 
 It is mandatory to restrict proper type and value of configurations in order to
 make AMO blockchain protocol keep operating as it has to, even after modifying
