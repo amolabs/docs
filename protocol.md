@@ -523,9 +523,9 @@ configuration.
 | `laziness_threshold` | float64 | `> 0` |
 | `block_binding_window` | int64 | `>= 10000` |
 | `lockup_period` | uint64 | `>= 10000` |
-| `draft_open_count` | uint64 | `>= 10000` |
-| `draft_close_count` | uint64 | `>= 10000` |
-| `draft_apply_count` | uint64 | `>= 10000` |
+| `draft_open_count` | int64 | `>= 10000` |
+| `draft_close_count` | int64 | `>= 10000` |
+| `draft_apply_count` | int64 | `>= 10000` |
 | `draft_deposit` | string | `>= 0` |
 | `draft_quorum_rate` | float64 | `> 0` |
 | `draft_pass_rate` | float64 | `> 0` |
@@ -538,8 +538,9 @@ make AMO blockchain protocol keep operating as it has to, even after modifying
 their values since genesis block. The currency-related configurations' type is
 restricted to `string` as it can store values without limit. Even though it is
 highly recommended to use `uint64` on configurations for its better space
-availability than `int64`, `laziness_counter_window` has to use `int64` as it
-is an tendermint-dependant configuration.
+availability than `int64`, `laziness_counter_window`, `block_binding_window`
+`draft_*_count`, `upgrade_protocol_height`  has to use `int64` as it is an
+tendermint-dependant configuration.
 
 ### Data stores
 There are 12 default data stores and optional UDC(user-defined coin) balance
