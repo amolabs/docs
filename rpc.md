@@ -131,18 +131,24 @@ The response value for this query has the following form:
   "max_validators": 100,
   "weight_validator": 2,
   "weight_delegator": 1,
-  "min_staking_unit", "_currency_",
-  "blk_reward": 0,
-  "tx_reward": 1e+17,
+  "min_staking_unit": "_currency_",
+  "blk_reward": "_currency_",
+  "tx_reward": "_currency_",
   "penalty_ratio_m": 0.1,
   "penalty_ratio_l": 0.01,
   "laziness_counter_window": 100,
   "laziness_threshold": 0.9,
-  "block_bound_tx_grace_period": 100,
+  "block_binding_window": 100,
   "lockup_period": 3600,
-  "draft_vote_open": 500000,
-  "draft_vote_close": 100000,
-  "draft_apply": 500000
+  "draft_open_count": 500000,
+  "draft_close_count": 100000,
+  "draft_apply_count": 500000,
+  "draft_deposit": "_currency_",
+  "draft_quorum_rate": 0.2,
+  "draft_pass_rate": 0.55,
+  "draft_refund_rate": 0.3,
+  "upgrade_protocol_height": 1,
+  "upgrade_protocol_version": 1
 }
 ```
 
@@ -164,10 +170,34 @@ When querying an account's stake, `data` is a HEX conversion of a JSON represent
 "_HEX_encoded_account_address_"
 ```
 
+The response value for this query has the following form:
+```json
+{
+  "validator": "_HEX_encoded_ed25519_pubkey_",
+  "amount": "_decimal_number_",
+  "delegates": [
+    {
+      "delegator": "_HEX_encoded_account_address_", 
+      "delegatee": "_HEX_encoded_account_address_", 
+      "amount": "_currency_"
+    }
+  ]
+}
+```
+
 ### Query delegate
 When querying an account's delegated stake, `data` is a HEX conversion of a JSON representation of an account address.
 ```json
 "_HEX_encoded_account_address_"
+```
+
+The response value for this query has the following form:
+```json
+{
+  "delegator": "_HEX_encoded_account_address_", 
+  "delegatee": "_HEX_encoded_account_address_", 
+  "amount": "_currency_"
+}
 ```
 
 ### Query validator
@@ -185,10 +215,65 @@ When querying a draft detail and voting progress, `data` is a HEX conversion of 
 "_draft_id_"
 ```
 
+The response value for this query has the following form:
+```json
+{
+  "proposer": "_HEX_encoded_account_address_",
+  "config": { 
+    "max_validators": 100,
+    "weight_validator": 2,
+    "weight_delegator": 1,
+    "min_staking_unit": "_currency_",
+    "blk_reward": "_currency_",
+    "tx_reward": "_currency_",
+    "penalty_ratio_m": 0.1,
+    "penalty_ratio_l": 0.01,
+    "laziness_counter_window": 100,
+    "laziness_threshold": 0.9,
+    "block_binding_window": 100,
+    "lockup_period": 3600,
+    "draft_open_count": 500000,
+    "draft_close_count": 100000,
+    "draft_apply_count": 500000,
+    "draft_deposit": "_currency_",
+    "draft_quorum_rate": 0.2,
+    "draft_pass_rate": 0.55,
+    "draft_refund_rate": 0.3,
+    "upgrade_protocol_height": 1,
+    "upgrade_protocol_version": 1
+  },
+  "desc": "human-readable string describing this draft",
+  "open_count": 100,
+  "close_count": 100,
+  "apply_count": 100,
+  "deposit": "_currency_",
+  "tally_quorum": "_currency_",
+  "tally_approve": "_currency_",
+  "tally_reject": "_currency_",
+  "votes": [
+    {
+      "voter": "_HEX_encoded_account_address_",
+      "approve": true // boolean 
+    }
+  ]
+}
+```
+
 ### Query storage
 When querying a storage detail, `data` is a HEX conversion of a JSON representation of a storage ID.
 ```json
 "_storage_id_"
+```
+
+The response value for this query has the following form:
+```json
+{
+  "owner": "_HEX_encoded_account_address_",
+  "url": "https://www.amo.foundation",
+  "registration_fee": "_currency_",
+  "hosting_fee": "_currency_",
+  "active": true // boolean
+}
 ```
 
 ### Query parcel
@@ -196,6 +281,33 @@ When querying a parcel, `data` is a HEX conversion of a JSON representation of
 a parcel ID.
 ```json
 "_HEX_encoded_parcel_id_"
+```
+
+The response value for this query has the following form:
+```json
+{
+  "owner": "_HEX_encoded_account_address_",
+  "custody": "_HEX_encoded_custody_",
+  "proxy_account": "_HEX_encoded_account_address_", // optional
+  "extra": {}, // application-specific JSON object, optional
+  "on_sale": true // boolen,
+  "requests": [ // optional
+    {
+      "payment": "_currency_",
+      "dealer": "_HEX_encoded_custody_", // optional
+      "dealer_fee": "_currency_", // optional
+      "extra": {}, // application-specific JSON object, optional
+      "buyer": "_HEX_encoded_account_address_"
+    }
+  ],
+  "usages": [ // optional
+    {
+      "custody": "_HEX_encoded_custody_",
+      "extra": {}, // application-specific JSON object, optional
+      "buyer": "_HEX_encoded_account_address_"
+    }
+  ]
+}
 ```
 
 ### Query request
@@ -206,6 +318,17 @@ JSON representation is as the following:
 {"buyer":"_HEX_encoded_account_address_","target":"_HEX_encoded_parcel_id_"}
 ```
 
+The response value for this query has the following form:
+```json
+{
+  "payment": "_currency_",
+  "dealer": "_HEX_encoded_custody_", // optional
+  "dealer_fee": "_currency_", // optional
+  "extra": {}, // application-specific JSON object, optional
+  "buyer": "_HEX_encoded_account_address_"
+}
+```
+
 ### Query usage
 When querying a usage for specific parcel, `data` is a HEX conversion of a
 compact JSON representation of (`buyer address`, `data parcel ID`), where this
@@ -214,11 +337,31 @@ JSON representation is as the following:
 {"buyer":"_HEX_encoded_account_address_","target":"_HEX_encoded_parcel_id_"}
 ```
 
+The response value for this query has the following form:
+```json
+{
+  "custody": "_HEX_encoded_custody_",
+  "extra": {}, // application-specific JSON object, optional
+  "buyer": "_HEX_encoded_account_address_"
+}
+```
+
 ### Query incentive for block
 When querying an incentive record for a specific block height, `data` is a HEX
 conversion of a _string-formatted_ block height.
 ```json
 "_deciman_number_"
+```
+
+The response value for this query has the following form:
+```json
+[
+  {
+    "block_height": 10,
+    "address": "_HEX_encoded_account_address_",
+    "amount": "_currency_"
+  }
+]
 ```
 
 ### Query incentive for account
@@ -229,6 +372,17 @@ address.
 "_HEX_encoded_account_address_"
 ```
 
+The response value for this query has the following form:
+```json
+[
+  {
+    "block_height": 10,
+    "address": "_HEX_encoded_account_address_",
+    "amount": "_currency_"
+  }
+]
+```
+
 ### Query incentive for block and account
 When querying an incentive record for a specific block height and a specific
 stake holder or delegated stake holder, `data` is a HEX conversion of a compact
@@ -236,6 +390,17 @@ JSON representation of (`block height`, `holder address`), where this JSON
 representation is as the following:
 ```json
 {"height":"_decimal_number_","address":"_HEX_encoded_account_address_"}
+```
+
+The response value for this query has the following form:
+```json
+[
+  {
+    "block_height": 10,
+    "address": "_HEX_encoded_account_address_",
+    "amount": "_currency_"
+  }
+]
 ```
 
 ## Broadcast Tx
