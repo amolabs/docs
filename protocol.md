@@ -514,9 +514,9 @@ configuration.
 | `max_validators` | uint64 | `> 0` |
 | `weight_validator` | uint64 | `> 0` | 
 | `weight_delegator` | uint64 | `> 0` | 
-| `min_staking_unit` | string | `> 0` |
-| `blk_reward` | string | `>= 0` |
-| `tx_reward` | string | `>= 0` |
+| `min_staking_unit` | currency | `> 0` |
+| `blk_reward` | currency | `>= 0` |
+| `tx_reward` | currency | `>= 0` |
 | `penalty_ratio_m` | float64 | `> 0` |
 | `penalty_ratio_l` | float64 | `> 0` |
 | `laziness_counter_window` | int64 | `>= 10000` |
@@ -526,7 +526,7 @@ configuration.
 | `draft_open_count` | int64 | `>= 10000` |
 | `draft_close_count` | int64 | `>= 10000` |
 | `draft_apply_count` | int64 | `>= 10000` |
-| `draft_deposit` | string | `>= 0` |
+| `draft_deposit` | currency | `>= 0` |
 | `draft_quorum_rate` | float64 | `> 0` |
 | `draft_pass_rate` | float64 | `> 0` |
 | `draft_refund_rate` | float64 | `> 0` |
@@ -1308,29 +1308,6 @@ Distribution](#distribution).
 - `LazinessThreshold`
 - `PenaltyRatioL`
 
-## Genesis App State
-Initial state of the app (_genesis app state_) is defined by genesis document
-(genesis.json file in tendermint config directory, typically
-$HOME/.tendermint/config/genesis.json). Initial app state is described in
-`app_state` field in a genesis document. For example:
-```json
-"app_state": {
-  "balances": [
-    {
-      "owner": "7CECB223B976F27D77B0E03E95602DABCC28D876",
-      "amount": "100"
-    }
-  ]
-}
-```
-**TM:** In order to reset and apply new genesis state, run the following
-command in command line:
-```bash
-tendermint unsafe_reset_all
-```
-An AMO-compliant blockchain node should have some mechanisms to modify internal
-database for this operation.
-
 ## On-line Protocol Upgrade
 To enhance the stability of AMO's overall system, it is required to upgrade its
 application protocol consistently. To apply a new protocol on alive blockchain,
@@ -1365,6 +1342,29 @@ conditions and processes operations as follows:
 #### State migration
 - if `blk.height` == `app.config.UpgradeProtocolHeight`
   - execute `app.MigrateToX()` (`X` refers to `sw.ProtocolVersion`)
+
+## Genesis App State
+Initial state of the app (_genesis app state_) is defined by genesis document
+(genesis.json file in tendermint config directory, typically
+$HOME/.tendermint/config/genesis.json). Initial app state is described in
+`app_state` field in a genesis document. For example:
+```json
+"app_state": {
+  "balances": [
+    {
+      "owner": "7CECB223B976F27D77B0E03E95602DABCC28D876",
+      "amount": "100"
+    }
+  ]
+}
+```
+**TM:** In order to reset and apply new genesis state, run the following
+command in command line:
+```bash
+amod tendermint unsafe_reset_all
+```
+An AMO-compliant blockchain node should have some mechanisms to modify internal
+database for this operation.
 
 ## Further Notes
 ### Replay Attack
