@@ -449,7 +449,7 @@ where `tx` is a base64 encoding of the following tx body:
 {"type":"transfer","sender":"662E3DD1C6470CFE12C8EDBCE5F44C08E2763753","fee":"0","last_height":"4052","payload":{"to":"614A9F2FC4E6B119D7612C35BC150E33CB38BB40","amount":"100"},"signature":{"pubkey":"04DBCEC2C0F52018606F588713305E1DA49367037281B960F51C46BE64E3144977009A811A865B3CB3331B788147C03853C7920C4C8FB6FFB5B0D435DAEB3F59A4","sig_bytes":"50A8307AAFF6611AE67ADD09EA813F37668072A214230DF375CFA25FB368B0EBD861943661EC690AE0E5D789E738B3C4518F78D768E5E006C9EB53E81821671D"}}
 ```
 
-An RPC result for broadcasting tx hash the following form:
+An RPC result for broadcasting tx has the following form:
 ```json
 {
   "check_tx": {},
@@ -474,3 +474,50 @@ contain the result. `height` field is relevant only when the method is
 `broadcast_tx_commit` and the tx is included successfully. It contains the
 height number of the block in which the tx is included.
 
+## Tx Search
+Tx Search is used to look for transactions tagged with specific tags. All of
+successfully delivered transactions are tagged with `tx.sender` and `tx.type`
+in common. Some of transactions are tagged with following tags:
+
+| tx | tags |
+|-|-|
+| register | `parcel.id`, `parcel.owner` |
+| discard | `parcel.id` |
+| request | `parcel.id` |
+| cancel | `parcel.id` |
+| grant | `parcel.id` |
+| revoke | `parcel.id` |
+
+Full rpc request body of `tx_search`:
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "non-empty",
+  "method": "tx_search",
+  "params": {
+    "query": "_query_string_"
+  }
+}
+```
+
+An example RPC message to search `stake` transactions sent by
+`662E3DD1C6470CFE12C8EDBCE5F44C08E2763753` is as the
+following:
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "non-empty",
+  "method": "tx_search",
+  "params": {
+    "query": "tx.sender='662E3DD1C6470CFE12C8EDBCE5F44C08E2763753' AND tx.type='stake'"
+  }
+}
+```
+
+An RPC result for searching tx has the following form:
+```json
+{
+  "txs": [],
+  "total_count": "_decimal_number_",
+}
+```
