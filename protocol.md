@@ -512,8 +512,8 @@ configuration.
 | key | value type | value constraint |
 |-|-|:-:|
 | `max_validators` | uint64 | `> 0` |
-| `weight_validator` | uint64 | `> 0` | 
-| `weight_delegator` | uint64 | `> 0` | 
+| `weight_validator` | float64 | `> 0` | 
+| `weight_delegator` | float64 | `> 0` | 
 | `min_staking_unit` | currency | `> 0` |
 | `blk_reward` | currency | `>= 0` |
 | `tx_reward` | currency | `>= 0` |
