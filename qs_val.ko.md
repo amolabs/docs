@@ -88,13 +88,13 @@ amod --home <dataroot>/amo tendermint init
 여기에서 `<dataroot>`는 앞서 준비한 데이터 디렉토리이다. 위 명령으로 노드 키와
 validator 키가 생성된다. `/mynode/amo/config/priv_validator_key.json` 파일을
 다른 안전한 장소에 백업해 놓는다. Validator 키가 다음과 같다고 가정한다:
-```
+```json
 {
-	"address": "9A8F09C644941B5A526B19641A3D7C8805E312B9",
-	"pub_key": {
-		"type": "tendermint/PubKeyEd25519",
-		"value": "+4jvv6ZCP+TxC0CwBQRr31ieZzj7KMZL3iwribL3czM="
-	}
+  "address": "9A8F09C644941B5A526B19641A3D7C8805E312B9",
+  "pub_key": {
+    "type": "tendermint/PubKeyEd25519",
+    "value": "+4jvv6ZCP+TxC0CwBQRr31ieZzj7KMZL3iwribL3czM="
+  }
 }
 ```
 

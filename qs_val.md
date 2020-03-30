@@ -91,10 +91,10 @@ We assume the validator public key is as follows:
 ```json
 {
   "address": "9A8F09C644941B5A526B19641A3D7C8805E312B9",
-    "pub_key": {
-      "type": "tendermint/PubKeyEd25519",
-      "value": "+4jvv6ZCP+TxC0CwBQRr31ieZzj7KMZL3iwribL3czM="
-    }
+  "pub_key": {
+    "type": "tendermint/PubKeyEd25519",
+    "value": "+4jvv6ZCP+TxC0CwBQRr31ieZzj7KMZL3iwribL3czM="
+  }
 }
 ```
 
