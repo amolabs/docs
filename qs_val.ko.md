@@ -24,9 +24,9 @@ Validator 노드를 실행하기 위해서는 인터넷 연결이 안정적인 �
 MacOS가 서버에 설치돼 있다고 가정한다.
 
 ### 필요한 패키지 설치
-서버의 터미널에 접속하여 root 권한으로 Docker와 git을 설치한다:
+서버의 터미널에 접속하여 root 권한으로 git을 설치한다:
 ```bash
-sudo apt install docker.io git
+sudo apt install git
 ```
 
 ## Testnet에서 실행
@@ -43,14 +43,13 @@ cd testnet
 ```
 
 ### 키 백업
-`/testnet/mynode/tendermint/config/priv_validator_key.json` 파일을 안전한 곳에
+`/testnet/mynode/amo/config/priv_validator_key.json` 파일을 안전한 곳에
 보관한다.
 
 ### 실행
 서버의 터미널에 접속하여 다음 명령을 실행한다:
 ```bash
-cd $HOME/testnet
-./run.sh /testnet/mynode
+sudo systemctl start amod
 ```
 
 ### 정보 수집
@@ -68,23 +67,27 @@ curl localhost:26657/status
 <p align="center"><img src="images/node_status.png"/></p>
 
 ## Mainnet에서 실행
+### 설치
+amoabci 문서에서 [시작하기](https://github.com/amolabs/amoabci#getting-started)
+섹션을 참조하여 컴파일된 바이너리 혹은 소스를 이용하여 `amod`를 설치한다.
+
 ### 준비
 amoabci 문서에서
 [실행준비](https://github.com/amolabs/amoabci#prepare-for-launch) 섹션을
 참조하여 정보를 모으고 데이터 디렉토리를 준비한다. 이 문서에서는 다음을
 가정한다:
 - 데이터 디렉토리가 `/mynode`에 있음
-- `config.toml`이 `/mynode/tendermint/config/config.toml`에 있음
-- `genesis.json`이 `/mynode/tendermint/config/genesis.json`에 있음
+- `config.toml`이 `/mynode/amo/config/config.toml`에 있음
+- `genesis.json`이 `/mynode/amo/config/genesis.json`에 있음
 
 ### Validator 키 준비
 다음 명령을 통해 validator 키를 생성한다:
 ```bash
-docker -it --rm -v /mynode/tendermint:/tendermint:Z -v /mynode/amo:/amo:Z amolabs/amod:latest tendermint init
+amod --home <dataroot>/amo tendermint init
 ```
-위 명령으로 노드 키와 validator 키가 생성된다.
-`/mynode/tendermint/config/priv_validator_key.json` 파일을 다른 안전한 장소에
-백업해 놓는다. Validator 키가 다음과 같다고 가정한다:
+여기에서 `<dataroot>`는 앞서 준비한 데이터 디렉토리이다. 위 명령으로 노드 키와
+validator 키가 생성된다. `/mynode/amo/config/priv_validator_key.json` 파일을
+다른 안전한 장소에 백업해 놓는다. Validator 키가 다음과 같다고 가정한다:
 ```
 {
 	"address": "9A8F09C644941B5A526B19641A3D7C8805E312B9",
@@ -96,14 +99,13 @@ docker -it --rm -v /mynode/tendermint:/tendermint:Z -v /mynode/amo:/amo:Z amolab
 ```
 
 ### 노드 실행
-데몬들을 실행하기 위해 다음 명령을 수행한다:
+`amod` 데몬을 실행하기 위해 다음 명령을 수행한다:
 ```bash
-docker run -it --rm -p 26656-26657 -v /mynode/tendermint:/tendermint:Z -v /mynode/amo:/amo:Z --name mynode -d amolabs/amod:latest
+amod --home <dataroot>/amo run 
 ```
-잠시 docker container의 출력을 살펴서 데몬들이 정상 동작하는지 확인한다.
-```bash
-docker logs -f mynode
-```
+데몬을 백그라운드 모드로 실행하려면 `amod --home <dataroot>/amo run &`와 같이
+한다. `amod`는 유입되는 P2P 연결을 위해 포트 26656을 열고, 유입되는 RPC 연결을
+위해 포트 26657을 연다. 
 
 다음 명령을 실행해서 노드의 상태를 확인한다:
 ```bash
@@ -120,11 +122,9 @@ curl localhost:26657/status
 하지만, 테스트넷인 경우는 <a href="http://explorer.amolabs.io/wallet">AMO
 블록체인 탐색기</a>에 접속하여 안내에 따른다. (*9월 6일부터 사용 가능*)
 
-코인을 stake하기 위해서는 AMO 클라이언트가 필요하다.
-```bash
-apt install golang
-go get github.com/amolabs/amo-client-go/cmd/amocli
-```
+코인을 stake하기 위해서는 `amocli`(AMO 클라이언트)가 필요하다. amo-client-go
+문서에서 [설치](https://github.com/amolabs/amo-client-go#installation) 섹션을
+참조하여 적절한 방법으로 `amocli`를 설치한다. 
 
 이 문서에서는 계정 키(amocli 사용자명 중 `myval`)와 충분한 AMO 코인을 확보한
 상태라고 가정한다. 이제 `stake` 거래를 블록체인에 전송해야 한다. `stake` 거래를
@@ -133,13 +133,13 @@ go get github.com/amolabs/amo-client-go/cmd/amocli
 세상에 선언하는 의미가 있다. docker로 실행된 노드의 validator 공개키를 알아내기
 위해서는 다음 명령을 실행한다:
 ```bash
-docker exec -it <container_name> tendermint show_validator
+amod --home <dataroot>/amo tendermint show_validator
 ```
 이 명령은 [Prepare validator key](#prepare-validator-key) 섹션에서 본 것과 같은
 형태로 validator 공개키를 표시한다. 이 공개키를 알아내는 작업을 자동화 스크립트
 등에서 수행하려는 경우 다음과 같이 할 수 있다:
 ```bash
-docker exec -it <container_name> tendermint show_validator | python -c "import sys, json; print json.load(sys.stdin)['value']"
+amod --home <dataroot>/amo tendermint show_validator | python -c "import sys, json; print json.load(sys.stdin)['value']"
 ```
 
 이제 validator 공개키가 준비되었다. 이 공개키에 대해 100 AMO를 stake하려면

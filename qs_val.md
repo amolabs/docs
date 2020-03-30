@@ -23,9 +23,9 @@ cloud, Microsoft Azure or similar services). In this guide, we assume typical
 Ubuntu Linux or MacOS is installed on the host machine.
 
 ### Install necessary packages
-Connect to a terminal of the server machine and install Docker and git as root:
+Connect to a terminal of the server machine and install git as root:
 ```bash
-sudo apt install docker.io git
+sudo apt install git
 ```
 
 ## Launch on testnet
@@ -42,14 +42,13 @@ cd testnet
 ```
 
 ### Backup key
-Backup `/testnet/mynode/tendermint/config/priv_validator_key.json` file to a
+Backup `/testnet/mynode/amo/config/priv_validator_key.json` file to a
 safe location.
 
-### 실행
+### Execution 
 Connect to a terminal of the server and execute the following commands:
 ```bash
-cd $HOME/testnet
-./run.sh /testnet/mynode
+sudo systemctl start amod
 ```
 
 ### Gather information
@@ -67,22 +66,28 @@ curl localhost:26657/status
 <p align="center"><img src="images/node_status.png"/></p>
 
 ## Launch on mainnet
+### Install
+See [Getting Started](https://github.com/amolabs/amoabci#getting-started)
+section in amoabci document to install `amod` from either pre-built binary or
+source.
+
 ### Prepare
 See [Prepare for launch](https://github.com/amolabs/amoabci#prepare-for-launch)
 section in amoabci document to get information and prepare data directory. We
 will assume the following:
 - data root at `/mynode`
-- `config.toml` at `/mynode/tendermint/config/config.toml`
-- `genesis.json` at `/mynode/tendermint/config/genesis.json`
+- `config.toml` at `/mynode/amo/config/config.toml`
+- `genesis.json` at `/mynode/amo/config/genesis.json`
 
 ### Prepare validator key
 Run the following command to generate a validator key:
 ```bash
-docker -it --rm -v /mynode/tendermint:/tendermint:Z -v /mynode/amo:/amo:Z amolabs/amod:latest tendermint init
+amod --home <dataroot>/amo tendermint init
 ```
-It will generate missing keys: node key and validator key. Copy
-`/mynode/tendermint/config/priv_validator_key.json` to some secure place for
-a backup. We assume the validator public key is as follows:
+Here, `<dataroot>` is a data directory prepared previously. It will generate
+missing keys: node key and validator key. Copy
+`/mynode/amo/config/priv_validator_key.json` to some secure place for a backup.
+We assume the validator public key is as follows:
 ```
 {
 	"address": "9A8F09C644941B5A526B19641A3D7C8805E312B9",
@@ -94,15 +99,13 @@ a backup. We assume the validator public key is as follows:
 ```
 
 ### Run node
-Execute the following command to run the daemons:
+Execute the following command to run the `amod` daemon:
 ```bash
-docker run -it --rm -p 26656-26657 -v /mynode/tendermint:/tendermint:Z -v /mynode/amo:/amo:Z --name mynode -d amolabs/amod:latest
+amod --home <dataroot>/amo run
 ```
-Observe the output of the docker container for a while to see if the daemons
-are functioning correctly.
-```bash
-docker logs -f mynode
-```
+To run the daemon in background mode, use `amod --home <dataroot>/amo run &`.
+`amod` will open port 26656 for incoming P2P connection and port 26657 for
+incoming RPC connection.
 
 Check the node status by running the following command:
 ```bash
@@ -120,13 +123,11 @@ followings, but for the testnet you may visit <a
 href="http://explorer.amolabs.io/wallet">AMO blockchain explorer</a> and follow
 the guide there. (*Available on 6th Sep.*)
 
-You need AMO client to stake coins.
-```bash
-apt install golang
-go get github.com/amolabs/amo-client-go/cmd/amocli
-```
+You need `amocli`(AMO client) to stake coins. See
+[Installation](https://github.com/amolabs/amo-client-go#installation) section
+in amo-client-go document to install `amocli` in proper way.
 
-We assume you posses the account key (`myval` for amocli username) and
+We assume you possess the account key (`myval` for amocli username) and
 necessary AMO coins. Now, you need to send a `stake` transaction to the
 blockchain. For the `stake` transaction you need a validator public key. This
 process is equivalent to announce to the world that you take the control over a
@@ -134,13 +135,13 @@ validator node which is running with the validator public key. To find out the
 validator public key of a node which is launched via docker, you may execute
 the following command:
 ```bash
-docker exec -it <container_name> tendermint show_validator
+amod --home <dataroot>/amo tendermint show_validator
 ```
 This will print the validator public key in the same format as seen in [Prepare
 validator key](#prepare-validator-key) section. In order to feed this output to
 some kind of automated script, you may do this:
 ```bash
-docker exec -it <container_name> tendermint show_validator | python -c "import sys, json; print json.load(sys.stdin)['value']"
+amod --home <dataroot>/amo tendermint show_validator | python -c "import sys, json; print json.load(sys.stdin)['value']"
 ```
 
 Now, you have a validator public key to announce. To stake 100 AMO along with
