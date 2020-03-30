@@ -88,13 +88,13 @@ Here, `<dataroot>` is a data directory prepared previously. It will generate
 missing keys: node key and validator key. Copy
 `/mynode/amo/config/priv_validator_key.json` to some secure place for a backup.
 We assume the validator public key is as follows:
-```
+```json
 {
-	"address": "9A8F09C644941B5A526B19641A3D7C8805E312B9",
-	"pub_key": {
-		"type": "tendermint/PubKeyEd25519",
-		"value": "+4jvv6ZCP+TxC0CwBQRr31ieZzj7KMZL3iwribL3czM="
-	}
+  "address": "9A8F09C644941B5A526B19641A3D7C8805E312B9",
+    "pub_key": {
+      "type": "tendermint/PubKeyEd25519",
+      "value": "+4jvv6ZCP+TxC0CwBQRr31ieZzj7KMZL3iwribL3czM="
+    }
 }
 ```
 
