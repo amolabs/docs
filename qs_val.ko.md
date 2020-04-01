@@ -24,41 +24,95 @@ Validator 노드를 실행하기 위해서는 인터넷 연결이 안정적인 �
 MacOS가 서버에 설치돼 있다고 가정한다.
 
 ### 필요한 패키지 설치
-서버의 터미널에 접속하여 root 권한으로 git을 설치한다:
+서버의 터미널에 접속하여 root 권한으로 `git`, `wget` 그리고 `curl`을 설치한다:
 ```bash
-sudo apt install git
+sudo apt install git wget curl
 ```
 
-## Testnet에서 실행
-### 준비
-먼저, 데이터 디렉토리를 어디에 둘 것인지 결정한다. 이 문서에서는
-`/testnet/mynode`를 사용한다고 가정한다. 노드의 이름을 무엇으로 할 것인지
-결정한다. 이 문서에서는 `mynodename`을 사용한다고 가정한다. 서버의 터미널에
+### `amod` 데몬 설치
+amoabci 문서의 [Getting
+Started](https://github.com/amolabs/amoabci#getting-started) 섹션을 참조하여
+컴파일된 바이너리 혹은 소스파일을 이용하여 `amod` 데몬을 설치한다.
+
+### 설정 스크립트 설치
+Validator 노드 설정을 도와주는 스크립트를 사용하기 위해서는 서버의 터미널에
 접속하여 다음 명령을 실행한다:
 ```bash
 cd $HOME
 git clone https://github.com/amolabs/testnet
 cd testnet
-./setup.sh /testnet/mynode mynodename f5123e0f663fe8e0662b82de8f6a1d843a9d4fbd@172.104.88.12:26656
+```
+해당 스크립트는 데이터 디렉토리를 준비하고, `config.toml` 파일을 생성하고,
+`systemd`에 `amod.service`를 등록하고, 데이터 디렉토리에 필요한 파일들을
+복사해준다. 만약 당신이 `node_key.json` 과 `priv_validator_key.json` 파일을
+가지고 있다면, 그것들을 `testnet` 디렉토리 아래에 위치시킨다. 해당 파일들은
+데이터 디렉토리에 자동으로 복사된다. 만약 가지고 있지 않다면, 스트립트가 당신을
+위하여 해당 파일들을 생성한다.
+
+## Mainnet/Testnet에서 실행
+### 노드 정보
+
+| | `node_id` | `node_ip_addr` | `node_p2p_port` | `node_rpc_port` |
+|-|-|-|-|-|
+| mainnet | `f5123e0f663fe8e0662b82de8f6a1d843a9d4fbd` | `172.104.88.12` | `26656` | `26657` |
+| testnet | `a944a1fa8259e19a9bac2c2b41d050f04ce50e51` | `172.105.213.114` | `26656` | `26657` |
+
+### `genesis.json` 얻기
+`genesis.json` 파일을 얻기 위하여 다음 명령을 실행한다.
+```bash
+cd testnet
+wget <node_ip_addr>:<node_rpc_port>/genesis -O genesis.json
+```
+[노드 정보](#노드-정보) 섹션을 참조하여, 당신이 어떠한 네트워크에 접속하고
+싶은지에 따라, 알맞은 `node_ip_addr`과 `node_rpc_port`를 입력한다.
+
+예를 들어, **mainnet**을 위한 `genesis.json` 파일을 다운로드 하기 위해서는 다음
+명령을 실행한다:
+```bash
+cd testnet
+wget 172.104.88.12:26657/genesis -O genesis.json
+```
+
+### 설정
+먼저, 데이터 디렉토리 위치를 선정하고, 현재 서버의 외부 ip 주소와 seed 노드의
+정보를 파악한다. 그리고, 다음 명령을 실행한다: 
+```bash
+sudo ./setup.sh -e <ext_ip_addr> <data_root> <moniker> <node_id>@<node_ip_addr>:<node_p2p_port>
+```
+[노드 정보](#노드-정보) 섹션을 참조하여, 당신이 어떠한 네트워크에 접속하고
+싶은지에 따라, 알맞은 `ext_ip_addr`, `data_root`, `moniker`(노드 이름) 그리고
+`node_*` 정보를 입력한다.
+
+예를 들어, 현재 서버의 외부 ip 주소가 `123.456.789.0`(불가능 ip 주소)이고
+데이터 디렉토리가 `/mynode`이고 노드 이름이 `mynodename`이고 당신이 mainnet에
+접속하고 싶다면, root 권한으로 다음 명령을 실행한다: 
+```bash
+sudo ./setup.sh -e 123.456.789.0 /mynode mynodename f5123e0f663fe8e0662b82de8f6a1d843a9d4fbd@172.104.88.12:26656
 ```
 
 ### 키 백업
-`/testnet/mynode/amo/config/priv_validator_key.json` 파일을 안전한 곳에
+`/mynode/amo/config/priv_validator_key.json` 파일을 안전한 곳에
 보관한다.
 
-### 실행
-서버의 터미널에 접속하여 다음 명령을 실행한다:
+### 노드 실행
+노드를 실행하기 위하여 root 권한으로 다음 명령을 실행한다:
 ```bash
 sudo systemctl start amod
 ```
 
-### 정보 수집
-서버의 터미널에서 `curl` 패키지를 설치한다:
+### 노드 상태 확인
+노드 상태를 확인하기 위하여 root 권한으로 다음 명령을 실행한다:
 ```bash
-sudo apt install curl
+sudo systemctl status amod
 ```
-실행 여부를 묻는 경우 y를 입력하고 엔터 키를 입력한다.
 
+### 노드 정지
+노드를 정기하기 위하여 root 권한으로 다음 명령을 실행한다:
+```bash
+sudo systemctl stop amod
+```
+
+### 정보 수집
 다음 명령으로 노드의 validator 주소와 공개키를 확인하여 편리한 곳에 기록해
 둔다.
 ```bash
@@ -66,28 +120,38 @@ curl localhost:26657/status
 ```
 <p align="center"><img src="images/node_status.png"/></p>
 
-## Mainnet에서 실행
-### 설치
-amoabci 문서에서 [시작하기](https://github.com/amolabs/amoabci#getting-started)
-섹션을 참조하여 컴파일된 바이너리 혹은 소스를 이용하여 `amod`를 설치한다.
+출력에서 `"sync_info"` 부분을 확하여 블록체인 네트워크의 다른 노드들과의 동기화
+과정이 제대로 수행되고 있는지 확인한다. `"catching_up"`이 `true`일 경우
+블록체인의 정보를 계속 수신하고 있는 중인 것이다. 그러니 동기화 과정이 끝날
+때까지 기다린다.
 
-### 준비
-amoabci 문서에서
-[실행준비](https://github.com/amolabs/amoabci#prepare-for-launch) 섹션을
-참조하여 정보를 모으고 데이터 디렉토리를 준비한다. 이 문서에서는 다음을
-가정한다:
-- 데이터 디렉토리가 `/mynode`에 있음
-- `config.toml`이 `/mynode/amo/config/config.toml`에 있음
-- `genesis.json`이 `/mynode/amo/config/genesis.json`에 있음
+## Stake 생성
+**NOTE:** 메인넷인 경우는 아래의 방법 등과 같이 보다 통제된 방법을 사용해야
+하지만, 테스트넷인 경우는 <a href="http://explorer.amolabs.io/wallet">AMO
+블록체인 탐색기</a>에 접속하여 안내에 따른다.
 
-### Validator 키 준비
-다음 명령을 통해 validator 키를 생성한다:
+코인을 stake하기 위해서는 `amocli`(AMO 클라이언트)가 필요하다. amo-client-go
+문서에서 [설치](https://github.com/amolabs/amo-client-go#installation) 섹션을
+참조하여 적절한 방법으로 `amocli`를 설치한다. 
+
+이 문서에서는 계정 키(amocli 사용자명 중
+`myval`, 지갑 주소 `D2CC7F160874AF06027A09DC0E8DC67E85E6D704`)와 충분한 AMO
+코인을 확보한 상태라고 가정한다. 이제 `stake` 거래를 블록체인에 전송해야 한다.
+`stake` 거래를 위해서는 validator 공개키가 필요하다. 이 거래를 전송하는 행위는
+이 공개키가 로드되어 실행되고 있는 validator 노드에 대해서 당신이 제어권을
+행사하고 있다고 세상에 선언하는 의미가 있다. validator 공개키를 알아내기
+위해서는 다음 명령을 실행한다:
 ```bash
-amod --home <dataroot>/amo tendermint init
+amod --home <data_root>/amo tendermint show_validator
 ```
-여기에서 `<dataroot>`는 앞서 준비한 데이터 디렉토리이다. 위 명령으로 노드 키와
-validator 키가 생성된다. `/mynode/amo/config/priv_validator_key.json` 파일을
-다른 안전한 장소에 백업해 놓는다. Validator 키가 다음과 같다고 가정한다:
+알맞은 `data_root`를 입력한다.
+
+예를 들어, 데이터 디렉토리가 `/mynode`이면 다음 명령을 실행한다:
+```bash
+amod --home /mynode/amo tendermint show_validator
+```
+
+Validator 키가 다음과 같다고 가정한다:
 ```json
 {
   "address": "9A8F09C644941B5A526B19641A3D7C8805E312B9",
@@ -98,57 +162,18 @@ validator 키가 생성된다. `/mynode/amo/config/priv_validator_key.json` 파�
 }
 ```
 
-### 노드 실행
-`amod` 데몬을 실행하기 위해 다음 명령을 수행한다:
+이제 validator 공개키가 준비되었다. 이 공개키에 대해 1000000 AMO를 stake 하기
+위해서 다음 명령을 실행한다:
 ```bash
-amod --home <dataroot>/amo run 
-```
-데몬을 백그라운드 모드로 실행하려면 `amod --home <dataroot>/amo run &`와 같이
-한다. `amod`는 유입되는 P2P 연결을 위해 포트 26656을 열고, 유입되는 RPC 연결을
-위해 포트 26657을 연다. 
-
-다음 명령을 실행해서 노드의 상태를 확인한다:
-```bash
-apt install curl
-curl localhost:26657/status
-```
-출력에서 `"sync_info"` 부분을 확하여 블록체인 네트워크의 다른 노드들과의 동기화
-과정이 제대로 수행되고 있는지 확인한다. `"catching_up"`이 `true`일 경우
-블록체인의 정보를 계속 수신하고 있는 중인 것이다. 그러니 동기화 과정이 끝날
-때까지 기다린다.
-
-## Stake 생성
-**NOTE:** 메인넷인 경우는 아래의 방법 등과 같이 보다 통제된 방법을 사용해야
-하지만, 테스트넷인 경우는 <a href="http://explorer.amolabs.io/wallet">AMO
-블록체인 탐색기</a>에 접속하여 안내에 따른다. (*9월 6일부터 사용 가능*)
-
-코인을 stake하기 위해서는 `amocli`(AMO 클라이언트)가 필요하다. amo-client-go
-문서에서 [설치](https://github.com/amolabs/amo-client-go#installation) 섹션을
-참조하여 적절한 방법으로 `amocli`를 설치한다. 
-
-이 문서에서는 계정 키(amocli 사용자명 중 `myval`)와 충분한 AMO 코인을 확보한
-상태라고 가정한다. 이제 `stake` 거래를 블록체인에 전송해야 한다. `stake` 거래를
-위해서는 validator 공개키가 필요하다. 이 거래를 전송하는 행위는 이 공개키가
-로드되어 실행되고 있는 validator 노드에 대해서 당신이 제어권을 행사하고 있다고
-세상에 선언하는 의미가 있다. docker로 실행된 노드의 validator 공개키를 알아내기
-위해서는 다음 명령을 실행한다:
-```bash
-amod --home <dataroot>/amo tendermint show_validator
-```
-이 명령은 [Prepare validator key](#prepare-validator-key) 섹션에서 본 것과 같은
-형태로 validator 공개키를 표시한다. 이 공개키를 알아내는 작업을 자동화 스크립트
-등에서 수행하려는 경우 다음과 같이 할 수 있다:
-```bash
-amod --home <dataroot>/amo tendermint show_validator | python -c "import sys, json; print json.load(sys.stdin)['value']"
+amocli tx --user myval stake '+4jvv6ZCP+TxC0CwBQRr31ieZzj7KMZL3iwribL3czM=' 1000000000000000000000000 
 ```
 
-이제 validator 공개키가 준비되었다. 이 공개키에 대해 100 AMO를 stake하려면
-다음과 같이 명령한다:
+1000000 AMO가 제대로 stake 되었는지 확인하기 위하여 다음 명령을 실행한다:
 ```bash
-amocli tx stake --user myval '+4jvv6ZCP+TxC0CwBQRr31ieZzj7KMZL3iwribL3czM=' 100000000000000000000
+amocli query stake 'D2CC7F160874AF06027A09DC0E8DC67E85E6D704'
 ```
 
-모든 validator의 목록과 그들의 voting power등을 확인하기 위해서는 다음 명령을
+모든 validator의 목록과 그들의 voting power등을 확인하기 위해서 다음 명령을
 실행한다:
 ```bash
 curl localhost:26657/validators
