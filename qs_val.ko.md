@@ -24,9 +24,9 @@ Validator 노드를 실행하기 위해서는 인터넷 연결이 안정적인 �
 MacOS가 서버에 설치돼 있다고 가정한다.
 
 ### 필요한 패키지 설치
-서버의 터미널에 접속하여 root 권한으로 `git`, `wget` 그리고 `curl`을 설치한다:
+서버의 터미널에 접속하여 root 권한으로 `git`, `curl` 그리고 `jq`를 설치한다:
 ```bash
-sudo apt install git wget curl
+sudo apt install git curl jq
 ```
 
 ### `amod` 데몬 설치
@@ -61,7 +61,7 @@ cd testnet
 `genesis.json` 파일을 얻기 위하여 다음 명령을 실행한다.
 ```bash
 cd testnet
-wget <node_ip_addr>:<node_rpc_port>/genesis -O genesis.json
+curl <node_ip_addr>:<node_rpc_port>/genesis | jq '.result.genesis' > genesis.json
 ```
 [노드 정보](#노드-정보) 섹션을 참조하여, 당신이 어떠한 네트워크에 접속하고
 싶은지에 따라, 알맞은 `node_ip_addr`과 `node_rpc_port`를 입력한다.
@@ -70,7 +70,7 @@ wget <node_ip_addr>:<node_rpc_port>/genesis -O genesis.json
 명령을 실행한다:
 ```bash
 cd testnet
-wget 172.104.88.12:26657/genesis -O genesis.json
+curl 172.104.88.12:26657/genesis | jq '.result.genesis' > genesis.json
 ```
 
 ### 설정

@@ -23,10 +23,10 @@ cloud, Microsoft Azure or similar services). In this guide, we assume typical
 Ubuntu Linux or MacOS is installed on the host machine.
 
 ### Install necessary packages
-Connect to a terminal of the server machine and install `git`, `wget` and
-`curl` as root:
+Connect to a terminal of the server machine and install `git`, `curl` and `jq`
+as root:
 ```bash
-sudo apt install git wget curl
+sudo apt install git curl jq
 ```
 
 ### Install `amod` daemon
@@ -60,7 +60,7 @@ automatically. Otherwise, the script would generate them for you.
 To download `genesis.json` file, execute the following commands:
 ```bash
 cd testnet
-wget http://<node_ip_addr>:<node_rpc_port>/genesis -O genesis.json
+curl <node_ip_addr>:<node_rpc_port>/genesis | jq '.result.genesis' > genesis.json
 ```
 Specify proper `node_ip_addr` and `node_rpc_port` depending on which network
 you would like to connect to, by referring to [Node info](#node-info) section.
@@ -69,7 +69,7 @@ For example, to download `genesis.json` file for **mainnet**, execute the
 following commands:
 ```bash
 cd testnet
-wget http://172.104.88.12:26657/genesis -O genesis.json
+curl 172.104.88.12:26657/genesis | jq '.result.genesis' > genesis.json
 ```
 
 ### Setup
