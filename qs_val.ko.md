@@ -87,7 +87,7 @@ sudo ./setup.sh -e <ext_ip_addr> <data_root> <moniker> <node_id>@<node_ip_addr>:
 데이터 디렉토리가 `/mynode`이고 노드 이름이 `mynodename`이고 당신이 mainnet에
 접속하고 싶다면, root 권한으로 다음 명령을 실행한다: 
 ```bash
-sudo ./setup.sh -e 123.456.789.0 /mynode mynodename f5123e0f663fe8e0662b82de8f6a1d843a9d4fbd@172.104.88.12:26656
+sudo ./setup.sh -e 123.456.789.0 /mynode mynodename fbd1cb0741e30308bf7aae562f65e3fd54359573@172.104.88.12:26656
 ```
 
 ### 키 백업

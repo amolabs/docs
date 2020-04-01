@@ -88,7 +88,7 @@ avaiable ip address), data root directory is `/mynode`, node name is
 `mynodename` and you'd like to connect to mainnet, then execute the following
 commands:
 ```bash
-sudo ./setup.sh -e 123.456.789.0 /mynode mynodename f5123e0f663fe8e0662b82de8f6a1d843a9d4fbd@172.104.88.12:26656
+sudo ./setup.sh -e 123.456.789.0 /mynode mynodename fbd1cb0741e30308bf7aae562f65e3fd54359573@172.104.88.12:26656
 ```
 
 ### Backup key
