@@ -54,7 +54,7 @@ cd testnet
 
 | | `node_id` | `node_ip_addr` | `node_p2p_port` | `node_rpc_port` |
 |-|-|-|-|-|
-| mainnet | `f5123e0f663fe8e0662b82de8f6a1d843a9d4fbd` | `172.104.88.12` | `26656` | `26657` |
+| mainnet | `fbd1cb0741e30308bf7aae562f65e3fd54359573` | `172.104.88.12` | `26656` | `26657` |
 | testnet | `a944a1fa8259e19a9bac2c2b41d050f04ce50e51` | `172.105.213.114` | `26656` | `26657` |
 
 ### `genesis.json` 얻기
