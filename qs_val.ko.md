@@ -154,7 +154,6 @@ amod --home /mynode/amo tendermint show_validator
 Validator 키가 다음과 같다고 가정한다:
 ```json
 {
-  "address": "9A8F09C644941B5A526B19641A3D7C8805E312B9",
   "pub_key": {
     "type": "tendermint/PubKeyEd25519",
     "value": "+4jvv6ZCP+TxC0CwBQRr31ieZzj7KMZL3iwribL3czM="
