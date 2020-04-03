@@ -136,7 +136,7 @@ You need `amocli`(AMO client) to stake coins. See
 [Installation](https://github.com/amolabs/amo-client-go#installation) section
 in amo-client-go document to install `amocli` in proper way.
 
-We assume you possess the account key (`myval` for amocli username,
+We assume you possess the account key (`myval` for amocli key username,
 `D2CC7F160874AF06027A09DC0E8DC67E85E6D704` for address) and necessary AMO
 coins. Now, you need to send a `stake` transaction to the blockchain. For the
 `stake` transaction you need a validator public key. This process is equivalent
@@ -163,16 +163,31 @@ We assume the validator public key is as follows:
   }
 }
 ```
+Now, you have a validator public key to announce.
 
-Now, you have a validator public key to announce. To stake 1000000 AMO along
-with the public key, execute the following command:
+To stake certain amount of AMO on a validator, execute the following command:
 ```bash
-amocli tx --user myval stake '+4jvv6ZCP+TxC0CwBQRr31ieZzj7KMZL3iwribL3czM=' 1000000000000000000000000 
+amocli tx --user <key_username> stake <validator_pub_key> <amount>
+```
+Specify proper `key_username`, `validator_pub_key` and `amount`.
+
+For example, to stake 1000000 AMO along with the validator public key, execute
+the following command:
+```bash
+amocli tx --user myval stake +4jvv6ZCP+TxC0CwBQRr31ieZzj7KMZL3iwribL3czM= 1000000000000000000000000 
 ```
 
-To check if 1000000 AMO is properly staked, execute the following command:
+To check if certain amount of AMO is properly staked, execute the following
+command:
 ```bash
-amocli query stake 'D2CC7F160874AF06027A09DC0E8DC67E85E6D704'
+amocli query stake <key_address>
+```
+Specify proper `key_address`.
+
+For example, to check if 1000000 AMO is properly staked on `myval` along with
+the validator public key, execute the following command:
+```bash
+amocli query stake D2CC7F160874AF06027A09DC0E8DC67E85E6D704
 ```
 
 You can inspect the list of validators and their voting power by executing the

@@ -134,13 +134,13 @@ curl localhost:26657/status
 문서에서 [설치](https://github.com/amolabs/amo-client-go#installation) 섹션을
 참조하여 적절한 방법으로 `amocli`를 설치한다. 
 
-이 문서에서는 계정 키(amocli 사용자명 중
-`myval`, 지갑 주소 `D2CC7F160874AF06027A09DC0E8DC67E85E6D704`)와 충분한 AMO
-코인을 확보한 상태라고 가정한다. 이제 `stake` 거래를 블록체인에 전송해야 한다.
-`stake` 거래를 위해서는 validator 공개키가 필요하다. 이 거래를 전송하는 행위는
-이 공개키가 로드되어 실행되고 있는 validator 노드에 대해서 당신이 제어권을
-행사하고 있다고 세상에 선언하는 의미가 있다. validator 공개키를 알아내기
-위해서는 다음 명령을 실행한다:
+이 문서에서는 계정 키(amocli 키 사용자명 `myval`, 지갑 주소
+`D2CC7F160874AF06027A09DC0E8DC67E85E6D704`)와 충분한 AMO 코인을 확보한 상태라고
+가정한다. 이제 `stake` 거래를 블록체인에 전송해야 한다.  `stake` 거래를
+위해서는 validator 공개키가 필요하다. 이 거래를 전송하는 행위는 이 공개키가
+로드되어 실행되고 있는 validator 노드에 대해서 당신이 제어권을 행사하고 있다고
+세상에 선언하는 의미가 있다. validator 공개키를 알아내기 위해서는 다음 명령을
+실행한다:
 ```bash
 amod --home <data_root>/amo tendermint show_validator
 ```
@@ -160,16 +160,30 @@ Validator 키가 다음과 같다고 가정한다:
   }
 }
 ```
+이제 validator 공개키가 준비되었다.
 
-이제 validator 공개키가 준비되었다. 이 공개키에 대해 1000000 AMO를 stake 하기
-위해서 다음 명령을 실행한다:
+일정량의 AMO를 validator에게 stake 하기 위하여 다음 명령을 실행한다: 
 ```bash
-amocli tx --user myval stake '+4jvv6ZCP+TxC0CwBQRr31ieZzj7KMZL3iwribL3czM=' 1000000000000000000000000 
+amocli tx --user <key_username> stake <validator_pub_key> <amount>
+```
+알맞은 `key_username`, `validator_pub_key` 그리고 `amount`를 입력한다.
+
+예를 들어, 해당 공개키에 대해 1000000 AMO를 stake 하기 위하여 다음 명령을
+실행한다:
+```bash
+amocli tx --user myval stake +4jvv6ZCP+TxC0CwBQRr31ieZzj7KMZL3iwribL3czM= 1000000000000000000000000 
 ```
 
-1000000 AMO가 제대로 stake 되었는지 확인하기 위하여 다음 명령을 실행한다:
+일정량의 AMO가 제대로 stake 되었는지 확인하기 위하여 다음 명령을 실행한다:
 ```bash
-amocli query stake 'D2CC7F160874AF06027A09DC0E8DC67E85E6D704'
+amocli query stake <key_address>
+```
+알맞은 `key_address`를 입력한다.
+
+Validator 공개키에 대해 `myval`에게 1000000 AMO가 제대로 stake 되었는지
+확인하기 위하여 다음 명령을 실행한다:
+```bash
+amocli query stake D2CC7F160874AF06027A09DC0E8DC67E85E6D704
 ```
 
 모든 validator의 목록과 그들의 voting power등을 확인하기 위해서 다음 명령을
