@@ -1,10 +1,11 @@
-# Validator 노드의 빠른 실행 가이드
+# Validator와 Delegator를 위한 빠른 실행 가이드
 This document is available in [English](qs_val.md) also.
 
 ## 소개
-이 가이드는 validator 노드를 준비하고 실행하기 위한 방법을 기술한다. 이
-가이드는 [amoabci README](https://github.com/amolabs/amoabci/README.md)에
-설명된 방법을 활용한 것이다.
+이 가이드는 validator 노드를 준비하고 실행하기 위한 방법과 노드에 stake 하고
+delegate 하는 방법을 기술한다. 이 가이드는 [amoabci
+README](https://github.com/amolabs/amoabci/README.md)에 설명된 방법을 활용한
+것이다.
 
 ## 화폐 자산
 블록체인 노드가 합의 과정에 제대로 참여하기 위해서는 stake가 있어야 한다.
@@ -13,8 +14,7 @@ This document is available in [English](qs_val.md) also.
 노드를 위한 충분한 양의 AMO 코인을 얻을 수 있다. 그러나 메인넷의 경우 필요한
 AMO 코인을 획득하는 것은 전적으로 사용자에게 달려 있다. 이 가이드는 메인넷을
 위해 어떻게 코인을 확보할 수 있는지는 설명하지 않는다. 테스트넷과 메인넷 모두
-`stake` 거래를 전송(이 가이드의 가장 마지막 단계)하기 전에 코인을 확보해 놓아야
-한다.
+`stake` 거래를 전송하기 전에 코인을 확보해 놓아야 한다.
 
 ## 서버 환경 준비
 ### 서버 머신
@@ -131,9 +131,10 @@ curl localhost:26657/status
 블록체인 탐색기</a>에 접속하여 안내에 따른다.
 
 ### `amocli` 설치
-코인을 stake하기 위해서는 `amocli`(AMO 클라이언트)가 필요하다. amo-client-go
-문서에서 [설치](https://github.com/amolabs/amo-client-go#installation) 섹션을
-참조하여 적절한 방법으로 `amocli`를 설치한다. 
+코인을 stake 혹은 delegate 하기 위해서는 `amocli`(AMO 클라이언트)가 필요하다.
+amo-client-go 문서에서
+[설치](https://github.com/amolabs/amo-client-go#installation) 섹션을 참조하여
+적절한 방법으로 `amocli`를 설치한다.
 
 이 문서에서는 계정 키(amocli 키 사용자명 `myval`, 지갑 주소
 `D2CC7F160874AF06027A09DC0E8DC67E85E6D704`)와 충분한 AMO 코인을 확보한 상태라고
@@ -166,8 +167,8 @@ Validator 키가 다음과 같다고 가정한다:
 ```
 이제 validator 공개키가 준비되었다.
 
-### Stake 트랜잭션 전송
-일정량의 AMO를 validator에게 stake 하기 위하여 다음 명령을 실행한다: 
+### Stake 거래 전송
+일정량의 AMO 코인을 validator에게 stake 하기 위하여 다음 명령을 실행한다:
 ```bash
 amocli tx --user <key_username> stake <validator_pub_key> <amount>
 ```
@@ -180,14 +181,14 @@ amocli tx --user myval stake +4jvv6ZCP+TxC0CwBQRr31ieZzj7KMZL3iwribL3czM= 100000
 ```
 
 ### Stake 쿼리
-일정량의 AMO가 제대로 stake 되었는지 확인하기 위하여 다음 명령을 실행한다:
+일정량의 AMO 코인이 제대로 stake 되었는지 확인하기 위하여 다음 명령을 실행한다:
 ```bash
 amocli query stake <key_address>
 ```
 알맞은 `key_address`를 입력한다.
 
-Validator 공개키에 대해 `myval`에게 1000000 AMO가 제대로 stake 되었는지
-확인하기 위하여 다음 명령을 실행한다:
+예를 들어, Validator 공개키에 대해 `myval`에게 1000000 AMO가 제대로 stake
+되었는지 확인하기 위하여 다음 명령을 실행한다:
 ```bash
 amocli query stake D2CC7F160874AF06027A09DC0E8DC67E85E6D704
 ```
@@ -199,8 +200,8 @@ amocli query stake D2CC7F160874AF06027A09DC0E8DC67E85E6D704
 curl localhost:26657/validators
 ```
 
-### Withdraw 트랜잭션 전송
-Stake 된 AMO 중 일부 혹은 전체를 출금하기 위하여 다음 명령을 실행한다:
+### Withdraw 거래 전송
+Stake 된 AMO 코인 중 일부 혹은 전체를 출금하기 위하여 다음 명령을 실행한다:
 ```bash
 amocli tx --user <key_username> withdraw <amount>
 ```
@@ -209,4 +210,52 @@ amocli tx --user <key_username> withdraw <amount>
 예를 들어, `myval`의 stake 중 100 AMO를 출금하기 위하여, 다음 명령을 실행한다:
 ```bash
 amocli tx --user myval 100000000000000000000
+```
+
+## Delegate 생성
+이 문서에서는 계정 키(amocli 키 사용자명 `mydel`, 지갑 주소
+`4BFCD048B837135C1F23B6302000E096D48F99B8`)와 충분한 AMO 코인을 확보한 상태라고
+가정한다. 이제 `delegate` 거래를 블록체인에 전송해야 한다. `delegate` 거래를
+위해서는 당신이 일정량의 AMO 코인을 delegate 하고 싶은 validator의 계정
+주소(account address)가 필요하다. 해당 가이드에서는 위임받는자(delegatee)의
+계정 주소는 `D2CC7F160874AF06027A09DC0E8DC67E85E6D704`이라고 가정한다.
+
+### Delegate 거래 전송
+일정량의 AMO 코인을 validator에게 delegate 하기 위하여 다음 명령을 실행한다:
+```bash
+amocli tx --user <key_username> delegate <validator_account_address> <amount>
+```
+알맞은 `key_username`, `validator_account_address` 그리고 `amount`를 입력한다.
+
+예를 들어, validator `myval`의 계정 주소에 100 AMO를 delegate 하기 위하여 다음
+명령을 실행한다:
+```bash
+amocli tx --user mydel delegate D2CC7F160874AF06027A09DC0E8DC67E85E6D704 100000000000000000000 
+```
+
+### Delegate 쿼리
+일정량의 AMO 코인이 제대로 delegate 되었는지 확인하기 위하여 다음 명령을
+실행한다:
+```bash
+amocli query delegate <key_address>
+```
+알맞은 `key_address`를 입력한다.
+
+예를 들어, 100 AMO가 제대로 delegate 되었는지 확인하기 위하여 다음 명령을
+실행한다:
+```bash
+amocli query delegate 4BFCD048B837135C1F23B6302000E096D48F99B8
+```
+
+### Retract 거래 전송
+Delegate 된 AMO 코인 중 일부 혹은 전체를 출금하기 위하여 다음 명령을 실행한다:
+```bash
+amocli tx --user <key_username> retract <amount>
+```
+알맞은 `key_username`과 `amount`를 입력한다.
+
+예를 들어, `mydel`의 delegate stake 중 1 AMO를 출금하기 위하여, 다음 명령을
+실행한다:
+```bash
+amocli tx --user mydel 1000000000000000000
 ```

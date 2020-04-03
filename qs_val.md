@@ -1,9 +1,10 @@
-# Quick Start Guide for Validator Node
+# Quick Start Guide for Validator and Delegator
 This document is available in [Korean](qs_val.ko.md) also.
 
 ## Introduction
-This quick start guide describes how to prepare and launch validator node in
-proper way. This guide will use the method described in [amoabci
+This quick start guide describes how to prepare and launch a validator node in
+proper way, and also how to stake and delegate on a validator. This guide will
+use the method described in [amoabci
 README](https://github.com/amolabs/amoabci/README.md).
 
 ## Monetary asset
@@ -13,7 +14,7 @@ testnet, you can contact AMO Labs via various channels to acquire enough AMO
 coins for a validator node. But, for the mainnet, it is up to you to acquire
 necessary AMO coins. This guide will not describe how to acquire AMO coins for
 the mainnet. For both of testnet and mainnet, you need to acquire AMO coins
-before you send a `stake` transaction (the last step in this guide).
+before you send a `stake` transaction.
 
 ## Prepare server environment
 ### Server machine
@@ -132,11 +133,6 @@ followings, but for the testnet you may visit <a
 href="http://explorer.amolabs.io/wallet">AMO blockchain explorer</a> and follow
 the guide there.
 
-### Install `amocli`
-You need `amocli`(AMO client) to stake coins. See
-[Installation](https://github.com/amolabs/amo-client-go#installation) section
-in amo-client-go document to install `amocli` in proper way.
-
 We assume you possess the account key (`myval` for amocli key username,
 `D2CC7F160874AF06027A09DC0E8DC67E85E6D704` for address) and necessary AMO
 coins. Now, you need to send a `stake` transaction to the blockchain. For the
@@ -170,7 +166,8 @@ We assume the validator public key is as follows:
 Now, you have a validator public key to announce.
 
 ### Send stake transaction
-To stake certain amount of AMO on a validator, execute the following command:
+To stake certain amount of AMO coins on a validator, execute the following
+command:
 ```bash
 amocli tx --user <key_username> stake <validator_pub_key> <amount>
 ```
@@ -183,15 +180,15 @@ amocli tx --user myval stake +4jvv6ZCP+TxC0CwBQRr31ieZzj7KMZL3iwribL3czM= 100000
 ```
 
 ### Query stake
-To check if certain amount of AMO is properly staked, execute the following
-command:
+To check if certain amount of AMO coins are properly staked, execute the
+following command:
 ```bash
 amocli query stake <key_address>
 ```
 Specify proper `key_address`.
 
-For example, to check if 1000000 AMO is properly staked on `myval` along with
-the validator public key, execute the following command:
+For example, to check if 1000000 AMO coins are properly staked on `myval` along
+with the validator public key, execute the following command:
 ```bash
 amocli query stake D2CC7F160874AF06027A09DC0E8DC67E85E6D704
 ```
@@ -203,8 +200,8 @@ command:
 curl localhost:26657/validators
 ```
 
-### Send withdraw transaction 
-To withdraw all or part of AMO locked as a stake, execute the following
+### Send withdraw transaction
+To withdraw all or part of AMO coins locked as a stake, execute the following
 command:
 ```bash
 amocli tx --user <key_username> withdraw <amount>
@@ -217,3 +214,53 @@ command:
 amocli tx --user myval 100000000000000000000
 ```
 
+## Delegate coins
+We assume you possess the account key (`mydel` for amocli key username
+`4BFCD048B837135C1F23B6302000E096D48F99B8` for key address) and necessary AMO
+coins. Now, you need to send a `delegate` transaction to the blockchain. For
+the `delegate` transaction you need a validator account address to which you
+would like to delegate specific amount of AMO coins. In this guide, we assume
+the degelatee's validator account address is
+`D2CC7F160874AF06027A09DC0E8DC67E85E6D704`.
+
+### Send delegate transaction
+To delegate certain amount of AMO coins to a validator, execute the following
+command:
+```bash
+amocli tx --user <key_username> delegate <validator_account_address> <amount>
+```
+Specify proper `key_username`, `validator_account_address` and `amount`.
+
+For example, to delegate 100 AMO to the validator `myval`'s account address,
+execute the following command:
+```bash
+amocli tx --user mydel delegate D2CC7F160874AF06027A09DC0E8DC67E85E6D704 100000000000000000000
+```
+
+### Query delegate
+To check if certain amount of AMO coins are properly delegated, execute the
+following command:
+```bash
+amocli query delegate <key_address>
+```
+Specify proper `key_address`.
+
+For example, to check if 100 AMO coins are properly delegated, execute the
+following command:
+```bash
+amocli query delegate 4BFCD048B837135C1F23B6302000E096D48F99B8
+```
+
+### Send retract transaction
+To retract all or part of the AMO coins locked as a delegated stake, execute
+the following command:
+```bash
+amocli tx --user <key_username> retract <amount>
+```
+Specify proper `key_username` and `amount`.
+
+For example, to retract 1 AMO from `mydel`'s delegate stakes, exectue the
+following command:
+```bash
+amocli tx --user mydel 1000000000000000000
+```
