@@ -132,6 +132,7 @@ followings, but for the testnet you may visit <a
 href="http://explorer.amolabs.io/wallet">AMO blockchain explorer</a> and follow
 the guide there.
 
+### Install `amocli`
 You need `amocli`(AMO client) to stake coins. See
 [Installation](https://github.com/amolabs/amo-client-go#installation) section
 in amo-client-go document to install `amocli` in proper way.
@@ -141,8 +142,11 @@ We assume you possess the account key (`myval` for amocli key username,
 coins. Now, you need to send a `stake` transaction to the blockchain. For the
 `stake` transaction you need a validator public key. This process is equivalent
 to announce to the world that you take the control over a validator node which
-is running with the validator public key. To find out the validator public key
-of a node which is launched, execute the following command:
+is running with the validator public key. 
+
+### Inspect validator public key
+To find out the validator public key of a node which is launched, connect to a
+terminal of the server machine and execute the following command:
 ```bash
 amod --home <data_root>/amo tendermint show_validator
 ```
@@ -165,6 +169,7 @@ We assume the validator public key is as follows:
 ```
 Now, you have a validator public key to announce.
 
+### Send stake transaction
 To stake certain amount of AMO on a validator, execute the following command:
 ```bash
 amocli tx --user <key_username> stake <validator_pub_key> <amount>
@@ -177,6 +182,7 @@ the following command:
 amocli tx --user myval stake +4jvv6ZCP+TxC0CwBQRr31ieZzj7KMZL3iwribL3czM= 1000000000000000000000000 
 ```
 
+### Query stake
 To check if certain amount of AMO is properly staked, execute the following
 command:
 ```bash
@@ -190,8 +196,24 @@ the validator public key, execute the following command:
 amocli query stake D2CC7F160874AF06027A09DC0E8DC67E85E6D704
 ```
 
-You can inspect the list of validators and their voting power by executing the
-following command:
+### Inspect validators
+To inspect the list of validators and their voting power, execute the following
+command:
 ```bash
 curl localhost:26657/validators
 ```
+
+### Send withdraw transaction 
+To withdraw all or part of AMO locked as a stake, execute the following
+command:
+```bash
+amocli tx --user <key_username> withdraw <amount>
+```
+Specify proper `key_username` and `amount`.
+
+For example, to withdraw 100 AMO from `myval`'s stakes, exectue the following
+command:
+```bash
+amocli tx --user myval 100000000000000000000
+```
+
