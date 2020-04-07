@@ -878,11 +878,11 @@ the `address` is the sender account.
 ### Proposing and voting
 When it is necessary to modify the configuration of AMO blockchain without
 hard-forking the chain, one of the validators can propose a draft containing
-the configuration to get applied and its description, with deposit. Then, the
+the configuration to get applied with its description and deposit. Then, the
 validators vote for or against it. For the draft to get processed further after
 the vote is closed, the draft must have a quorum for voting. If not, the votes
 for draft are ignored no matter what the final result of votes is. On the other
-hand, if quorum is met, the draft would get applied or not according to its
+hand, if quorum is met, the draft would get applied or not, according to its
 final result. Also, if turnout of voters is below refund rate, the draft
 deposit is distributed among the validators who participate in voting.
 Otherwise, it is returned to the proposer.
@@ -898,8 +898,6 @@ performs a validity check and add a record in `draft` store.
     1. `tx.draft_id` == `state.latest_draft_id` + 1
 1. state change
     1. add new record having `tx.draft_id` as a key in `draft` store
-    1. `draft.tally_approve` &larr; `draft.tally_approve` +
-       `sender.effective_stake`
     1. `sender.balance` &larr; `sender.balance` - `config.draft_deposit` -
        `tx.fee`
     1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
@@ -916,12 +914,25 @@ performs a validity check and add a record in `vote` store.
     1. `sender.balance` &ge; `tx.fee`
 1. state change
     1. add new record having `tx.draft_id`+`sender` as a key in `vote` store 
-    1. `draft.tally_approve` &larr; `draft.tally_approve` +
-       `sender.effective_stake`, if `tx.approve` is `true`
-    1. `draft.tally_reject` &larr; `draft.tally_reject` +
-       `sender.effective_stake`, if `tx.approve` is `false`
     1. `sender.balance` &larr; `sender.balance` - `tx.fee`
     1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+
+Upon `close_count` reaches zero and the vote gets closed, an AMO blockchain
+node calculates and updates `draft.tally_*` values.
+
+1. state change
+	1. for `validator` in `validators`: `draft.tally_quorum` &larr;
+	   `draft.tally_quorum` + `validator.effective_stake`
+	1. `draft.tally_quorum` &larr; `draft.tally_quorum` *
+	   `config.draft_quorum_rate`
+	1. `draft.tally_approve` &larr; `draft.tally_approve` +
+	   `draft.proposer.effective_stake`
+	1. for `vote` in `draft.votes`: `draft.tally_approve` &larr;
+	   `draft.tally_approve` + `vote.voter.effective_stake`, if `vote.approve`
+	   is `true`
+	1. for `vote` in `draft.votes`: `draft.tally_reject` &larr;
+	   `draft.tally_reject` + `vote.voter.effective_stake`, if `vote.approve`
+	   is `false`
 
 ### Registering storage
 In order to register a data parcel in AMO blockchain, there must be an already
