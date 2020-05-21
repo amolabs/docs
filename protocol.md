@@ -182,6 +182,7 @@ usage store extra
 Since a JSON object must be enclosed by braces(`{` and `}`), it cannot be a
 single JSON value. Each extra info must be an empty object(`{}`) or a proper
 JSON object with members.
+
 ```json
 {
   "register": "boo", // wrong
@@ -512,8 +513,8 @@ configuration.
 | key | value type | value constraint |
 |-|-|:-:|
 | `max_validators` | uint64 | `> 0` |
-| `weight_validator` | float64 | `> 0` | 
-| `weight_delegator` | float64 | `> 0` | 
+| `weight_validator` | float64 | `> 0` |
+| `weight_delegator` | float64 | `> 0` |
 | `min_staking_unit` | currency | `> 0` |
 | `blk_reward` | currency | `>= 0` |
 | `tx_reward` | currency | `>= 0` |
@@ -1254,30 +1255,6 @@ weight.
 **TODO:** Eliminate ambiguity in float number arithmetic.
 
 **TODO:** Take care of overflow situation.
-
-### History Record
-**NOTE:** The key and value of data are stored on the database in the type of
-byte array. To prevent unexpected collisions, derived from using the same key,
-such as overwriting or deleting data, hard-coded prefix value is attached to the
-key.
-
-The information on incentives distributed to stake holders per block creation
-is recorded in the history database. The concerned data are stored in two
-different types, containing identical contents, as follows, to facilitate both
-`BlockHeight`-first and `Address`-first search.
-
-- BlockHeightAddressHistory
-    - prefix: `"ba"`
-    - key: {prefix + `BlockHeight` + `Address`}
-    - value: `Amount`
-- AddressBlockHeightHistory
-    - prefix: `"ab"`
-    - key: {prefix + `Address` + `BlockHeight`}
-    - value: `Amount`
-
-where `BlockHeight` is the height of a newly generated block, `Address` the
-address of a stake holder, `Amount` the amount of incentive distributed to a
-stake holder.
 
 ## Penalty
 To maintain the DPoS blockchain as healthy as possible, it is essential to
