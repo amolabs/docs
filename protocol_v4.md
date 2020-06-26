@@ -243,6 +243,9 @@ following:
     - `discard`
     - `cancel`
     - `revoke`
+- did
+    - `claim`
+    - `dismiss`
 - user-defined coin
     - `issue`
     - `burn`
@@ -430,6 +433,26 @@ A payload format for each transaction type is as the following.
   where `target` is the id of a parcel currently being revoked, and `grantee`
   is the address of a buyer which is previously granted a usage on the parcel.
 
+- `claim` payload
+  ```json
+  {
+    "target": "_string_",
+    "document": {} // DID document in the form of JSON object
+  }
+  ```
+  where `target` is a JSON string conforming to `idchar` in DID syntax.
+  `document` value will be stored as a compact representation. When `claim` tx
+  is received on a previously claimed `target`, `document` will be replaced
+  with a new one.
+
+- `dismiss` payload
+  ```json
+  {
+    "target": "_string_",
+  }
+  ```
+  effectively removes the DID document from the DID registry.
+
 - `issue` payload
   ```json
   {
@@ -565,6 +588,7 @@ and balance lock stores.
 | 2 | non-fungible asset | parcel | `parcel:` |
 | 2 | non-fungible asset | request | `request:` |
 | 2 | non-fungible asset | usage | `usage:` |
+| 2 | non-fungible asset | did | `did:` |
 | 3 | maintenance | UDC | `udc:` |
 | 3 | fungible asset | UDC balance | `balance:<udc_id>:` |
 | 3 | maintenance | UDC balance lock | `udclock:<udc_id>:` |
@@ -691,6 +715,15 @@ business data items, while tier 3 items are pretty much optional.
       }
       ```
     - key is a concatenation of `grantee` and `target` of a grant tx
+- did
+    - key: `_did_address_`
+    - value: compact representation of a JSON object
+    ```json
+    {
+      "owner": "_HEX_encoded_account_address_",
+      "document": {} // DID documentn in the form of JSON object
+    }
+    ```
 - udc(user-defined coin)
     - key: `_udc_id_`
     - value: compact representation of a JSON object
@@ -1109,6 +1142,31 @@ performs a validity check and remove record in `usage` store.
     1. `sender.balance` &ge; `tx.fee`
 1. state change
     1. remove record corresponding to `tx.target` in `usage` store
+    1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+    1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+
+### Claiming DID document
+Upon receiving a `claim` transaction from an account, an AMO blockchain node
+performs a validity check and add new record in `did` store.
+
+1. validity check
+	1. if `tx.target` already exists in `did` store, `did.target.owner` must be
+	   the same as `tx.sender`.
+    1. `sender.balance` &ge; `tx.fee`
+1. state change
+	1. add new record or replace the record with key `tx.target`
+    1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+    1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+
+Upon receiving a `dismiss` transaction from an account, an AMO blockchain node
+performs a validity check and remove record from `did` store.
+
+1. validity check
+	1. `tx.target` should exist in `did` store
+	1. `did.target.owner` must be the same as `tx.sender`
+    1. `sender.balance` &ge; `tx.fee`
+1. state change
+	1. remove record with key `tx.target` from `did` store
     1. `sender.balance` &larr; `sender.balance` - `tx.fee`
     1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
