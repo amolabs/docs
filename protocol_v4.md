@@ -1,6 +1,9 @@
 # AMO Blockchain Protocol Specification
 
+AMO protocol version 4.
+
 ## Introduction
+
 Although the current implementation of AMO blockchain depends ***heavily*** on
 Tendermint, AMO blockchain protocol itself is independent of Tendermint. It is
 described by several protocol messages and corresponding state transition in
@@ -494,8 +497,10 @@ configuration.
   "tx_reward": "_currency_",
   "penalty_ratio_m": 0.1,
   "penalty_ratio_l": 0.01,
-  "laziness_counter_window": 100,
-  "laziness_threshold": 0.9,
+  "laziness_window": 100,
+  "laziness_threshold": 90,
+  "hibernate_threshold": 10,
+  "hibernate_period": 1000,
   "block_binding_window": 100,
   "lockup_period": 3600,
   "draft_open_count": 500000,
@@ -520,8 +525,10 @@ configuration.
 | `tx_reward` | currency | `>= 0` |
 | `penalty_ratio_m` | float64 | `> 0` |
 | `penalty_ratio_l` | float64 | `> 0` |
-| `laziness_counter_window` | int64 | `>= 10000` |
-| `laziness_threshold` | float64 | `> 0` |
+| `laziness_window` | int64 | `>= 10000` |
+| `laziness_threshold` | int64 | `> 0` |
+| `hibernate_threshold` | int64 | `>= 10000` |
+| `hibernate_period` | int64 | `> 0` |
 | `block_binding_window` | int64 | `>= 10000` |
 | `lockup_period` | int64 | `>= 10000` |
 | `draft_open_count` | int64 | `>= 10000` |
@@ -539,7 +546,7 @@ make AMO blockchain protocol keep operating as it has to, even after modifying
 their values since genesis block. The currency-related configurations' type is
 restricted to `string` as it can store values without limit. Even though it is
 highly recommended to use `uint64` on configurations for its better space
-availability than `int64`, `laziness_counter_window`, `block_binding_window`,
+availability than `int64`, `laziness_window`, `block_binding_window`,
 `lockup_period`, `draft_*_count`, and `upgrade_protocol_height` have to use
 `int64` as it is an tendermint-dependant configuration.
 
@@ -709,6 +716,22 @@ business data items, while tier 3 items are pretty much optional.
     - UDC balance of an account cannot be lowered under this value via transfer
       tx. This lock value may be higher than the UDC balance of an account at
       the time of processing lock tx
+
+Non-tx states:
+- missed block runs
+	- key: `_validator_address_` + `_head_height_` (big-endian 64-bit integer)
+	- value: NULL or JSON integer `_integer_`
+	- NULL value means this run is the last and on-going one. Otherwise this
+	  run is a historical record. Non-NULL value is the length of the run.
+- validator hibernation
+	- key: `_validator_address_`
+	- value: compact representation of a JSON object
+      ```json
+      {
+        "start": _block_height_,
+        "end": _block_height_
+      }
+      ```
 
 ### Merkle tree and app hash
 Although the internal state DB is composed of top-level data items and several
@@ -1149,19 +1172,42 @@ performs a validity check and reduce sender's designated UDC balance.
 ### Completing Block
 After processing state changes triggered by users' transactions in
 `DeliverTx()`, the nodes complete a block in `EndBlock()` by applying
-additional state changes which are the artifacts of following operations.
+additional state changes described in this section.
 
 #### Distributing Incentive
+
 `tx.fee` is collected while transactions are processed and it gets included in
 `blk.incentive`. Then, `blk.incentive` is distributed among the stakers and the
 delegators at the end of block creation. The process is explained in [incentive
 distribution](#distribution) section, in more detail.
 
-#### Updating validator set
-If there is at least one of `stake`, `withdraw`, `delegate` or `retract`
-transaction in the last block, the top `n_val` accounts with the highest
-*effective stake* value shall be selected again. These accounts shall be new
-validators for the upcoming blocks.
+#### Validator hibernation
+
+A lazy validator is a validator who is in the validator set until a block, but
+did not vote in the consensus process for the block. We say the validator
+missed the block. If a validator missed **consecutive** `blks_lazy` blocks and
+`blks_lazy >= hibernate_threshold`, it is removed from the validator set for
+the next `hibernate_period` blocks. We say the validator enters hibernation
+state. If a validator missed consecutive `blks_lazy` blocks and `blks_lazy <
+hibernate_threshold` but wakes up and comes back to the consensus process,
+`blks_lazy` resets to zero.
+
+If a validator stayed hibernation state for `blks_hib` blocks and `blks_hib >=
+hibernate_period`, then it leaves the hibernation state and may be included in
+the validator set again.
+
+#### Validator Updates
+
+TM validator set may change along with the progress of the chain. There are two
+reasons for the change:
+
+- Validator hibernation state change
+- Stake or effective stake change
+
+In order to select new set of validators, first top `n_val` accounts with
+highest *effective stakes* are selected excluding accounts associated to the
+validators in hibernation state. Extract validator public keys for the
+accounts, and inform the list of validator public keys to Tendermint layer.
 
 **NOTE:** Effective stake value is the sum of his/her own stake in the `stake`
 store and all items in the `delegate` store having the same `delegatee` field
@@ -1183,6 +1229,7 @@ consensus algorithm of tendermint and results in the interruption of generating
 blocks on the chain.
 
 ##### Voting power calculation
+
 **TM:** In tendermint, a **voting power** has a similar role as a stake in PoS
 or DPoS consensus mechanism. One limitation is that sum of voting powers of all
 validators must not exceed the value `MaxTotalVotingPower`, which is 2^60 - 1.
@@ -1190,6 +1237,7 @@ When we use one-to-one relation between stake value and voting power, exceeding
 this max limit is not very likely, but possible anyway. So, the validator set
 update mechanism must adjust voting power of each validator, so that total sum
 of voting power does not exceed `MaxTotalVotingPower`:
+
 1. For each validator `Val_i`, set voting power `vp_i` to be `stake` of
    `Val_i`.
 1. Calculate `TotalVotingPower`, which is the sum of `vp_i`s of all validators
@@ -1260,7 +1308,9 @@ weight.
 To maintain the DPoS blockchain as healthy as possible, it is essential to
 encourage block validators to participate in creating and verifying blocks with
 incentive, but also to impose responsibilities on their misbehavior with
-penalty.
+penalty. The penalty shall be distributed among the stake holder and the
+delegated stake holders according to the distribution mechanism presented in
+[Incentive Distribution](#distribution).
 
 The types of abnormal behavior and parameters are defined as follows:
 
@@ -1284,17 +1334,10 @@ presented in [Incentive Distribution](#distribution).
 - `PenaltyRatioM`
 
 ### Downtime
-If the ratio of the validator's absence ratio, in the fixed height window
-`LazinessCounterWindow`, is over `LazinessThreshold`, the specific amount of
-coins staked and delegated to the validator would be penalized. The penalty
-shall be distributed amount the stake holder and the delegated stake holders
-according to the distribution mechanism presented in [Incentive
-Distribution](#distribution).
+If a validator missed `n_blks` blocks within last `laziness_window`
+blocks and `n_blks >= laziness_threshold`, then this validator gets penalized
+accordingly. The penalty is calculated by `penalty_ratio_l * eff_stake`.
 
-#### parameters
-- `LazinessCounterWindow`
-- `LazinessThreshold`
-- `PenaltyRatioL`
 
 ## On-chain Protocol Upgrade
 To enhance the stability of AMO's overall system, it is required to upgrade its
