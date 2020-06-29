@@ -582,6 +582,7 @@ and balance lock stores.
 | 0 | fungible asset | AMO coin balance | `balance:` |
 | 0 | fungible asset | stake | `stake:` |
 | 0 | fungible asset | delegate | `delegate:` |
+| 0 | maintenance | hibernate | `hibernate:` |
 | 1 | governance | draft | `draft:` |
 | 1 | governance | vote | `vote:` |
 | 2 | maintenance | storage | `storage:` |
@@ -590,8 +591,8 @@ and balance lock stores.
 | 2 | non-fungible asset | usage | `usage:` |
 | 2 | non-fungible asset | did | `did:` |
 | 3 | maintenance | UDC | `udc:` |
-| 3 | fungible asset | UDC balance | `balance:<udc_id>:` |
 | 3 | maintenance | UDC balance lock | `udclock:<udc_id>:` |
+| 3 | fungible asset | UDC balance | `balance:<udc_id>:` |
 
 Tier 0 items are essential for the operations of a DPoS-based blockchain. Tier
 1 items are important as much as the tier 0 items, but the chain may be still
@@ -631,6 +632,15 @@ business data items, while tier 3 items are pretty much optional.
       any way. An implementor may choose to keep this `_account_address_` as a
       unique key, or use more loose database implementation with an application
       code or a wrapper layer to keep this constraint on top of it.
+- hibernate
+	- key: `_validator_address_`
+	- value: compact representation of a JSON object
+      ```json
+      {
+        "start": _block_height_,
+        "end": _block_height_
+      }
+      ```
 - draft
     - key: `_draft_id_`(big-endian)
     - value: compact representation of a JSON object
@@ -749,22 +759,6 @@ business data items, while tier 3 items are pretty much optional.
     - UDC balance of an account cannot be lowered under this value via transfer
       tx. This lock value may be higher than the UDC balance of an account at
       the time of processing lock tx
-
-Non-tx states:
-- missed block runs
-	- key: `_validator_address_` + `_head_height_` (big-endian 64-bit integer)
-	- value: NULL or JSON integer `_integer_`
-	- NULL value means this run is the last and on-going one. Otherwise this
-	  run is a historical record. Non-NULL value is the length of the run.
-- validator hibernation
-	- key: `_validator_address_`
-	- value: compact representation of a JSON object
-      ```json
-      {
-        "start": _block_height_,
-        "end": _block_height_
-      }
-      ```
 
 ### Merkle tree and app hash
 Although the internal state DB is composed of top-level data items and several
@@ -1245,14 +1239,17 @@ A lazy validator is a validator who is in the validator set until a block, but
 did not vote in the consensus process for the block. We say the validator
 missed the block. If a validator missed **consecutive** `blks_lazy` blocks and
 `blks_lazy >= hibernate_threshold`, it is removed from the validator set for
-the next `hibernate_period` blocks. We say the validator enters hibernation
-state. If a validator missed consecutive `blks_lazy` blocks and `blks_lazy <
+the next `hibernate_period` blocks. New record is created in `hibernate` store
+with `start` to be the current height, and `end` current height plug
+`hibernate_period`. We say the validator enters hibernation state. If a
+validator missed consecutive `blks_lazy` blocks and `blks_lazy <
 hibernate_threshold` but wakes up and comes back to the consensus process,
 `blks_lazy` resets to zero.
 
 If a validator stayed hibernation state for `blks_hib` blocks and `blks_hib >=
-hibernate_period`, then it leaves the hibernation state and may be included in
-the validator set again.
+hibernate_period`, i.e. `hibernate.address.end = current_height`, then
+`hibernate.address` is removed and the validator leaves the hibernation state
+and may be included in the validator set again.
 
 #### Validator Updates
 
