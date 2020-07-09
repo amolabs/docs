@@ -342,3 +342,34 @@ following command:
 ```bash
 amocli tx --user mydel 1000000000000000000
 ```
+
+## Upgrade node protocol
+
+### Using pre-compiled binary
+
+#### Update `amod` daemon to latest version
+Refer to [Getting Started](https://github.com/amolabs/amoabci#getting-started)
+section in amoabci document to install latest `amod`, which supports latest
+protocol, from either pre-built binary or source.
+
+#### Restart service
+To restart `amod` service, execute the following commands: 
+```bash
+sudo systemctl restart amod
+```
+
+### Using Docker
+
+#### Pull latest image
+To pull latest `amolabs/amod` docker image, execute the following commands:
+```bash
+sudo docker pull amolabs/amod:latest
+```
+
+#### Restart container 
+To restart `amod` docker container, execute the following commands:
+```bash
+sudo docker stop amod
+sudo docker rm amod
+sudo docker run -d --name amod -v <data_root>:/amo amolabs/amod:latest
+```
