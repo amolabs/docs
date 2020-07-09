@@ -16,46 +16,48 @@ necessary AMO coins. This guide will not describe how to acquire AMO coins for
 the mainnet. For both of testnet and mainnet, you need to acquire AMO coins
 before you send a `stake` transaction.
 
-## Prepare server environment
+## Prerequisite
+
 ### Server machine
 In order to run a validator node, you need a physical server with a stable
 internet connection or a virtual machine on a cloud service(Amazon AWS, Google
 cloud, Microsoft Azure or similar services). In this guide, we assume typical
-Ubuntu Linux or MacOS is installed on the host machine.
+Ubuntu Linux or macOS is installed on the host machine.
 
 ### Install necessary packages
-Connect to a terminal of the server machine and install `git`, `curl` and `jq`
-as root:
+Connect to a terminal of the server machine and install `git`, `curl` and `jq`:
 ```bash
 sudo apt install git curl jq
 ```
 
-### Install `amod` daemon
-See [Getting Started](https://github.com/amolabs/amoabci#getting-started)
-section in amoabci document to install `amod` from either pre-built binary or
-source.
+### Prepare data directory
+There needs a directory `data_root` in which all of AMO related data are stored
+on the server machine. To make the directory, execute the following commands:
+```bash
+sudo mkdir -p <data_root>/amo/config
+sudo mkdir -p <data_root>/amo/data
+```
 
-### Install setup script 
+As we assume the `data_root` is `/mynode`, execute the following commands:  
+```bash
+sudo mkdir -p /mynode/amo/config
+sudo mkdir -p /mynode/amo/data
+```
+
+### Download setup script
 To use the script which helps to setup a validator node, connect to a terminal
 of the server machine and execute the following commands:
 ```bash
 cd $HOME
 git clone https://github.com/amolabs/testnet
-cd testnet
 ```
+
 This script prepares data root directory, generates `config.toml`, registers
 `amod.service` in `systemd` and copies necessary files to data root directory.
-If you already have `node_key.json` and `priv_validator_key.json`, place them
-below `testnet` directory. They are going to be copied into data root directory
-automatically. Otherwise, the script would generate them for you.
-
-## Launch on Mainnet/Testnet 
-### Node info
-
-| | `node_id` | `node_ip_addr` | `node_p2p_port` | `node_rpc_port` |
-|-|-|-|-|-|
-| mainnet | `fbd1cb0741e30308bf7aae562f65e3fd54359573` | `172.104.88.12` | `26656` | `26657` |
-| testnet | `a944a1fa8259e19a9bac2c2b41d050f04ce50e51` | `172.105.213.114` | `26656` | `26657` |
+If you already have `genesis.json`, `node_key.json` and
+`priv_validator_key.json`, place them below `testnet` directory. They are going
+to be copied into data root directory automatically. Otherwise, the script
+would generate them for you.
 
 ### Get `genesis.json`
 To download `genesis.json` file, execute the following commands:
@@ -63,8 +65,9 @@ To download `genesis.json` file, execute the following commands:
 cd testnet
 curl <node_ip_addr>:<node_rpc_port>/genesis | jq '.result.genesis' > genesis.json
 ```
-Specify proper `node_ip_addr` and `node_rpc_port` depending on which network
-you would like to connect to, by referring to [Node info](#node-info) section.
+
+Specify proper `data_root`, `node_ip_addr` and `node_rpc_port` depending on the
+network you connect to, by referring to [Chain info](#chain-info) section.
 
 For example, to download `genesis.json` file for **mainnet**, execute the
 following commands:
@@ -73,46 +76,116 @@ cd testnet
 curl 172.104.88.12:26657/genesis | jq '.result.genesis' > genesis.json
 ```
 
-### Setup
-First, select data directory location, figure out current server's external ip
-address and seed node's information. Then, execute the following command as
-root:
+### Chain Info
+| `chain` | `node_id` | `node_ip_addr` | `node_p2p_port` | `node_rpc_port` |
+|-|-|-|-|-|
+| mainnet | `fbd1cb0741e30308bf7aae562f65e3fd54359573` | `172.104.88.12` | `26656` | `26657` |
+| testnet | `a944a1fa8259e19a9bac2c2b41d050f04ce50e51` | `172.105.213.114` | `26656` | `26657` |
+
+## Run using pre-compiled binary
+
+### Install `amod` daemon
+Refer to [Getting Started](https://github.com/amolabs/amoabci#getting-started)
+section in amoabci document to install `amod` from either pre-built binary or
+source.
+
+### Execute setup script
+First, figure out current server's external ip address and seed node's
+information. Then, execute the following command as root:
 ```bash
 sudo ./setup.sh -e <ext_ip_addr> <data_root> <moniker> <node_id>@<node_ip_addr>:<node_p2p_port>
 ```
+
 Specify proper `ext_ip_addr`, `data_root`, `moniker`(node name) and `node_*`
 information, depending on which network you would like to connect to by
-referring to [Node info](#node-info) section.
+referring to [Chain info](#chain-info) section.
 
 For example, if current server's external ip address is `123.456.789.0`(not
-avaiable ip address), data root directory is `/mynode`, node name is
-`mynodename` and you'd like to connect to mainnet, then execute the following
-commands:
+avaiable ip address), data root is `/mynode`, node name is `mynodename` and
+you'd like to connect to mainnet, then execute the following commands:
 ```bash
 sudo ./setup.sh -e 123.456.789.0 /mynode mynodename fbd1cb0741e30308bf7aae562f65e3fd54359573@172.104.88.12:26656
 ```
 
-### Backup key
-Backup `/mynode/amo/config/priv_validator_key.json` file to a
-safe location.
-
-### Run node 
+### Run service
 To run validator node, execute the following commands as root:
 ```bash
 sudo systemctl start amod
 ```
 
-### Check node status
 To check validator node status, execute the following commands as root:
 ```bash
 sudo systemctl status amod
 ```
 
-### Stop node
 To stop validator node, execute the following commands as root:
 ```bash
 sudo systemctl stop amod
 ```
+
+## Run using Docker
+
+### Install `docker`
+Refer to [Get Docker](https://docs.docker.com/get-docker/) in Docker's official
+document to install `docker` from either pre-built binary or source.
+
+### Pull `amolabs/amod` image
+To pull the official `amod` image of amolabs, execute the following commands:
+```bash
+sudo docker pull amolabs/amod:<tag>
+```
+
+Specify proper `tag` which indicates a specific version of `amod` image. To
+pull the latest image, `tag` should be `latest` or can be omitted. For example,
+if you would like to pull `1.6.5`, then execute the following commands: 
+```bash
+sudo docker pull amolabs/amod:1.6.5
+```
+
+### Execute setup script
+First, figure out current server's external ip address and seed node's
+information. Then, execute the following command as root:
+```bash
+sudo ./setup.sh -d -e <ext_ip_addr> <data_root> <moniker> <node_id>@<node_ip_addr>:<node_p2p_port>
+```
+
+Specify proper `ext_ip_addr`, `data_root`, `moniker`(node name) and `node_*`
+information, depending on which network you would like to connect to by
+referring to [Chain info](#chain-info) section.
+
+For example, if current server's external ip address is `123.456.789.0`(not
+avaiable ip address), data root is `/mynode`, node name is `mynodename` and
+you'd like to connect to mainnet, then execute the following commands:
+```bash
+sudo ./setup.sh -d -e 123.456.789.0 /mynode mynodename fbd1cb0741e30308bf7aae562f65e3fd54359573@172.104.88.12:26656
+```
+
+### Run container
+To run(create & start) validator node, execute the following commands as root:
+```bash
+sudo docker run -d --name amod -v <data_root>:/amo amolabs/amod
+```
+
+To start validator node, execute the following commands as root:
+```bash
+sudo docker start amod
+```
+
+To check validator node status, execute the following commands as root:
+```bash
+sudo docker stats amod
+```
+
+To stop validator node, execute the following commands as root:
+```bash
+sudo docker stop amod
+```
+
+## Postrequisite
+
+### Backup keys
+Backup `priv_validator_key.json`, `node_key.json` files found below
+`/mynode/amo/config` directory to a safe location.
 
 ### Gather information
 Execute the following command and write down the validator address and public
@@ -120,6 +193,7 @@ key somewhere convenient.
 ```bash
 curl localhost:26657/status
 ```
+
 <p align="center"><img src="images/node_status.png"/></p>
 
 Check `"sync_info"` in the output to see if our node is syncing properly with
@@ -145,6 +219,8 @@ To find out the validator public key of a node which is launched, connect to a
 terminal of the server machine and execute the following command:
 ```bash
 amod --home <data_root>/amo tendermint show_validator
+# or
+docker run -it --rm -v <data_root>/amo:/amo amolabs/amod amo tendermint show_validator
 ```
 Specify proper `data_root`.
 
@@ -152,6 +228,8 @@ For example, if data root directory is `/mynode`, execute the following
 command: 
 ```bash
 amod --home /mynode/amo tendermint show_validator
+# or
+docker run -it --rm -v /mynode/amo:/amo amolabs/amod amo tendermint show_validator
 ```
 
 We assume the validator public key is as follows:

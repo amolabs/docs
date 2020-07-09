@@ -16,12 +16,13 @@ AMO 코인을 획득하는 것은 전적으로 사용자에게 달려 있다. �
 위해 어떻게 코인을 확보할 수 있는지는 설명하지 않는다. 테스트넷과 메인넷 모두
 `stake` 거래를 전송하기 전에 코인을 확보해 놓아야 한다.
 
-## 서버 환경 준비
+## 사전준비
+
 ### 서버 머신
 Validator 노드를 실행하기 위해서는 인터넷 연결이 안정적인 물리적인 서버나
 클라우드 서비스(Amazon AWS, Google cloud, Microsoft Azure 또는 유사한 서비스들)
 상의 가상머신을 준비해야 한다. 이 가이드에서는 흔히 쓰이는 Ubuntu Linux나
-MacOS가 서버에 설치돼 있다고 가정한다.
+macOS가 서버에 설치돼 있다고 가정한다.
 
 ### 필요한 패키지 설치
 서버의 터미널에 접속하여 root 권한으로 `git`, `curl` 그리고 `jq`를 설치한다:
@@ -29,42 +30,44 @@ MacOS가 서버에 설치돼 있다고 가정한다.
 sudo apt install git curl jq
 ```
 
-### `amod` 데몬 설치
-amoabci 문서의 [Getting
-Started](https://github.com/amolabs/amoabci#getting-started) 섹션을 참조하여
-컴파일된 바이너리 혹은 소스파일을 이용하여 `amod` 데몬을 설치한다.
+### 데이터 디렉토리 준비
+서버 머신 상에 AMO 관련 모든 데이터가 저장될 `data_root` 디렉토리가 필요하다.
+해당 디렉토리를 만들기 위해, 다음 명령을 실행한다:
+```bash
+sudo mkdir -p <data_root>/amo/config
+sudo mkdir -p <data_root>/amo/data
+```
 
-### 설정 스크립트 설치
+`data_root`가 `/mynode`라고 가정하며 다음 명령을 실행한다:
+```bash
+sudo mkdir -p /mynode/amo/config
+sudo mkdir -p /mynode/amo/data
+```
+
+### 설정 스크립트 다운로드 
 Validator 노드 설정을 도와주는 스크립트를 사용하기 위해서는 서버의 터미널에
 접속하여 다음 명령을 실행한다:
 ```bash
 cd $HOME
 git clone https://github.com/amolabs/testnet
-cd testnet
 ```
+
 해당 스크립트는 데이터 디렉토리를 준비하고, `config.toml` 파일을 생성하고,
 `systemd`에 `amod.service`를 등록하고, 데이터 디렉토리에 필요한 파일들을
-복사해준다. 만약 당신이 `node_key.json` 과 `priv_validator_key.json` 파일을
-가지고 있다면, 그것들을 `testnet` 디렉토리 아래에 위치시킨다. 해당 파일들은
-데이터 디렉토리에 자동으로 복사된다. 만약 가지고 있지 않다면, 스트립트가 당신을
-위하여 해당 파일들을 생성한다.
-
-## Mainnet/Testnet에서 실행
-### 노드 정보
-
-| | `node_id` | `node_ip_addr` | `node_p2p_port` | `node_rpc_port` |
-|-|-|-|-|-|
-| mainnet | `fbd1cb0741e30308bf7aae562f65e3fd54359573` | `172.104.88.12` | `26656` | `26657` |
-| testnet | `a944a1fa8259e19a9bac2c2b41d050f04ce50e51` | `172.105.213.114` | `26656` | `26657` |
+복사해준다. 만약 당신이 `genesis.json`, `node_key.json` 과
+`priv_validator_key.json` 파일을 가지고 있다면, 그것들을 `testnet` 디렉토리
+아래에 위치시킨다. 해당 파일들은 데이터 디렉토리에 자동으로 복사된다. 만약
+가지고 있지 않다면, 스트립트가 당신을 위하여 해당 파일들을 생성한다.
 
 ### `genesis.json` 얻기
-`genesis.json` 파일을 얻기 위하여 다음 명령을 실행한다.
+`genesis.json` 파일을 얻기 위하여 다음 명령을 실행한다:
 ```bash
 cd testnet
 curl <node_ip_addr>:<node_rpc_port>/genesis | jq '.result.genesis' > genesis.json
 ```
-[노드 정보](#노드-정보) 섹션을 참조하여, 당신이 어떠한 네트워크에 접속하고
-싶은지에 따라, 알맞은 `node_ip_addr`과 `node_rpc_port`를 입력한다.
+
+[체인 정보](#체인-정보) 섹션을 참조하여, 당신이 어떠한 네트워크에 접속하고
+싶은지에 따라, 알맞은 `data_root`, `node_ip_addr`과 `node_rpc_port`를 입력한다.
 
 예를 들어, **mainnet**을 위한 `genesis.json` 파일을 다운로드 하기 위해서는 다음
 명령을 실행한다:
@@ -73,12 +76,26 @@ cd testnet
 curl 172.104.88.12:26657/genesis | jq '.result.genesis' > genesis.json
 ```
 
-### 설정
-먼저, 데이터 디렉토리 위치를 선정하고, 현재 서버의 외부 ip 주소와 seed 노드의
-정보를 파악한다. 그리고, 다음 명령을 실행한다: 
+### 체인 정보
+| `chain` | `node_id` | `node_ip_addr` | `node_p2p_port` | `node_rpc_port` |
+|-|-|-|-|-|
+| mainnet | `fbd1cb0741e30308bf7aae562f65e3fd54359573` | `172.104.88.12` | `26656` | `26657` |
+| testnet | `a944a1fa8259e19a9bac2c2b41d050f04ce50e51` | `172.105.213.114` | `26656` | `26657` |
+
+## 컴파일된 바이너리를 이용하여 실행
+
+### `amod` 데몬 설치
+amoabci 문서의 [Getting
+Started](https://github.com/amolabs/amoabci#getting-started) 섹션을 참조하여
+컴파일된 바이너리 혹은 소스파일을 이용하여 `amod` 데몬을 설치한다.
+
+### 설정 스크립트 실행
+먼저, 현재 서버의 외부 ip 주소와 seed 노드의 정보를 파악한다. 그리고, 다음
+명령을 실행한다: 
 ```bash
 sudo ./setup.sh -e <ext_ip_addr> <data_root> <moniker> <node_id>@<node_ip_addr>:<node_p2p_port>
 ```
+
 [노드 정보](#노드-정보) 섹션을 참조하여, 당신이 어떠한 네트워크에 접속하고
 싶은지에 따라, 알맞은 `ext_ip_addr`, `data_root`, `moniker`(노드 이름) 그리고
 `node_*` 정보를 입력한다.
@@ -90,27 +107,85 @@ sudo ./setup.sh -e <ext_ip_addr> <data_root> <moniker> <node_id>@<node_ip_addr>:
 sudo ./setup.sh -e 123.456.789.0 /mynode mynodename fbd1cb0741e30308bf7aae562f65e3fd54359573@172.104.88.12:26656
 ```
 
-### 키 백업
-`/mynode/amo/config/priv_validator_key.json` 파일을 안전한 곳에
-보관한다.
-
-### 노드 실행
+### 서비스 실행
 노드를 실행하기 위하여 root 권한으로 다음 명령을 실행한다:
 ```bash
 sudo systemctl start amod
 ```
 
-### 노드 상태 확인
 노드 상태를 확인하기 위하여 root 권한으로 다음 명령을 실행한다:
 ```bash
 sudo systemctl status amod
 ```
 
-### 노드 정지
 노드를 정기하기 위하여 root 권한으로 다음 명령을 실행한다:
 ```bash
 sudo systemctl stop amod
 ```
+
+## Docker를 이용하여 실행
+
+### `docker` 설치
+Docker 공식 문서의 [Get Docker](https://docs.docker.com/get-docker/)을 참조하여
+컴파일된 바이너리 혹은 소스파일을 이용하여 `docker`를 설치한다.
+
+### 이미지 `amolabs/amod` 가져오기
+amolabs의 공식 `amod` 이미지를 가져오기 위해서, 다음 명령을 실행한다:
+```bash
+sudo docker pull amolabs/amod:<tag>
+```
+
+`amod` 이미지의 특정 버젼을 가리키는 적절한 `tag`를 입력한다. 최신 이미지를
+가져오기 위해서는 `tag`는 `latest`가 되거나 생략될 수 있다. 예를 들어, `1.6.5`
+버젼의 이미지를 가져오기 위해서는 다음 명령을 실행한다:
+```bash
+sudo docker pull amolabs/amod:1.6.5
+```
+
+### 설정 스크립트 실행
+먼저, 현재 서버의 외부 ip 주소와 seed 노드의 정보를 파악한다. 그리고, 다음
+명령을 실행한다: 
+```bash
+sudo ./setup.sh -d -e <ext_ip_addr> <data_root> <moniker> <node_id>@<node_ip_addr>:<node_p2p_port>
+```
+
+[노드 정보](#노드-정보) 섹션을 참조하여, 당신이 어떠한 네트워크에 접속하고
+싶은지에 따라, 알맞은 `ext_ip_addr`, `data_root`, `moniker`(노드 이름) 그리고
+`node_*` 정보를 입력한다.
+
+예를 들어, 현재 서버의 외부 ip 주소가 `123.456.789.0`(불가능 ip 주소)이고
+데이터 디렉토리가 `/mynode`이고 노드 이름이 `mynodename`이고 당신이 mainnet에
+접속하고 싶다면, root 권한으로 다음 명령을 실행한다: 
+```bash
+sudo ./setup.sh -d -e 123.456.789.0 /mynode mynodename fbd1cb0741e30308bf7aae562f65e3fd54359573@172.104.88.12:26656
+```
+
+### 컨테이너 실행
+노드를 실행(생성 & 시작)하기 위하여 root 권한으로 다음 명령을 실행한다:
+```bash
+sudo docker run -d --name amod -v <data_root>:/amo amolabs/amod
+```
+
+노드를 시작하기 위하여 root 권한으로 다음 명령을 실행한다:
+```bash
+sudo docker start amod
+```
+
+노드 상태를 확인하기 위하여 root 권한으로 다음 명령을 실행한다:
+```bash
+sudo docker stats amod
+```
+
+노드를 정기하기 위하여 root 권한으로 다음 명령을 실행한다:
+```bash
+sudo docker stop amod
+```
+
+## 후속작업
+
+### 키 백업
+`/mynode/amo/config` 아래에 위치한 `priv_validator_key.json`, `node_key.json`
+파일을 안전한 곳에 보관한다.
 
 ### 정보 수집
 다음 명령으로 노드의 validator 주소와 공개키를 확인하여 편리한 곳에 기록해
@@ -118,6 +193,7 @@ sudo systemctl stop amod
 ```bash
 curl localhost:26657/status
 ```
+
 <p align="center"><img src="images/node_status.png"/></p>
 
 출력에서 `"sync_info"` 부분을 확하여 블록체인 네트워크의 다른 노드들과의 동기화
@@ -148,12 +224,16 @@ validator 공개키를 알아내기 위하여 서버의 터미널에 접속하�
 실행한다:
 ```bash
 amod --home <data_root>/amo tendermint show_validator
+# or
+docker run -it --rm -v <data_root>/amo:/amo amolabs/amod amo tendermint show_validator
 ```
 알맞은 `data_root`를 입력한다.
 
 예를 들어, 데이터 디렉토리가 `/mynode`이면 다음 명령을 실행한다:
 ```bash
 amod --home /mynode/amo tendermint show_validator
+# or
+docker run -it --rm -v /mynode/amo:/amo amolabs/amod amo tendermint show_validator
 ```
 
 Validator 키가 다음과 같다고 가정한다:
