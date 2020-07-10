@@ -16,21 +16,23 @@ AMO 코인을 획득하는 것은 전적으로 사용자에게 달려 있다. �
 위해 어떻게 코인을 확보할 수 있는지는 설명하지 않는다. 테스트넷과 메인넷 모두
 `stake` 거래를 전송하기 전에 코인을 확보해 놓아야 한다.
 
-## 사전준비
+## 노드 운영
 
-### 서버 머신
+### 사전준비
+
+#### 서버 머신
 Validator 노드를 실행하기 위해서는 인터넷 연결이 안정적인 물리적인 서버나
 클라우드 서비스(Amazon AWS, Google cloud, Microsoft Azure 또는 유사한 서비스들)
 상의 가상머신을 준비해야 한다. 이 가이드에서는 흔히 쓰이는 Ubuntu Linux나
 macOS가 서버에 설치돼 있다고 가정한다.
 
-### 필요한 패키지 설치
+#### 필요한 패키지 설치
 서버의 터미널에 접속하여 root 권한으로 `git`, `curl` 그리고 `jq`를 설치한다:
 ```bash
 sudo apt install git curl jq
 ```
 
-### 데이터 디렉토리 준비
+#### 데이터 디렉토리 준비
 서버 머신 상에 AMO 관련 모든 데이터가 저장될 `data_root` 디렉토리가 필요하다.
 해당 디렉토리를 만들기 위해, 다음 명령을 실행한다:
 ```bash
@@ -44,7 +46,7 @@ sudo mkdir -p /mynode/amo/config
 sudo mkdir -p /mynode/amo/data
 ```
 
-### 설정 스크립트 다운로드 
+#### 설정 스크립트 다운로드 
 Validator 노드 설정을 도와주는 스크립트를 사용하기 위해서는 서버의 터미널에
 접속하여 다음 명령을 실행한다:
 ```bash
@@ -59,7 +61,7 @@ git clone https://github.com/amolabs/testnet
 아래에 위치시킨다. 해당 파일들은 데이터 디렉토리에 자동으로 복사된다. 만약
 가지고 있지 않다면, 스트립트가 당신을 위하여 해당 파일들을 생성한다.
 
-### `genesis.json` 얻기
+#### `genesis.json` 얻기
 `genesis.json` 파일을 얻기 위하여 다음 명령을 실행한다:
 ```bash
 cd testnet
@@ -76,20 +78,20 @@ cd testnet
 curl 172.104.88.12:26657/genesis | jq '.result.genesis' > genesis.json
 ```
 
-### 체인 정보
+#### 체인 정보
 | `chain` | `node_id` | `node_ip_addr` | `node_p2p_port` | `node_rpc_port` |
 |-|-|-|-|-|
 | mainnet | `fbd1cb0741e30308bf7aae562f65e3fd54359573` | `172.104.88.12` | `26656` | `26657` |
 | testnet | `a944a1fa8259e19a9bac2c2b41d050f04ce50e51` | `172.105.213.114` | `26656` | `26657` |
 
-## 컴파일된 바이너리를 이용하여 실행
+### 컴파일된 바이너리를 이용하여 실행
 
-### `amod` 데몬 설치
+#### `amod` 데몬 설치
 amoabci 문서의 [Getting
 Started](https://github.com/amolabs/amoabci#getting-started) 섹션을 참조하여
 컴파일된 바이너리 혹은 소스파일을 이용하여 `amod` 데몬을 설치한다.
 
-### 설정 스크립트 실행
+#### 설정 스크립트 실행
 먼저, 현재 서버의 외부 ip 주소와 seed 노드의 정보를 파악한다. 그리고, 다음
 명령을 실행한다: 
 ```bash
@@ -107,7 +109,7 @@ sudo ./setup.sh -e <ext_ip_addr> <data_root> <moniker> <node_id>@<node_ip_addr>:
 sudo ./setup.sh -e 123.456.789.0 /mynode mynodename fbd1cb0741e30308bf7aae562f65e3fd54359573@172.104.88.12:26656
 ```
 
-### 서비스 실행
+#### 서비스 실행
 노드를 실행하기 위하여 root 권한으로 다음 명령을 실행한다:
 ```bash
 sudo systemctl start amod
@@ -123,13 +125,13 @@ sudo systemctl status amod
 sudo systemctl stop amod
 ```
 
-## Docker를 이용하여 실행
+### Docker를 이용하여 실행
 
-### `docker` 설치
+#### `docker` 설치
 Docker 공식 문서의 [Get Docker](https://docs.docker.com/get-docker/)을 참조하여
 컴파일된 바이너리 혹은 소스파일을 이용하여 `docker`를 설치한다.
 
-### 이미지 `amolabs/amod` 가져오기
+#### 이미지 `amolabs/amod` 가져오기
 amolabs의 공식 `amod` 이미지를 가져오기 위해서, 다음 명령을 실행한다:
 ```bash
 sudo docker pull amolabs/amod:<tag>
@@ -142,7 +144,7 @@ sudo docker pull amolabs/amod:<tag>
 sudo docker pull amolabs/amod:1.6.5
 ```
 
-### 설정 스크립트 실행
+#### 설정 스크립트 실행
 먼저, 현재 서버의 외부 ip 주소와 seed 노드의 정보를 파악한다. 그리고, 다음
 명령을 실행한다: 
 ```bash
@@ -160,7 +162,7 @@ sudo ./setup.sh -d -e <ext_ip_addr> <data_root> <moniker> <node_id>@<node_ip_add
 sudo ./setup.sh -d -e 123.456.789.0 /mynode mynodename fbd1cb0741e30308bf7aae562f65e3fd54359573@172.104.88.12:26656
 ```
 
-### 컨테이너 실행
+#### 컨테이너 실행
 노드를 실행(생성 & 시작)하기 위하여 root 권한으로 다음 명령을 실행한다:
 ```bash
 sudo docker run -d --name amod -v <data_root>:/amo amolabs/amod
@@ -181,13 +183,13 @@ sudo docker stats amod
 sudo docker stop amod
 ```
 
-## 후속작업
+### 후속작업
 
-### 키 백업
+#### 키 백업
 `/mynode/amo/config` 아래에 위치한 `priv_validator_key.json`, `node_key.json`
 파일을 안전한 곳에 보관한다.
 
-### 정보 수집
+#### 정보 수집
 다음 명령으로 노드의 validator 주소와 공개키를 확인하여 편리한 곳에 기록해
 둔다.
 ```bash
@@ -201,7 +203,36 @@ curl localhost:26657/status
 블록체인의 정보를 계속 수신하고 있는 중인 것이다. 그러니 동기화 과정이 끝날
 때까지 기다린다.
 
-## Stake 생성
+## 노드 업그레이드
+AMO 블록체인은 성능향상, 프로토콜 업그레이드 등과 같은 여러 이유로 주기적으로
+업그레이드 된다. 프로토콜 업그레이드의 경우, 노드가 셧다운 되어 stake된 코인이
+penalty를 받지 않고 최신의 프로토콜 상에서 작동할 수 있도록, validator 노드
+운영자가 가능한 빨리 노드를 업데이트 하는 것이 강력히 권장된다. Penalty를 막기
+위해서, validator 노드는 사전에 준비되어야 한다. 
+
+블록 높이(block height)가 `UpgradeProtocolHeight`에 도달하면 `amod` 데몬을
+작동시키는 서비스 혹은 docker 컨테이너가 패닉 상태에 빠지게 된다. 노드를 소생
+시키기 위해서는, 최신 프로토콜을 지원하는 `amod` 데몬으로 교체되고 다음과 같이
+재시작 되어야 한다.
+
+'On-chain Protocol Upgrade'가 어떻게 작동하는지에 대해 더욱 자세히 알기
+위해서는 [Protocol](protocol.md#on-chain-protocol-upgrade) 문서를 참조한다.
+
+### 컴파일된 바이너리를 이용하여 실행
+
+#### `amod` 데몬 업데이트
+amoabci 문서의 [Getting
+Started](https://github.com/amolabs/amoabci#getting-started) 섹션을 참조하여,
+컴파일된 바이너리 혹은 소스파일을 이용하여 최신 프로토콜을 지원하는 최신
+`amod`를 설치한다.
+
+#### 서비스 재시작
+`amod` 서비스를 재시작 하기 위하여 다음 명령을 실행한다:
+```bash
+sudo systemctl restart amod
+```
+
+### Stake 생성
 **NOTE:** 메인넷인 경우는 아래의 방법 등과 같이 보다 통제된 방법을 사용해야
 하지만, 테스트넷인 경우는 <a href="http://explorer.amolabs.io/wallet">AMO
 블록체인 탐색기</a>에 접속하여 안내에 따른다.
