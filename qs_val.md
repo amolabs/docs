@@ -16,21 +16,23 @@ necessary AMO coins. This guide will not describe how to acquire AMO coins for
 the mainnet. For both of testnet and mainnet, you need to acquire AMO coins
 before you send a `stake` transaction.
 
-## Prerequisite
+## Run node
 
-### Server machine
+### Prerequisite
+
+#### Server machine
 In order to run a validator node, you need a physical server with a stable
 internet connection or a virtual machine on a cloud service(Amazon AWS, Google
 cloud, Microsoft Azure or similar services). In this guide, we assume typical
 Ubuntu Linux or macOS is installed on the host machine.
 
-### Install necessary packages
+#### Install necessary packages
 Connect to a terminal of the server machine and install `git`, `curl` and `jq`:
 ```bash
 sudo apt install git curl jq
 ```
 
-### Prepare data directory
+#### Prepare data directory
 There needs a directory `data_root` in which all of AMO related data are stored
 on the server machine. To make the directory, execute the following commands:
 ```bash
@@ -44,7 +46,7 @@ sudo mkdir -p /mynode/amo/config
 sudo mkdir -p /mynode/amo/data
 ```
 
-### Download setup script
+#### Download setup script
 To use the script which helps to setup a validator node, connect to a terminal
 of the server machine and execute the following commands:
 ```bash
@@ -59,7 +61,7 @@ If you already have `genesis.json`, `node_key.json` and
 to be copied into data root directory automatically. Otherwise, the script
 would generate them for you.
 
-### Get `genesis.json`
+#### Get `genesis.json`
 To download `genesis.json` file, execute the following commands:
 ```bash
 cd testnet
@@ -76,20 +78,20 @@ cd testnet
 curl 172.104.88.12:26657/genesis | jq '.result.genesis' > genesis.json
 ```
 
-### Chain Info
+#### Chain Info
 | `chain` | `node_id` | `node_ip_addr` | `node_p2p_port` | `node_rpc_port` |
 |-|-|-|-|-|
 | mainnet | `fbd1cb0741e30308bf7aae562f65e3fd54359573` | `172.104.88.12` | `26656` | `26657` |
 | testnet | `a944a1fa8259e19a9bac2c2b41d050f04ce50e51` | `172.105.213.114` | `26656` | `26657` |
 
-## Run using pre-compiled binary
+### Run using pre-compiled binary
 
-### Install `amod` daemon
+#### Install `amod` daemon
 Refer to [Getting Started](https://github.com/amolabs/amoabci#getting-started)
 section in amoabci document to install `amod` from either pre-built binary or
 source.
 
-### Execute setup script
+#### Execute setup script
 First, figure out current server's external ip address and seed node's
 information. Then, execute the following command as root:
 ```bash
@@ -101,13 +103,13 @@ information, depending on which network you would like to connect to by
 referring to [Chain info](#chain-info) section.
 
 For example, if current server's external ip address is `123.456.789.0`(not
-avaiable ip address), data root is `/mynode`, node name is `mynodename` and
+available ip address), data root is `/mynode`, node name is `mynodename` and
 you'd like to connect to mainnet, then execute the following commands:
 ```bash
 sudo ./setup.sh -e 123.456.789.0 /mynode mynodename fbd1cb0741e30308bf7aae562f65e3fd54359573@172.104.88.12:26656
 ```
 
-### Run service
+#### Run service
 To run validator node, execute the following commands as root:
 ```bash
 sudo systemctl start amod
@@ -123,13 +125,13 @@ To stop validator node, execute the following commands as root:
 sudo systemctl stop amod
 ```
 
-## Run using Docker
+### Run using Docker
 
-### Install `docker`
+#### Install `docker`
 Refer to [Get Docker](https://docs.docker.com/get-docker/) in Docker's official
 document to install `docker` from either pre-built binary or source.
 
-### Pull `amolabs/amod` image
+#### Pull `amolabs/amod` image
 To pull the official `amod` image of amolabs, execute the following commands:
 ```bash
 sudo docker pull amolabs/amod:<tag>
@@ -142,7 +144,7 @@ if you would like to pull `1.6.5`, then execute the following commands:
 sudo docker pull amolabs/amod:1.6.5
 ```
 
-### Execute setup script
+#### Execute setup script
 First, figure out current server's external ip address and seed node's
 information. Then, execute the following command as root:
 ```bash
@@ -154,13 +156,13 @@ information, depending on which network you would like to connect to by
 referring to [Chain info](#chain-info) section.
 
 For example, if current server's external ip address is `123.456.789.0`(not
-avaiable ip address), data root is `/mynode`, node name is `mynodename` and
+available ip address), data root is `/mynode`, node name is `mynodename` and
 you'd like to connect to mainnet, then execute the following commands:
 ```bash
 sudo ./setup.sh -d -e 123.456.789.0 /mynode mynodename fbd1cb0741e30308bf7aae562f65e3fd54359573@172.104.88.12:26656
 ```
 
-### Run container
+#### Run container
 To run(create & start) validator node, execute the following commands as root:
 ```bash
 sudo docker run -d --name amod -v <data_root>:/amo amolabs/amod
@@ -181,13 +183,13 @@ To stop validator node, execute the following commands as root:
 sudo docker stop amod
 ```
 
-## Postrequisite
+### Postrequisite
 
-### Backup keys
+#### Backup keys
 Backup `priv_validator_key.json`, `node_key.json` files found below
 `/mynode/amo/config` directory to a safe location.
 
-### Gather information
+#### Gather information
 Execute the following command and write down the validator address and public
 key somewhere convenient.
 ```bash
@@ -200,6 +202,50 @@ Check `"sync_info"` in the output to see if our node is syncing properly with
 the other nodes in the blockchain network. If `"catching_up"` is `true`, then
 it still behind the tip of the blockchain. So, wait until the syncing process
 is complete.
+
+## Upgrade node
+AMO blockchain gets upgraded periodically for various reasons such as
+performance enhancement, protocol upgrade, etc. When it comes to protocol
+upgrade, it is **HIGHLY RECOMMENDED** and **MANDATORY** for validator node
+operators to update the node, as soon as possible, to let it keep working on
+latest protocol, without being shutdown leading to getting penalized on its
+staked coins. To prevent it, validator node should get prepared in advance.
+
+When block height reaches `UpgradeProtocolHeight`, the service or the docker
+container running `amod` daemon would get panicked. To revive the node, the
+`amod` daemon should get replaced with the one supporting the latest protocol
+and gets restarted as follows.
+
+Refer to [Protocol](protocol.md#on-chain-protocol-upgrade) document section to
+learn how 'On-chain Protocol Upgrade' works in more detail.
+
+### Using pre-compiled binary
+
+#### Update `amod` daemon
+Refer to [Getting Started](https://github.com/amolabs/amoabci#getting-started)
+section in amoabci document to install latest `amod`, which supports latest
+protocol, from either pre-built binary or source.
+
+#### Restart service
+To restart `amod` service, execute the following commands: 
+```bash
+sudo systemctl restart amod
+```
+
+### Using Docker
+
+#### Pull latest image
+To pull latest `amolabs/amod` docker image, execute the following commands:
+```bash
+sudo docker pull amolabs/amod:latest
+```
+
+#### Restart container 
+To restart `amod` docker container, execute the following commands:
+```bash
+sudo docker stop amod && sudo docker rm amod
+sudo docker run -d --name amod -v <data_root>:/amo amolabs/amod:latest
+```
 
 ## Stake coins
 **NOTE:** For the mainnet, you must use more controlled steps as the
@@ -341,35 +387,4 @@ For example, to retract 1 AMO from `mydel`'s delegate stakes, exectue the
 following command:
 ```bash
 amocli tx --user mydel 1000000000000000000
-```
-
-## Upgrade node protocol
-
-### Using pre-compiled binary
-
-#### Update `amod` daemon to latest version
-Refer to [Getting Started](https://github.com/amolabs/amoabci#getting-started)
-section in amoabci document to install latest `amod`, which supports latest
-protocol, from either pre-built binary or source.
-
-#### Restart service
-To restart `amod` service, execute the following commands: 
-```bash
-sudo systemctl restart amod
-```
-
-### Using Docker
-
-#### Pull latest image
-To pull latest `amolabs/amod` docker image, execute the following commands:
-```bash
-sudo docker pull amolabs/amod:latest
-```
-
-#### Restart container 
-To restart `amod` docker container, execute the following commands:
-```bash
-sudo docker stop amod
-sudo docker rm amod
-sudo docker run -d --name amod -v <data_root>:/amo amolabs/amod:latest
 ```
