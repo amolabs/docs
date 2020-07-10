@@ -215,21 +215,36 @@ penalty를 받지 않고 최신의 프로토콜 상에서 작동할 수 있도�
 시키기 위해서는, 최신 프로토콜을 지원하는 `amod` 데몬으로 교체되고 다음과 같이
 재시작 되어야 한다.
 
-'On-chain Protocol Upgrade'가 어떻게 작동하는지에 대해 더욱 자세히 알기
-위해서는 [Protocol](protocol.md#on-chain-protocol-upgrade) 문서를 참조한다.
+'On-chain Protocol Upgrade'가 어떻게 작동하는지에 대해 더욱 자세히 알기 위해서는
+[Protocol](protocol.md#on-chain-protocol-upgrade) 문서를 참조한다.
 
-### 컴파일된 바이너리를 이용하여 실행
+### 컴파일된 바이너리를 이용하여
 
 #### `amod` 데몬 업데이트
-amoabci 문서의 [Getting
-Started](https://github.com/amolabs/amoabci#getting-started) 섹션을 참조하여,
-컴파일된 바이너리 혹은 소스파일을 이용하여 최신 프로토콜을 지원하는 최신
-`amod`를 설치한다.
+amoabci 문서의
+[Getting Started](https://github.com/amolabs/amoabci#getting-started) 섹션을
+참조하여, 컴파일된 바이너리 혹은 소스파일을 이용하여 최신 프로토콜을 지원하는
+최신 `amod`를 설치한다.
 
 #### 서비스 재시작
 `amod` 서비스를 재시작 하기 위하여 다음 명령을 실행한다:
 ```bash
 sudo systemctl restart amod
+```
+
+### Docker를 이용하여
+
+### 최신 이미지 가져오기
+최신 `amolabs/amod` docker 이미지를 가져오기 위하여 다음 명령을 실행한다:
+```bash
+sudo docker pull amolabs/amod:latest
+```
+
+#### 컨테이너 재시작
+`amod` docker 컨테이너를 재시작 하기 위하여 다음 명령을 실행한다:
+```bash
+sudo docker stop amod && sudo docker rm amod
+sudo docker run -d --name amod -v <data_root>:/amo amolabs/amod:latest
 ```
 
 ### Stake 생성
