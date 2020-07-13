@@ -352,7 +352,7 @@ A payload format for each transaction type is as the following.
 - `setup` payload
   ```json
   {
-    "storage": "_storage_id_",
+    "storage": _storage_id_, // integer
     "url": "_url_",
     "registration_fee": "_currency_",
     "hosting_fee": "_currency_"
@@ -362,7 +362,7 @@ A payload format for each transaction type is as the following.
 - `close` payload
   ```json
   {
-    "storage": "_storage_id_"
+    "storage": _storage_id_ // integer
   }
   ```
 
