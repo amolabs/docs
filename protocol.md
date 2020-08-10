@@ -378,7 +378,7 @@ A payload format for each transaction type is as the following.
   {
     "target": "_HEX_encoded_parcel_id_",
     "payment": "_currency_",
-    "recipient_pubkey": "_HEX_encoded_secp256r1_pubkey_",
+    "recipient_pubkey": "_HEX_encoded_secp256r1_pubkey_", // optional
     "dealer": "_HEX_encoded_account_address_", // optional
     "dealer_fee": "_currency_", // optional
     "extra": {} // application-specific JSON object, optional

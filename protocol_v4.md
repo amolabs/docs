@@ -384,13 +384,16 @@ A payload format for each transaction type is as the following.
   {
     "target": "_HEX_encoded_parcel_id_",
     "payment": "_currency_",
+    "recipient_pubkey": "_HEX_encoded_secp256r1_pubkey_", // optional
     "dealer": "_HEX_encoded_account_address_", // optional
     "dealer_fee": "_currency_", // optional
     "extra": {} // application-specific JSON object, optional
   }
   ```
   where `target` is the id of a parcel for which the sender wants usage grant,
-  `payment` is amount of AMO coin to be collected by the seller. In order for
+  `payment` is amount of AMO coin to be collected by the seller.
+  `recipient_pubkey` is a public key that granters use to derive a grantee's
+  address and to encrypt DEK to produce a buyer key custody. In order for
   `dealer_fee` to work, both of `dealer` and `dealer_fee` must be valid.
 
 - `grant` payload
