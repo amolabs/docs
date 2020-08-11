@@ -382,33 +382,33 @@ A payload format for each transaction type is as the following.
 - `request` payload:
   ```json
   {
+    "recipient": "_HEX_encoded_account_address_",
     "target": "_HEX_encoded_parcel_id_",
     "payment": "_currency_",
-    "recipient_pubkey": "_HEX_encoded_secp256r1_pubkey_", // optional
     "dealer": "_HEX_encoded_account_address_", // optional
     "dealer_fee": "_currency_", // optional
     "extra": {} // application-specific JSON object, optional
   }
   ```
-  where `target` is the id of a parcel for which the sender wants usage grant,
-  `payment` is amount of AMO coin to be collected by the seller.
-  `recipient_pubkey` is a public key that granters use to derive a grantee's
-  address and to encrypt DEK to produce a buyer key custody. In order for
-  `dealer_fee` to work, both of `dealer` and `dealer_fee` must be valid.
+  where `recipient` is the address of a recipient expected to get granted a
+  usage on the parcel, `target` is the id of a parcel for which the sender
+  wants usage grant, `payment` is amount of AMO coin to be collected by the
+  seller. In order for `dealer_fee` to work, both of `dealer` and `dealer_fee`
+  must be valid.
 
 - `grant` payload
   ```json
   {
+    "recipient": "_HEX_encoded_account_address_",
     "target": "_HEX_encoded_parcel_id_",
-    "grantee": "_HEX_encoded_account_address_",
     "custody": "_HEX_encoded_key_custody_",
     "extra": {} // application-specific JSON object, optional
   }
   ```
-  where `target` is the id of a parcel currently being granted, `grantee` is
-  the address of a buyer, `custody` is a encrypted key material used to encrypt
-  the data parcel body, and the key material is encrypted by the buyer's public
-  key.
+  where `recipient` is the address of a recipient, `target` is the id of a
+  parcel currently being granted, , `custody` is a encrypted key material used
+  to encrypt the data parcel body, and the key material is encrypted by the
+  buyer's public key.
 
 - `discard` payload
   ```json
@@ -421,20 +421,23 @@ A payload format for each transaction type is as the following.
 - `cancel` payload
   ```json
   {
+    "recipient": "_HEX_encoded_account_address_",
     "target": "_HEX_encoded_parcel_id_"
   }
   ```
-  where `target` is the id of a parcel which the sender requested previously.
+  where `recipient` is the address of a recipient expected to get granted a
+  usage on the parcel, `target` is the id of a parcel which the sender
+  requested previously.
 
 - `revoke` payload
   ```json
   {
-    "target": "_HEX_encoded_parcel_id_",
-    "grantee": "_HEX_encoded_account_address_"
+    "recipient": "_HEX_encoded_account_address_",
+    "target": "_HEX_encoded_parcel_id_"
   }
   ```
-  where `target` is the id of a parcel currently being revoked, and `grantee`
-  is the address of a buyer which is previously granted a usage on the parcel.
+  where `recipient` is the address of a buyer which is previously granted a
+  usage on the parcel, `target` is the id of a parcel currently being revoked.
 
 - `claim` payload
   ```json
@@ -711,13 +714,15 @@ business data items, while tier 3 items are pretty much optional.
     - value: compact representation of a JSON object
       ```json
       {
+        "agnecy": "_HEX_encoded_account_address_",
+        "recipient": "_HEX_encoded_account_address_",
         "payment": "_currency_",
         "dealer": "_HEX_encoded_account_address_", // optional
         "dealer_fee": "_currency_", // optional
         "extra": {} // application-specific JSON object
       }
       ```
-    - key is a concatenation of the sender and `target` of a request tx
+    - key is a concatenation of `recipient` and `target` of a request tx
 - usage
     - key: `_account_address_` + `_parcel_id_`
     - value: compact representation of a JSON object
@@ -727,7 +732,7 @@ business data items, while tier 3 items are pretty much optional.
         "extra": {} // application-specific JSON object
       }
       ```
-    - key is a concatenation of `grantee` and `target` of a grant tx
+    - key is a concatenation of `recipient` and `target` of a grant tx
 - did
     - key: `_did_address_`
     - value: compact representation of a JSON object
@@ -1058,17 +1063,17 @@ performs a validity check and add a new record with its extra information in
 
 1. validity check
     1. `tx.target` should exist in `parcel` store
-    1. form request ID `request` from `sender.address`+`tx.target`
+    1. form request ID `request` from `tx.recipient`+`tx.target`
     1. `request` should NOT exist in `request` store
     1. `request` should NOT exist in `usage` store
-    1. `sender` &ne; `tx.target.owner`
+    1. `tx.recipient` &ne; `tx.target.owner`
     1. if `tx.dealer` and `tx.dealer_fee` is valid, then<br/>
        `sender.balance` &ge; `tx.fee` + `tx.payment` + `tx.dealer_fee`
     1. else<br/>
        `sender.balance` &ge; `tx.fee` + `tx.payment`
 1. state change
-    1. add new record having `sender.address`+`tx.target` as a key in `request`
-       store
+    1. add new record having `tx.recipient`+`tx.target` as a key in `request`
+       store where `request.agency` is `sender`
     1. if `tx.dealer` and `tx.dealer_fee` is valid, then<br/>
        `sender.balance` &larr; `sender.balance` - `tx.fee` - `tx.payment` -
        `tx.dealer_fee`
@@ -1081,16 +1086,18 @@ performs a validity check and remove record in `request` store.
 
 1. validity check
     1. `tx.target` should exist in `parcel` store
-    1. form request ID `request` from `sender.address`+`tx.target`
+    1. form request ID `request` from `tx.recipient`+`tx.target`
     1. `request` should exist in `request` store
+    1. `sender` == `request.agency`
     1. `sender.balance` &ge; `tx.fee`
 1. state change
-    1. remove record corresponding to `tx.target` in `request` store
-    1. if `tx.dealer` and `tx.dealer_fee` is valid, then<br/>
-       `sender.balance` &larr; `sender.balance` - `tx.fee` + `request.payment` +
+    1. delete record having id as `tx.recipient` + `tx.target` in `request`
+       store
+    1. if `tx.dealer` and `tx.dealer_fee` is valid, then<br/> `sender.balance`
+       &larr; `sender.balance` - `tx.fee` + `request.payment` +
        `request.dealer_fee`
-    1. else<br/>
-       `sender.balance` &larr; `sender.balance` - `tx.fee` + `tx.target.payment`
+    1. else<br/> `sender.balance` &larr; `sender.balance` - `tx.fee` +
+       `tx.target.payment`
     1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
 **NOTE:** `payment` refers to the amount of coins `sender` is willing to pay
@@ -1109,7 +1116,7 @@ performs a validity check and add a new record with its extra information in
     1. extract storage ID `storage` from `tx.target`
     1. `storage` should exist in storage store and `storage.active` should be
        true
-    1. find `request` having id as `tx.grantee` + `tx.target` in `request`
+    1. find `request` having id as `tx.recipient` + `tx.target` in `request`
        store
     1. if `sender` == `tx.target.owner`, then <br/>
        `sender.balance` + `request.payment` &ge; `storage.hosting_fee` +
@@ -1118,8 +1125,10 @@ performs a validity check and add a new record with its extra information in
        `sender.balance` &ge; `tx.fee` and <br/>
        `tx.target.owner.balance` + `request.payment` &ge; `storage.hosting_fee`
 1. state change
-    1. delete record having id as `tx.grantee` + `tx.target` in `request` store
-    1. add new record having id as `tx.grantee` + `tx.target` in `usage` store
+    1. delete record having id as `tx.recipient` + `tx.target` in `request`
+       store
+    1. add new record having id as `tx.recipient` + `tx.target` in `usage`
+       store
     1. `tx.target.owner.balance` &larr; `tx.target.owner.balance` +
        `tx.target.payment` - `storage.hosting_fee`
     1. `storage.owner.balance` &larr; `storage.owner.balance` +
@@ -1138,7 +1147,7 @@ performs a validity check and remove record in `usage` store.
     1. `sender` == `tx.target.owner` or `sender` == `tx.target.proxy_account`
     1. `sender.balance` &ge; `tx.fee`
 1. state change
-    1. remove record corresponding to `tx.target` in `usage` store
+    1. delete record having id as `tx.recipient` + `tx.target` in `usage` store
     1. `sender.balance` &larr; `sender.balance` - `tx.fee`
     1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
