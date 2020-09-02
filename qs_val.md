@@ -122,29 +122,33 @@ block, you can skip this step.
 
 As syncing from genesis block consumes lots of physical time, we offer snapshot
 of blocks taken at certain block height. The offerings are as follows:
-| `chain_id` | `version` | `db_backend` | `block_height` |
-|-|-|-|-|
-| `cherryblossom_01` | `v1.7.5` | `rocksdb` | `6451392` |
-| `cherryblossom_01` | `v1.6.5` | `rocksdb` | `2908399` |
+| chain id | `preset` | `version` | `db_backend` | `block_height` | size</br>(comp/raw) |
+|-|-|-|-|-|-|
+| `amo-cherryblossom-01` | `cherryblossom` | `v1.7.5` | `rocksdb` | `6451392` | 56GB / 116GB |
+| `amo-cherryblossom-01` | `cherryblossom` | `v1.6.5` | `rocksdb` | `2908399` | 21GB / 50GB |
 
-**NOTE:** Mainnet's chain id is `cherryblossom_01`.
+**NOTE:** Mainnet's chain id is `amo-cherryblossom-01`.
 
 To download and setup the snapshot, execute the following commands:
 ```bash
-sudo wget http://us-east-1.linodeobjects.com/amo-archive/<chain_id>_<version>_<db_backend>_<block_height>.tar.bz2
-sudo tar -xjf <chain_id>_<version>_<db_backend>_<block_height>.tar.bz2
+sudo wget http://us-east-1.linodeobjects.com/amo-archive/<preset>_<version>_<db_backend>_<block_height>.tar.bz2
+sudo tar -xjf <preset>_<version>_<db_backend>_<block_height>.tar.bz2
 sudo rm -rf <data_root>/amo/data/
-sudo mv data/ <data_root>/amo/
+sudo mv amo-data/amo/data/ <data_root>/amo/
 ```
 
-For example, if chain id is `cherryblossom_01`, version is `v1.7.5`, db backend
-is `rocksdb`, block height is `6451392`, and data root is `/mynode, then
-execute the following commands:
+**NOTE:** The directory structure of files extracted from compressed `*.tar.bz2`
+file may differ from each one. Check out whether extracted `data/` directory is
+properly placed under `<data_root>/amo/` directory.
+
+For example, if chain id is `amo-cherryblossom-01`, version is `v1.7.5`, db
+backend is `rocksdb`, block height is `6451392`, and data root is `/mynode,
+then execute the following commands:
 ```bash
 sudo wget http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.5_rocksdb_6451392.tar.bz2
 sudo tar -xjf cherryblossom_v1.7.5_rocksdb_6451392.tar.bz2
 sudo rm -rf /mynode/amo/data/
-sudo mv data/ /mynode/amo/
+sudo mv amo-data/amo/data/ /mynode/amo/
 ```
 
 That' pretty much it. Counduct the following steps.

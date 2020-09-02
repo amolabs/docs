@@ -120,24 +120,28 @@ sudo ./setup.sh -d -e 111.111.111.111 /mynode mynodename fbd1cb0741e30308bf7aae5
 
 Genesis 블록부터 동기화하는 것은 많은 물리적 시간을 소모하기에, 특정 블록
 높이에서 찍은 블록 스냅샷을 제공한다. 제공되는 스냅샷은 다음과 같다:
-| `chain_id` | `version` | `db_backend` | `block_height` |
-|-|-|-|-|
-| `cherryblossom_01` | `v1.7.5` | `rocksdb` | `6451392` |
-| `cherryblossom_01` | `v1.6.5` | `rocksdb` | `2908399` |
+| chain id | `preset` | `version` | `db_backend` | `block_height` | size</br>(comp/raw) |
+|-|-|-|-|-|-|
+| `amo-cherryblossom-01` | `cherryblossom` | `v1.7.5` | `rocksdb` | `6451392` | 56GB / 116GB |
+| `amo-cherryblossom-01` | `cherryblossom` | `v1.6.5` | `rocksdb` | `2908399` | 21GB / 50GB |
 
-**NOTE:** **mainne**t의 chain id 는 `cherryblossom_01` 이다.
+**NOTE:** **mainne**t의 chain id 는 `amo-cherryblossom-01` 이다.
 
 스냅샷을 다운로드 하고 설정하기 위해서, 다음 명령을 실행한다:
 ```bash
-sudo wget http://us-east-1.linodeobjects.com/amo-archive/<chain_id>_<version>_<db_backend>_<block_height>.tar.bz2
-sudo tar -xjf <chain_id>_<version>_<db_backend>_<block_height>.tar.bz2
+sudo wget http://us-east-1.linodeobjects.com/amo-archive/<preset>_<version>_<db_backend>_<block_height>.tar.bz2
+sudo tar -xjf <preset>_<version>_<db_backend>_<block_height>.tar.bz2
 sudo rm -rf <data_root>/amo/data/
-sudo mv data/ <data_root>/amo/
+sudo mv amo-data/amo/data/ <data_root>/amo/
 ```
 
-예를 들어, chain id 가 `cherryblossom_01`, version 은 `v1.7.5`, db backend 가
-`rocksdb`, 블록 높이는 `6451392`, 데이터 디렉토리가 `/mynode` 이면, 다음 명령을
-실행한다:
+**NOTE:** 압축된 `*.tar.bz2` 파일로부터 압축 해제된 파일의 디렉토리 구조가
+파일에 따라 다를 수 있다. 압축 해제된 `data/` 디렉토리가 `<data_root>/amo/`
+디렉토리 아래에 잘 위치해 있는지 확인하여야 한다.
+
+예를 들어, chain id 가 `amo-cherryblossom-01`, version 은 `v1.7.5`, db backend
+가 `rocksdb`, 블록 높이는 `6451392`, 데이터 디렉토리가 `/mynode` 이면, 다음
+명령을 실행한다:
 ```bash
 sudo wget http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.5_rocksdb_6451392.tar.bz2
 sudo tar -xjf cherryblossom_v1.7.5_rocksdb_6451392.tar.bz2
@@ -145,7 +149,7 @@ sudo rm -rf /mynode/amo/data/
 sudo mv data/ /mynode/amo/
 ```
 
-스냅샷을로 동기화 하기 위한 설정이 끝났다.
+스냅샷으로 동기화 하기 위한 설정이 끝났다.
 
 #### 컨테이너 실행
 노드를 생성하고 실행하기 위하여 다음 명령을 실행한다:
