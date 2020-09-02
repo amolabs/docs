@@ -113,8 +113,42 @@ sudo ./setup.sh -d -e <ext_ip_addr> <data_root> <moniker> <node_id>@<node_ip_add
 sudo ./setup.sh -d -e 111.111.111.111 /mynode mynodename fbd1cb0741e30308bf7aae562f65e3fd54359573@172.104.88.12:26656
 ```
 
+#### 스냅샷으로 동기화 (선택사항)
+노드를 실행하기 전에, 블록을 동기화하는 방법에는 두 가지 방법이 있다; genesis
+블록부터 동기화 혹은 스냅샷부터 동기화. 만약 genesis 블록부터 동기화하기
+원한다면 해당 단계를 건너뛸 수 있다.
+
+Genesis 블록부터 동기화하는 것은 많은 물리적 시간을 소모하기에, 특정 블록
+높이에서 찍은 블록 스냅샷을 제공한다. 제공되는 스냅샷은 다음과 같다:
+| `chain_id` | `version` | `db_backend` | `block_height` |
+|-|-|-|-|
+| `cherryblossom_01` | `v1.7.5` | `rocksdb` | `6451392` |
+| `cherryblossom_01` | `v1.6.5` | `rocksdb` | `2908399` |
+
+**NOTE:** **mainne**t의 chain id 는 `cherryblossom_01` 이다.
+
+스냅샷을 다운로드 하고 설정하기 위해서, 다음 명령을 실행한다:
+```bash
+sudo wget http://us-east-1.linodeobjects.com/amo-archive/<chain_id>_<version>_<db_backend>_<block_height>.tar.bz2
+sudo tar -xjf <chain_id>_<version>_<db_backend>_<block_height>.tar.bz2
+sudo rm -rf <data_root>/amo/data/
+sudo mv data/ <data_root>/amo/
+```
+
+예를 들어, chain id 가 `cherryblossom_01`, version 은 `v1.7.5`, db backend 가
+`rocksdb`, 블록 높이는 `6451392`, 데이터 디렉토리가 `/mynode` 이면, 다음 명령을
+실행한다:
+```bash
+sudo wget http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.5_rocksdb_6451392.tar.bz2
+sudo tar -xjf cherryblossom_v1.7.5_rocksdb_6451392.tar.bz2
+sudo rm -rf /mynode/amo/data/
+sudo mv data/ /mynode/amo/
+```
+
+스냅샷을로 동기화 하기 위한 설정이 끝났다.
+
 #### 컨테이너 실행
-노드를 생성하기 위하여 다음 명령을 실행한다:
+노드를 생성하고 실행하기 위하여 다음 명령을 실행한다:
 ```bash
 sudo docker run -d --name amod -v <data_root>:/amo amolabs/amod
 ```

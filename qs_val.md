@@ -115,8 +115,42 @@ mainnet, then execute the following commands:
 sudo ./setup.sh -d -e 111.111.111.111 /mynode mynodename fbd1cb0741e30308bf7aae562f65e3fd54359573@172.104.88.12:26656
 ```
 
+#### Sync from snapshot (optional)
+Before running a node, there are two available options to sync blocks; sync
+from genesis block or sync from snapshot. If you'd like to sync from genesis
+block, you can skip this step.
+
+As syncing from genesis block consumes lots of physical time, we offer snapshot
+of blocks taken at certain block height. The offerings are as follows:
+| `chain_id` | `version` | `db_backend` | `block_height` |
+|-|-|-|-|
+| `cherryblossom_01` | `v1.7.5` | `rocksdb` | `6451392` |
+| `cherryblossom_01` | `v1.6.5` | `rocksdb` | `2908399` |
+
+**NOTE:** Mainnet's chain id is `cherryblossom_01`.
+
+To download and setup the snapshot, execute the following commands:
+```bash
+sudo wget http://us-east-1.linodeobjects.com/amo-archive/<chain_id>_<version>_<db_backend>_<block_height>.tar.bz2
+sudo tar -xjf <chain_id>_<version>_<db_backend>_<block_height>.tar.bz2
+sudo rm -rf <data_root>/amo/data/
+sudo mv data/ <data_root>/amo/
+```
+
+For example, if chain id is `cherryblossom_01`, version is `v1.7.5`, db backend
+is `rocksdb`, block height is `6451392`, and data root is `/mynode, then
+execute the following commands:
+```bash
+sudo wget http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.5_rocksdb_6451392.tar.bz2
+sudo tar -xjf cherryblossom_v1.7.5_rocksdb_6451392.tar.bz2
+sudo rm -rf /mynode/amo/data/
+sudo mv data/ /mynode/amo/
+```
+
+That' pretty much it. Counduct the following steps.
+
 #### Run container
-To create a node, execute the following command:
+To create and run a node, execute the following command:
 ```bash
 sudo docker run -d --name amod -v <data_root>:/amo amolabs/amod
 ```
