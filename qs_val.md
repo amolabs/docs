@@ -156,7 +156,7 @@ That' pretty much it. Counduct the following steps.
 #### Run container
 To create and run a node, execute the following command:
 ```bash
-sudo docker run -d --name amod -v <data_root>:/amo amolabs/amod
+sudo docker run -d --name amod -v <data_root>/amo:/amo amolabs/amod
 ```
 
 To start a node, execute the following command:

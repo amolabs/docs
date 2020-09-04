@@ -146,7 +146,7 @@ sudo mv amo-data/amo/data/ <data_root>/amo/
 sudo wget http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.5_rocksdb_6451392.tar.bz2
 sudo tar -xjf cherryblossom_v1.7.5_rocksdb_6451392.tar.bz2
 sudo rm -rf /mynode/amo/data/
-sudo mv data/ /mynode/amo/
+sudo mv amo-data/amo/data/ <data_root>/amo/
 ```
 
 스냅샷으로 동기화 하기 위한 설정이 끝났다.
@@ -154,7 +154,7 @@ sudo mv data/ /mynode/amo/
 #### 컨테이너 실행
 노드를 생성하고 실행하기 위하여 다음 명령을 실행한다:
 ```bash
-sudo docker run -d --name amod -v <data_root>:/amo amolabs/amod
+sudo docker run -d --name amod -v <data_root>/amo:/amo amolabs/amod
 ```
 
 노드를 시작하기 위하여 다음 명령을 실행한다:
