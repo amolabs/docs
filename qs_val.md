@@ -124,6 +124,7 @@ As syncing from genesis block consumes lots of physical time, we offer snapshot
 of blocks taken at certain block height. The offerings are as follows:
 | chain id | `preset` | `version` | `db_backend` | `block_height` | size</br>(comp/raw) |
 |-|-|-|-|-|-|
+| `amo-cherryblossom-01` | `cherryblossom` | `v1.7.5` | `rocksdb` | `7698783` | 70GB / 141GB |
 | `amo-cherryblossom-01` | `cherryblossom` | `v1.7.5` | `rocksdb` | `6451392` | 56GB / 116GB |
 | `amo-cherryblossom-01` | `cherryblossom` | `v1.6.5` | `rocksdb` | `2908399` | 21GB / 50GB |
 
@@ -142,11 +143,11 @@ file may differ from each one. Check out whether extracted `data/` directory is
 properly placed under `<data_root>/amo/` directory.
 
 For example, if chain id is `amo-cherryblossom-01`, version is `v1.7.5`, db
-backend is `rocksdb`, block height is `6451392`, and data root is `/mynode,
+backend is `rocksdb`, block height is `7698783`, and data root is `/mynode,
 then execute the following commands:
 ```bash
-sudo wget http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.5_rocksdb_6451392.tar.bz2
-sudo tar -xjf cherryblossom_v1.7.5_rocksdb_6451392.tar.bz2
+sudo wget http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.5_rocksdb_7698783.tar.bz2
+sudo tar -xjf cherryblossom_v1.7.5_rocksdb_7698783.tar.bz2
 sudo rm -rf /mynode/amo/data/
 sudo mv amo-data/amo/data/ /mynode/amo/
 ```
