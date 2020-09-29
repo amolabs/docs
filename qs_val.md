@@ -122,11 +122,11 @@ block, you can skip this step.
 
 As syncing from genesis block consumes lots of physical time, we offer snapshot
 of blocks taken at certain block height. The offerings are as follows:
-| chain id | `preset` | `version` | `db_backend` | `block_height` | size</br>(comp/raw) |
-|-|-|-|-|-|-|
-| `amo-cherryblossom-01` | `cherryblossom` | `v1.7.5` | `rocksdb` | `7698783` | 70GB / 141GB |
-| `amo-cherryblossom-01` | `cherryblossom` | `v1.7.5` | `rocksdb` | `6451392` | 56GB / 116GB |
-| `amo-cherryblossom-01` | `cherryblossom` | `v1.6.5` | `rocksdb` | `2908399` | 21GB / 50GB |
+| chain id | `preset` | `version` | `db_backend` | `block_height` | size</br>(comp/raw) | link |
+|-|-|-|-|-|-|-|
+| `amo-cherryblossom-01` | `cherryblossom` | `v1.7.5` | `rocksdb` | `7698783` | 70GB / 141GB | [file](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.5_rocksdb_7698783.tar.bz2), [sha256](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.5_rocksdb_7698783.tar.bz2.sha256)
+| `amo-cherryblossom-01` | `cherryblossom` | `v1.7.5` | `rocksdb` | `6451392` | 56GB / 116GB | [file](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.5_rocksdb_6451392.tar.bz2), [sha256](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.5_rocksdb_6451392.tar.bz2.sha256)
+| `amo-cherryblossom-01` | `cherryblossom` | `v1.6.5` | `rocksdb` | `2908399` | 21GB / 50GB | [file](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.6.5_rocksdb_2908399.tar.bz2), [sha256](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.6.5_rocksdb_2908399.tar.bz2.sha256) |
 
 **NOTE:** Mainnet's chain id is `amo-cherryblossom-01`.
 
