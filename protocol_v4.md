@@ -580,7 +580,7 @@ availability than `int64`, `laziness_window`, `block_binding_window`,
 `int64` as it is an tendermint-dependant configuration.
 
 ### State stores
-There are 14 default state stores and optional UDC(user-defined coin) balance
+There are 12 default state stores and optional UDC(user-defined coin) balance
 and balance lock stores.
 
 | tier | category | store | prefix |
