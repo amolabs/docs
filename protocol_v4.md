@@ -161,20 +161,20 @@ i.e. `parcel` stores extra from register tx, `request` stores extra from
 register tx and request tx, `usage` stores extra from register tx, request tx
 and grant tx.
 
-parcel store extra
+extra in `parcel` store
 ```json
 {
   "register": {} // application-specific JSON object, optional
 }
 ```
-request store extra
+extra in `request` store
 ```json
 {
   "register": {}, // application-specific JSON object, optional
   "request": {} // application-specific JSON object, optional
 }
 ```
-usage store extra
+extra in `usage` store
 ```json
 {
   "register": {}, // application-specific JSON object, optional
@@ -194,7 +194,7 @@ JSON object with members.
 }
 ```
 Each member is marked as *optional*, so an empty object(`{}`) is valid extra
-information for all of three stores.
+information for all of three state stores.
 
 ## Message Format
 ### Transaction
@@ -506,14 +506,14 @@ obligation is that every blockchain node must be able to calculate the same
 the same semantic meaning. This section describes the data format suitable for
 calculating `app_hash`.
 
-The state database stores data items in separate logical *stores* according to
-the data type. To separate each logical store from the others, each data store
-has unique prefix for the database key. A prefix is a human-readable ASCII
-string, but it is treated as a byte array when concatenating with the in-store
-data item key.
+The state database stores data items in separate logical *state stores*
+according to the data type. To distinguish between logical state stores, each
+state store has unique prefix for the database key. A prefix is a
+human-readable ASCII string, but it is treated as a byte array when
+concatenating with the in-store data item key.
 
 ### Top-level data
-There is a top-level data item not associated with any logical data store. This
+There is a top-level data item not associated with any logical state store. This
 item has the key as `config` and the value is a JSON marshaled blockchain
 configuration.
 ```json
@@ -579,8 +579,8 @@ availability than `int64`, `laziness_window`, `block_binding_window`,
 `lockup_period`, `draft_*_count`, and `upgrade_protocol_height` have to use
 `int64` as it is an tendermint-dependant configuration.
 
-### Data stores
-There are 12 default data stores and optional UDC(user-defined coin) balance
+### State stores
+There are 14 default state stores and optional UDC(user-defined coin) balance
 and balance lock stores.
 
 | tier | category | store | prefix |
@@ -770,7 +770,7 @@ business data items, while tier 3 items are pretty much optional.
 
 ### Merkle tree and app hash
 Although the internal state DB is composed of top-level data items and several
-logical data stores, its actual form is a linear key-value database. In
+logical state stores, its actual form is a linear key-value database. In
 viewpoint of state management, it suffices to manage this database in any form
 as long as the contents are equivalent. However, in order to interact with the
 underlying Tendermint consensus engine, we need to calculate *app hash* from
