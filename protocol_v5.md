@@ -1,6 +1,6 @@
 # AMO Blockchain Protocol Specification
 
-AMO protocol version 4.
+AMO protocol version 5.
 
 ## Introduction
 
@@ -1174,14 +1174,15 @@ performs a validity check and remove record in `usage` store.
     1. `sender.balance` &larr; `sender.balance` - `tx.fee`
     1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
-### Transferring data ownership
+### Transferring data parcel ownership
+
 Upon receiving a `transfer` transaction from an account with an asset type of `parcel`, an AMO blockchain node performs a validity check and transfers the ownership of the parcel to the recipient when the transaction is valid.
 
 NOTE: When the asset type is AMO coin or UDC coin, see
 [Transferring coin](#transferring-coin).
 
 1. validity check
-    1. `tx.parcel.owner` = `tx.sender`
+    1. `tx.parcel.owner` == `tx.sender`
     1. `sender.balance` &ge; `tx.fee`
 1. state change
     1. `tx.parcel.owner` &larr; `tx.to`
