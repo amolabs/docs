@@ -1,6 +1,9 @@
 # AMO Blockchain Protocol Specification
 
+AMO protocol version 3.
+
 ## Introduction
+
 Although the current implementation of AMO blockchain depends ***heavily*** on
 Tendermint, AMO blockchain protocol itself is independent of Tendermint. It is
 described by several protocol messages and corresponding state transition in
@@ -158,20 +161,20 @@ i.e. `parcel` stores extra from register tx, `request` stores extra from
 register tx and request tx, `usage` stores extra from register tx, request tx
 and grant tx.
 
-parcel store extra
+extra in `parcel` store
 ```json
 {
   "register": {} // application-specific JSON object, optional
 }
 ```
-request store extra
+extra in `request` store
 ```json
 {
   "register": {}, // application-specific JSON object, optional
   "request": {} // application-specific JSON object, optional
 }
 ```
-usage store extra
+extra in `usage` store
 ```json
 {
   "register": {}, // application-specific JSON object, optional
@@ -191,7 +194,7 @@ JSON object with members.
 }
 ```
 Each member is marked as *optional*, so an empty object(`{}`) is valid extra
-information for all of three stores.
+information for all of three state stores.
 
 ## Message Format
 ### Transaction
@@ -474,14 +477,14 @@ obligation is that every blockchain node must be able to calculate the same
 the same semantic meaning. This section describes the data format suitable for
 calculating `app_hash`.
 
-The state database stores data items in separate logical *stores* according to
-the data type. To separate each logical store from the others, each data store
-has unique prefix for the database key. A prefix is a human-readable ASCII
-string, but it is treated as a byte array when concatenating with the in-store
-data item key.
+The state database stores data items in separate logical *state stores*
+according to the data type. To distinguish between logical state stores, each
+state store has unique prefix for the database key. A prefix is a
+human-readable ASCII string, but it is treated as a byte array when
+concatenating with the in-store data item key.
 
 ### Top-level data
-There is a top-level data item not associated with any logical data store. This
+There is a top-level data item not associated with any logical state store. This
 item has the key as `config` and the value is a JSON marshaled blockchain
 configuration.
 ```json
@@ -543,8 +546,8 @@ availability than `int64`, `laziness_counter_window`, `block_binding_window`,
 `lockup_period`, `draft_*_count`, and `upgrade_protocol_height` have to use
 `int64` as it is an tendermint-dependant configuration.
 
-### Data stores
-There are 12 default data stores and optional UDC(user-defined coin) balance
+### State stores
+There are 12 default state stores and optional UDC(user-defined coin) balance
 and balance lock stores.
 
 | tier | category | store | prefix |
@@ -559,8 +562,8 @@ and balance lock stores.
 | 2 | non-fungible asset | request | `request:` |
 | 2 | non-fungible asset | usage | `usage:` |
 | 3 | maintenance | UDC | `udc:` |
-| 3 | fungible asset | UDC balance | `balance:<udc_id>:` |
 | 3 | maintenance | UDC balance lock | `udclock:<udc_id>:` |
+| 3 | fungible asset | UDC balance | `balance:<udc_id>:` |
 
 Tier 0 items are essential for the operations of a DPoS-based blockchain. Tier
 1 items are important as much as the tier 0 items, but the chain may be still
@@ -712,7 +715,7 @@ business data items, while tier 3 items are pretty much optional.
 
 ### Merkle tree and app hash
 Although the internal state DB is composed of top-level data items and several
-logical data stores, its actual form is a linear key-value database. In
+logical state stores, its actual form is a linear key-value database. In
 viewpoint of state management, it suffices to manage this database in any form
 as long as the contents are equivalent. However, in order to interact with the
 underlying Tendermint consensus engine, we need to calculate *app hash* from
@@ -1014,13 +1017,13 @@ performs a validity check and add a new record with its extra information in
     1. else<br/>
        `sender.balance` &ge; `tx.fee` + `tx.payment`
 1. state change
-    1. add new record having `sender.address`+`tx.target` as a key in `request`
+    1. add new record having `sender`+`tx.target` as a key in `request`
        store
     1. if `tx.dealer` and `tx.dealer_fee` is valid, then<br/>
        `sender.balance` &larr; `sender.balance` - `tx.fee` - `tx.payment` -
        `tx.dealer_fee`
     1. else<br/>
-       `sender.balance` &larr; `sender.balance` - `tx.fee` - `tx.payment` 
+       `sender.balance` &larr; `sender.balance` - `tx.fee` - `tx.payment`
     1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
 Upon receiving a `cancel` transaction from an account, an AMO blockchain node
@@ -1149,9 +1152,10 @@ performs a validity check and reduce sender's designated UDC balance.
 ### Completing Block
 After processing state changes triggered by users' transactions in
 `DeliverTx()`, the nodes complete a block in `EndBlock()` by applying
-additional state changes which are the artifacts of following operations.
+additional state changes described in this section.
 
 #### Distributing Incentive
+
 `tx.fee` is collected while transactions are processed and it gets included in
 `blk.incentive`. Then, `blk.incentive` is distributed among the stakers and the
 delegators at the end of block creation. The process is explained in [incentive
@@ -1183,6 +1187,7 @@ consensus algorithm of tendermint and results in the interruption of generating
 blocks on the chain.
 
 ##### Voting power calculation
+
 **TM:** In tendermint, a **voting power** has a similar role as a stake in PoS
 or DPoS consensus mechanism. One limitation is that sum of voting powers of all
 validators must not exceed the value `MaxTotalVotingPower`, which is 2^60 - 1.
@@ -1190,6 +1195,7 @@ When we use one-to-one relation between stake value and voting power, exceeding
 this max limit is not very likely, but possible anyway. So, the validator set
 update mechanism must adjust voting power of each validator, so that total sum
 of voting power does not exceed `MaxTotalVotingPower`:
+
 1. For each validator `Val_i`, set voting power `vp_i` to be `stake` of
    `Val_i`.
 1. Calculate `TotalVotingPower`, which is the sum of `vp_i`s of all validators
@@ -1260,7 +1266,9 @@ weight.
 To maintain the DPoS blockchain as healthy as possible, it is essential to
 encourage block validators to participate in creating and verifying blocks with
 incentive, but also to impose responsibilities on their misbehavior with
-penalty.
+penalty. The penalty shall be distributed among the stake holder and the
+delegated stake holders according to the distribution mechanism presented in
+[Incentive Distribution](#distribution).
 
 The types of abnormal behavior and parameters are defined as follows:
 
