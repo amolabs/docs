@@ -1,7 +1,8 @@
-# Validator와 Delegator를 위한 빠른 실행 가이드
+# Validator를 위한 빠른 실행 가이드
 This document is available in [English](qs_val.md) also.
 
 ## 소개
+
 이 가이드는 validator 노드를 준비하고 실행하기 위한 방법과 노드에 stake 하고
 delegate 하는 방법을 기술한다. 이 가이드는 [amoabci
 README](https://github.com/amolabs/amoabci/README.md)에 설명된 방법을 활용한

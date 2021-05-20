@@ -1,4 +1,4 @@
-# Quick Start Guide for Validator and Delegator
+# Quick Start Guide for Validator
 This document is available in [Korean](qs_val.ko.md) also.
 
 ## Introduction
