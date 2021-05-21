@@ -1,4 +1,6 @@
 # 프로토콜 업그레이드 가이드
+This document is available in [English](protocol_upgrade.md) also.
+
 이 문서의 대상은 validator 여부와 상관 없이 AMO blockchain node를 운영하는 모든
 주체이다. 이 문서에서는 독자가 이미 운영중인 AMO blockchain node를 보유하고
 있다고 가정한다. 이 문서는 AMO protocol이 업그레이드 될 때마다 수행해야 하는

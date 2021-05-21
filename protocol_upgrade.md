@@ -1,4 +1,6 @@
 # Protocol Upgrade Guide
+This document is available in [Korean](protocol_upgrade.ko.md) also.
+
 The intended audience of this document are all entities running an AMO
 blockchain node either validator node or not. This document assumes the reader
 posesses a already running AMO blockchain node. This document explains the
