@@ -12,7 +12,7 @@ AMO blockchain node `amod v1.7.x`를 `amod v1.8.3`으로 교체한다.
    ```
    docker pull amolabs/amod:1.8.3
    ```
-1. docker container 재시작
+1. `amod` docker container 재시작
    ```
    docker stop amod
    docker rm amod
@@ -27,6 +27,19 @@ AMO blockchain node `amod v1.7.x`를 `amod v1.8.3`으로 교체한다.
    보기를 종료
 
 ### 직접 컴파일한 바이너리 사용시 작업 내용
+1. 필요 라이브러리 설치 (snappy, cleveldb, rocksdb)
+   * ubuntu
+      ```
+	  sudo apt-get install libsnappy-dev libleveldb-dev librocksdb-dev
+	  ```
+   * centos
+      ```
+	  sudo yum install snappy-devel leveldb-devel
+	  wget https://github.com/facebook/rocksdb/archive/v5.18.4.zip
+	  unzip v5.18.4.zip
+	  cd rocksdb-5.18.4
+	  make shared_lib && sudo make install-shared
+	  ```
 1. https://github.com/amolabs/amoabci 로부터 source code를 체크아웃
    ```
    # 이미 다운로드 받은 소스코드가 있는 경우
@@ -40,6 +53,14 @@ AMO blockchain node `amod v1.7.x`를 `amod v1.8.3`으로 교체한다.
    ```
 1. https://github.com/amolabs/amoabci/blob/master/README.ko.md 문서를 참고하여
    컴파일
+   ```
+   make build_c
+   ```
+1. `amod` 재실행
+   ```
+   killall amod
+   ./amod run --home <data_root>/amo
+   ```
 
 ## Protocol v3 &rarr; v4 (2020년 8월에 실행)
 TBA

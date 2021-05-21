@@ -12,7 +12,7 @@ Replace AMO blockchain node `amod v1.7.x` with `amod v1.8.3`.
    ```
    docker pull amolabs/amod:1.8.3
    ```
-1. restart docker container
+1. restart `amod` docker container
    ```
    docker stop amod
    docker rm amod
@@ -27,6 +27,19 @@ Replace AMO blockchain node `amod v1.7.x` with `amod v1.8.3`.
    &lt;CTRL-C&gt; to stop viewing logs
 
 ### Steps when using custom-built binary
+1. Install necessary libraries (snappy, cleveldb, rocksdb)
+   * ubuntu
+	  ```
+	  sudo apt-get install libsnappy-dev libleveldb-dev librocksdb-dev
+	  ```
+   * centos
+      ```
+	  sudo yum install snappy-devel leveldb-devel
+	  wget https://github.com/facebook/rocksdb/archive/v5.18.4.zip
+	  unzip v5.18.4.zip
+	  cd rocksdb-5.18.4
+	  make shared_lib && sudo make install-shared
+	  ```
 1. checkout source code from https://github.com/amolabs/amoabci
    ```
    # when there is source code checked out previously
@@ -38,8 +51,16 @@ Replace AMO blockchain node `amod v1.7.x` with `amod v1.8.3`.
    cd amoabci
    git checkout v1.8.3
    ```
-1. compile the binary consulting
+1. compile the binary according to
    https://github.com/amolabs/amoabci/blob/master/README.md
+   ```
+   make build_c
+   ```
+1. restart `amod`
+   ```
+   killall amod
+   ./amod run --home <data_root>/amo
+   ```
 
 ## Protocol v3 &rarr; v4 (Executed in Aug 2020)
 TBA
