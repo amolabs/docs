@@ -93,26 +93,27 @@ sudo ./setup.sh -d 1.8.3 -e <ext_ip_addr> /mynode <moniker> <p2p_addr>
 Instead of syncing from the geneis block, download the latest snapshot of the
 chain DB and start syncing from there. Here is the list of all snapshots:
 
-| `SW version` | `DB backend` | `block_height` | size (uncompressed) | download |
-|-|-|-|-|-|
-| `v1.7.7` | `rocksdb` | `11762421` | 101GB (200GB) | [link](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.7_rocksdb_11762421.tar.bz2)([sha256](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.7_rocksdb_11762421.tar.bz2.sha256)) |
-| `v1.7.5` | `rocksdb` | `7698783` | 70GB (141GB) | [link](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.5_rocksdb_7698783.tar.bz2)([sha256](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.5_rocksdb_7698783.tar.bz2.sha256)) |
-| `v1.7.5` | `rocksdb` | `6451392` | 56GB (116GB) | [link](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.5_rocksdb_6451392.tar.bz2)([sha256](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.5_rocksdb_6451392.tar.bz2.sha256)) |
-| `v1.6.5` | `rocksdb` | `2908399` | 21GB (50GB) | [link](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.6.5_rocksdb_2908399.tar.bz2)([sha256](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.6.5_rocksdb_2908399.tar.bz2.sha256)) |
+| Block height | DB backend | Size (uncompressed) | Protocol | SW ver. | Download |
+|-|-|-|-|-|-|
+| 19538000 | rocksdb | 138GB (263GB) | v4 | v1.7.7, v1.8.3 | [link](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.7_rocksdb_19538000.tar.bz2)([sha256](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.7_rocksdb_19538000.tar.bz2.sha256)) |
+| 11762421 | rocksdb | 101GB (200GB) | v4 | v1.7.7 | [link](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.7_rocksdb_11762421.tar.bz2)([sha256](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.7_rocksdb_11762421.tar.bz2.sha256)) |
+| 7698783 | rocksdb | 70GB (141GB) | v4 | v1.7.5 | [link](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.5_rocksdb_7698783.tar.bz2)([sha256](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.5_rocksdb_7698783.tar.bz2.sha256)) |
+| 6451392 | rocksdb | 56GB (116GB) | v4 | v1.7.5 | [link](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.5_rocksdb_6451392.tar.bz2)([sha256](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.5_rocksdb_6451392.tar.bz2.sha256)) |
+| 2908399 | rocksdb | 21GB (50GB) | v3 | v1.6.5 | [link](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.6.5_rocksdb_2908399.tar.bz2)([sha256](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.6.5_rocksdb_2908399.tar.bz2.sha256)) |
 
 Download the snapshot:
 ```bash
-wget http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.7_rocksdb_11762421.tar.bz2
-wget http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.7_rocksdb_11762421.tar.bz2.sha256
+wget http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.7_rocksdb_19538000.tar.bz2
+wget http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.7_rocksdb_19538000.tar.bz2.sha256
 ```
 Verify the chesksum:
 ```bash
-sha256sum cherryblossom_v1.7.7_rocksdb_11762421.tar.bz2
-cat cherryblossom_v1.7.7_rocksdb_11762421.tar.bz2.sha256
+sha256sum cherryblossom_v1.7.7_rocksdb_19538000.tar.bz2
+cat cherryblossom_v1.7.7_rocksdb_19538000.tar.bz2.sha256
 ```
 Check two checksums are equal. Replace the chain DB:
 ```bash
-tar jxf cherryblossom_v1.7.7_rocksdb_11762421.tar.bz2
+tar jxf cherryblossom_v1.7.7_rocksdb_19538000.tar.bz2
 sudo rm -rf /mynode/amo/data/
 sudo mv amo-data/amo/data/ /mynode/amo/
 ```
