@@ -276,7 +276,7 @@ A payload format for each transaction type is as the following.
 - `transfer` payload:
   ```json
   {
-    "udc": "_udc_id_", // optional
+    "udc": _udc_id_, // optional
     "to": "_HEX_encoded_account_address_",
     "amount": "_currency_"
   }
@@ -433,7 +433,7 @@ A payload format for each transaction type is as the following.
 - `issue` payload
   ```json
   {
-    "udc": "_udc_id_",
+    "udc": _udc_id_,
     "desc": "human-readable string describing this user-defined coin",
     "operators": [
       "_HEX_encoded_account_address_",
@@ -448,7 +448,7 @@ A payload format for each transaction type is as the following.
 - `lock` payload
   ```json
   {
-    "udc": "_udc_id_",
+    "udc": _udc_id_,
     "holder": "_HEX_encoded_account_address_",
     "amount": "_currency_"
   }
@@ -459,7 +459,7 @@ A payload format for each transaction type is as the following.
 - `burn` payload
   ```json
   {
-    "udc": "_udc_id_",
+    "udc": _udc_id_,
     "amount": "_currency_"
   }
   ```
