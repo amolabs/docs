@@ -95,6 +95,7 @@ chain DB and start syncing from there. Here is the list of all snapshots:
 
 | Block height | DB backend | Size (uncompressed) | Protocol | SW ver. | Download |
 |-|-|-|-|-|-|
+| 19788000 | rocksdb | 142GB (268GB) | v5 | v1.8.3 | [link](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.8.3_rocksdb_19788000.tar.bz2)([sha256](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.8.3_rocksdb_19788000.tar.bz2.sha256)) |
 | 19538000 | rocksdb | 138GB (263GB) | v4 | v1.7.7, v1.8.3 | [link](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.7_rocksdb_19538000.tar.bz2)([sha256](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.7_rocksdb_19538000.tar.bz2.sha256)) |
 | 11762421 | rocksdb | 101GB (200GB) | v4 | v1.7.7 | [link](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.7_rocksdb_11762421.tar.bz2)([sha256](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.7_rocksdb_11762421.tar.bz2.sha256)) |
 | 7698783 | rocksdb | 70GB (141GB) | v4 | v1.7.5 | [link](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.5_rocksdb_7698783.tar.bz2)([sha256](http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.5_rocksdb_7698783.tar.bz2.sha256)) |
@@ -103,19 +104,19 @@ chain DB and start syncing from there. Here is the list of all snapshots:
 
 Download the snapshot:
 ```bash
-wget http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.7_rocksdb_19538000.tar.bz2
-wget http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.7.7_rocksdb_19538000.tar.bz2.sha256
+wget http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.8.3_rocksdb_19788000.tar.bz2
+wget http://us-east-1.linodeobjects.com/amo-archive/cherryblossom_v1.8.3_rocksdb_19788000.tar.bz2.sha256
 ```
 Verify the chesksum:
 ```bash
-sha256sum cherryblossom_v1.7.7_rocksdb_19538000.tar.bz2
-cat cherryblossom_v1.7.7_rocksdb_19538000.tar.bz2.sha256
+sha256sum cherryblossom_v1.8.3_rocksdb_19788000.tar.bz2
+cat cherryblossom_v1.8.3_rocksdb_19788000.tar.bz2.sha256
 ```
 Check two checksums are equal. Replace the chain DB:
 ```bash
-tar jxf cherryblossom_v1.7.7_rocksdb_19538000.tar.bz2
+tar jxf cherryblossom_v1.8.3_rocksdb_19788000.tar.bz2
 sudo rm -rf /mynode/amo/data/
-sudo mv amo-data/amo/data/ /mynode/amo/
+sudo mv data/ /mynode/amo/
 ```
 
 **NOTE:** The directory structure of files extracted from compressed `*.tar.bz2`
