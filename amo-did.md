@@ -197,11 +197,18 @@ for a new DID document.
 
 **TODO:** tx body
 
-See [Transmitting tx](#transmitting-tx) for more information.
+See [`claim` tx](https://github.com/amolabs/docs/blob/master/protocol_v5.md#transaction-payload)
+for more detail.
+
+See [Transmitting tx](#transmitting-tx) for more information about sending a tx
+body to AMO blockchain.
 
 ### Read (Resolve)
 
 Perform ABCI query for `did` store to the AMO blockchain mainnet.
+
+See [ABCI query](https://github.com/amolabs/docs/blob/master/rpc.md#abci-query)
+for more detail.
 
 ### Update (Replace)
 
@@ -210,7 +217,11 @@ for an existing DID document.
 
 **TODO:** tx body
 
-See [Transmitting tx](#transmitting-tx) for more information.
+See [`claim` tx](https://github.com/amolabs/docs/blob/master/protocol_v5.md#transaction-payload)
+for more detail.
+
+See [Transmitting tx](#transmitting-tx) for more information about sending a tx
+body to AMO blockchain.
 
 ### Delete (Revoke)
 
@@ -219,18 +230,23 @@ is for an existing DID document.
 
 **TODO:** tx body
 
-See [Transmitting tx](#transmitting-tx) for more information.
+See [`dismiss` tx](https://github.com/amolabs/docs/blob/master/protocol_v5.md#transaction-payload)
+for more detail.
+
+See [Transmitting tx](#transmitting-tx) for more information about sending a tx
+body to AMO blockchain.
 
 ## Blockchain Interaction
 
-### AMO Blockchain RPC
+### Accessing AMO Blockchain
 
-There is a public RPC node for use by anybody in the world: https://rpc.amolabs.io.
+In order to interact with AMO blockchain, one needs to find a RPC node of the
+chain, and form an appropriate RPC message and send it to the node. One could
+set up its own AMO blockchain node with the RPC feature on. However, there is a
+public RPC node open to anybody in the world: https://rpc.amolabs.io.
 
-*NOTE: rpc.amolabs.io uses 443 (https) port instead of default 26657 port of
-tendermint.*
-
-### Chain ID
+*NOTE: rpc.amolabs.io serves on 443 (https) port instead of default 26657 port
+of tendermint.*
 
 The chain ID for AMO blockchain mainnet is `amo-cherryblossom-01`.
 
@@ -238,13 +254,16 @@ The chain ID for AMO blockchain mainnet is `amo-cherryblossom-01`.
 
 **TODO:** Construct signed tx.
 
-Send signed tx to one of AMO blockchain RPC nodes. See 
+Send signed tx to one of AMO blockchain RPC nodes. See [AMO blockchain
+protocol](https://github.com/amolabs/docs/blob/master/protocol_v5.md#transaction)
+for more detail.
 
 ### ABCI query
 
 **TODO:** Costruct ABCI query message.
 
-Send query message to one of AMO blockchain RPC nodes.
+Send query message to one of AMO blockchain RPC nodes. See [AMO client RPC
+spec](https://github.com/amolabs/docs/blob/master/rpc.md) for more detail.
 
 ### AMO Blockchain Explorer
 
