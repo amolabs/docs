@@ -180,55 +180,80 @@ Method](#verification-method). For example, `did:amo:addressinhex#keys-1`.
 }
 ```
 
-
-
 ## CRUD (Operations)
 
 ### Create (Register)
 
-Transmit a `claim` tx to the AMO blockchain mainnet, where corresponding DID is
-for a new DID document.
-
-**TODO:** tx body
+Transmit a `claim` tx to the AMO blockchain mainnet. Form a tx body as follows:
+```json
+{
+  "target": _amo_did_,
+  "document": _amo_did_document_
+}
+```
+`_amo_did_` is a DID for a newly created DID document `_amo_did_document_`.
 
 See [`claim` tx](https://github.com/amolabs/docs/blob/master/protocol_v5.md#transaction-payload)
 for more detail.
 
-See [Transmitting tx](#transmitting-tx) for more information about sending a tx
-body to AMO blockchain.
+See [Transmitting tx](#transmitting-tx) for information about sending a signed
+tx to AMO blockchain.
 
 ### Read (Resolve)
 
-Perform ABCI query for `did` store to the AMO blockchain mainnet.
+Perform ABCI query for `did` store to the AMO blockchain mainnet. Form a query
+message as follows:
+```json
+{
+  "path": "/did",
+  "data": _query_data_
+}
+```
+`_query_data_` is formed as follows:
+1. construct a double-quoted string containing an address part of an AMO
+   DID<br/>
+   `"70EAD5B53B11DFE78EC8CF131D7960F097D48D70"` for
+   `did:amo:70EAD5B53B11DFE78EC8CF131D7960F097D48D70`
+1. convert the result of step 1 using hex conversion<br/>
+   `223730454144354235334231314446453738454338434631333144373936304630393744343844373022`
 
-See [ABCI query](https://github.com/amolabs/docs/blob/master/rpc.md#abci-query)
-for more detail.
+See [ABCI query](#abci-query) for information about sending an ABCI query to
+AMO blockchain.
 
 ### Update (Replace)
 
-Transmit a `claim` tx to the AMO blockchain mainnet, where corresponding DID is
-for an existing DID document.
-
-**TODO:** tx body
+Transmit a `claim` tx to the AMO blockchain mainnet. Form a tx body as follows:
+```json
+{
+  "target": _amo_did_,
+  "document": _amo_did_document_
+}
+```
+`_amo_did_` is a DID for an existing DID document, which is replaced by a new
+document `_amo_did_document_`.
 
 See [`claim` tx](https://github.com/amolabs/docs/blob/master/protocol_v5.md#transaction-payload)
 for more detail.
 
-See [Transmitting tx](#transmitting-tx) for more information about sending a tx
-body to AMO blockchain.
+See [Transmitting tx](#transmitting-tx) for information about sending a signed
+tx to AMO blockchain.
 
-### Delete (Revoke)
+### Deactivate (Revoke)
 
-Transmit a `dismiss` tx to the AMO blockchain mainnet, where corresponding DID
-is for an existing DID document.
-
-**TODO:** tx body
+Transmit a `dismiss` tx to the AMO blockchain mainnet. Form a tx body as
+follows:
+```json
+{
+  "target": _amo_did
+}
+```
+`_amo_did` is a DID for an existing DID document to be deactivated.
 
 See [`dismiss` tx](https://github.com/amolabs/docs/blob/master/protocol_v5.md#transaction-payload)
 for more detail.
 
-See [Transmitting tx](#transmitting-tx) for more information about sending a tx
-body to AMO blockchain.
+See [Transmitting tx](#transmitting-tx) for information about sending a signed
+tx to AMO blockchain.
 
 ## Blockchain Interaction
 
@@ -246,17 +271,13 @@ The chain ID for AMO blockchain mainnet is `amo-cherryblossom-01`.
 
 ### Transmitting tx
 
-**TODO:** Construct signed tx.
-
 Send signed tx to one of AMO blockchain RPC nodes. See [AMO blockchain
 protocol](https://github.com/amolabs/docs/blob/master/protocol_v5.md#transaction)
 for more detail.
 
 ### ABCI query
 
-**TODO:** Costruct ABCI query message.
-
-Send query message to one of AMO blockchain RPC nodes. See [AMO client RPC
+Send ABCI query message to one of AMO blockchain RPC nodes. See [AMO client RPC
 spec](https://github.com/amolabs/docs/blob/master/rpc.md) for more detail.
 
 ### AMO Blockchain Explorer
