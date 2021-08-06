@@ -276,24 +276,18 @@ is also possible to use the above URL as an alias for the DID
 resolution is a simple HTTP request and the response is the DID document for
 the requested DID.
 
-## Security Considerations
+## Security and Privacy Considerations
 
 ### Sybil Attack
 
 An attacker must solve a computationally hard problem to forge a private key of
-the account in order to register a DID document.
+the account in order to register a DID document for an arbitrary DID.
 
 ### Replay Attack
 
 An attacker must subverts a [Replay
 Preventer](https://github.com/amolabs/docs/blob/master/protocol_v5.md#replay-attack)
 of AMO blockchain in order to replay any tx previously sent to the blockchain.
-
-## Privacy Considerations
-
-### Traceability of a DID
-
-
 
 ## References
 
