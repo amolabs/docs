@@ -67,12 +67,11 @@ did:amo:70EAD5B53B11DFE78EC8CF131D7960F097D48D (length error)
 
 In AMO DID method, a DID document is represented in the JSON-LD format. When
 represented in JSON-LD format, `@context` property must have the following
-entries:
+entry:
 
 ```json
 "@context": [
-  "https://www.w3.org/ns/did/v1",
-  "https://amolabs.github.io/did/v1"
+  "https://www.w3.org/ns/did/v1"
 ]
 ```
 
@@ -161,8 +160,7 @@ Method](#verification-method). For example, `did:amo:addressinhex#keys-1`.
 ```json
 {
   "@context": [
-    "https://www.w3.org/ns/did/v1",
-    "https://amolabs.github.io/did/v1"
+    "https://www.w3.org/ns/did/v1"
   ],
   "id": "did:amo:70EAD5B53B11DFE78EC8CF131D7960F097D48D70",
   "controller": "did:amo:0687D766FF0563B86BFF078B7F560AFC070C81AD",
