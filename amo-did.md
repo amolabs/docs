@@ -281,13 +281,41 @@ the requested DID.
 ### Sybil Attack
 
 An attacker must solve a computationally hard problem to forge a private key of
-the account in order to register a DID document for an arbitrary DID.
+the corresponding account in order to register a DID document for an arbitrary
+DID.
+
+### Unauthorized Update
+
+An attacker must solve a computationally hard problem to forge a private key of
+the corresponding account in order to update or deactivate a DID document not
+controlled by the attacker.
 
 ### Replay Attack
 
 An attacker must subverts a [Replay
 Preventer](https://github.com/amolabs/docs/blob/master/protocol_v5.md#replay-attack)
-of AMO blockchain in order to replay any tx previously sent to the blockchain.
+of AMO blockchain in order to replay any tx previously sent to the blockchain
+by a legitimate user.
+
+### Exposure of Account Address
+
+It is inherent that an AMO blockchain account has a fixed address for a
+lifetime of the account. It is inevitable to expose the account address while
+interacting with AMO blockchain (or many other blockchains). Thus, this should
+not be considered to be an additional privacy problem raised by this DID
+method.
+
+Since there is no published information about the real-world owner of an AMO
+blockchain account, a user's real world identity remains safe even if the
+account address is exposed.
+
+### Linkability
+
+Anyone who can read a public AMO blockchain data can track activies of an AMO
+blockchain account. Thus all activies can be linkable to a specific AMO
+blockchain account. However, this is an inherent property of AMO blockchain (or
+many other blockchains). Thus, this should not be considered to be an
+additional privacy problem raised by this DID method.
 
 ## References
 
