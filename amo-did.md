@@ -210,12 +210,12 @@ message as follows:
 }
 ```
 `_query_data_` is formed as follows:
-1. construct a double-quoted string containing an address part of an AMO
+1. construct a double-quoted string containing an AMO
    DID<br/>
-   `"70EAD5B53B11DFE78EC8CF131D7960F097D48D70"` for
+   `"did:amo:70EAD5B53B11DFE78EC8CF131D7960F097D48D70"` for
    `did:amo:70EAD5B53B11DFE78EC8CF131D7960F097D48D70`
 1. convert the result of step 1 using hex conversion<br/>
-   `223730454144354235334231314446453738454338434631333144373936304630393744343844373022`
+   `226469643A616D6F3A0A3730454144354235334231314446453738454338434631333144373936304630393744343844373022`
 
 See [ABCI query](#abci-query) for information about sending an ABCI query to
 AMO blockchain.
