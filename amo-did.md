@@ -37,11 +37,9 @@ When generating a new DID based on an AMO blockchain account, one would execute
 either of the following procedures:
 
 1. Generate a new AMO blockchain address according to [Account
-   address](https://github.com/amolabs/docs/blob/master/protocol_v5.md#account-address)
-   described in [AMO blockchain
-   protocol](https://github.com/amolabs/docs/blob/master/protocol_v5.md). Grab
-   the account address `address` and form a DID as a concatenation of
-   `did:amo:` and `address`.
+   address](protocol_v6.md#account-address) described in [AMO blockchain
+   protocol](protocol_v6.md). Grab the account address `address` and form a DID
+   as a concatenation of `did:amo:` and `address`.
 2. Obtain an account address `address` from existing AMO blockchain account.
    Form a DID as a concatenation of `did:amo:` and `address`.
 
@@ -98,12 +96,11 @@ AMO blockchain account has a pair of private and public keys,
 `verificationMethod` property must have at least one entry as the first one.
 `id` of the first verification method must be a concatenation of `id` of the
 DID subject and `#keys-1`. As described in [AMO blockchain
-protocol](https://github.com/amolabs/docs/blob/master/protocol_v5.md#account-key), AMO
-blockchain uses ECDSA over NIST P256 curve. A corresponding public key is
-described `publicKeyJwk` property. Properties of `publicKeyJwk` is as described
-in [JSON Web Key
-2020](https://w3c-ccg.github.io/lds-jws2020/#json-web-key-2020).
-`controller` property must be the same as the DID subject.
+protocol](protocol_v6.md#account-key), AMO blockchain uses ECDSA over NIST P256
+curve. A corresponding public key is described `publicKeyJwk` property.
+Properties of `publicKeyJwk` is as described in [JSON Web Key
+2020](https://w3c-ccg.github.io/lds-jws2020/#json-web-key-2020). `controller`
+property must be the same as the DID subject.
 
 ```json
 "verificationMethod": [{
@@ -184,7 +181,7 @@ Method](#verification-method). For example, `did:amo:addressinhex#keys-1`.
 
 ### Create (Register)
 
-Transmit a `claim` tx to the AMO blockchain mainnet. Form a tx body as follows:
+Transmit a `did.claim` tx to the AMO blockchain mainnet. Form a tx body as follows:
 ```json
 {
   "target": _amo_did_,
@@ -193,8 +190,7 @@ Transmit a `claim` tx to the AMO blockchain mainnet. Form a tx body as follows:
 ```
 `_amo_did_` is a DID for a newly created DID document `_amo_did_document_`.
 
-See [`claim` tx](https://github.com/amolabs/docs/blob/master/protocol_v5.md#transaction-payload)
-for more detail.
+See [`did.claim` tx](protocol_v6.md#transaction-payload) for more detail.
 
 See [Transmitting tx](#transmitting-tx) for information about sending a signed
 tx to AMO blockchain.
@@ -203,6 +199,7 @@ tx to AMO blockchain.
 
 Perform ABCI query for `did` store to the AMO blockchain mainnet. Form a query
 message as follows:
+
 ```json
 {
   "path": "/did",
@@ -210,8 +207,7 @@ message as follows:
 }
 ```
 `_query_data_` is formed as follows:
-1. construct a double-quoted string containing an AMO
-   DID<br/>
+1. construct a double-quoted string containing an AMO DID<br/>
    `"did:amo:70EAD5B53B11DFE78EC8CF131D7960F097D48D70"` for
    `did:amo:70EAD5B53B11DFE78EC8CF131D7960F097D48D70`
 1. convert the result of step 1 using hex conversion<br/>
@@ -222,35 +218,38 @@ AMO blockchain.
 
 ### Update (Replace)
 
-Transmit a `claim` tx to the AMO blockchain mainnet. Form a tx body as follows:
+Transmit a `did.claim` tx to the AMO blockchain mainnet. Form a tx body as
+follows:
+
 ```json
 {
   "target": _amo_did_,
   "document": _amo_did_document_
 }
 ```
+
 `_amo_did_` is a DID for an existing DID document, which is replaced by a new
 document `_amo_did_document_`.
 
-See [`claim` tx](https://github.com/amolabs/docs/blob/master/protocol_v5.md#transaction-payload)
-for more detail.
+See [`did.claim` tx](protocol_v6.md#transaction-payload) for more detail.
 
 See [Transmitting tx](#transmitting-tx) for information about sending a signed
 tx to AMO blockchain.
 
 ### Deactivate (Revoke)
 
-Transmit a `dismiss` tx to the AMO blockchain mainnet. Form a tx body as
+Transmit a `did.dismiss` tx to the AMO blockchain mainnet. Form a tx body as
 follows:
+
 ```json
 {
-  "target": _amo_did
+  "target": _amo_did_
 }
 ```
-`_amo_did` is a DID for an existing DID document to be deactivated.
 
-See [`dismiss` tx](https://github.com/amolabs/docs/blob/master/protocol_v5.md#transaction-payload)
-for more detail.
+`_amo_did_` is a DID for an existing DID document to be deactivated.
+
+See [`did.dismiss` tx](protocol_v6.md#transaction-payload) for more detail.
 
 See [Transmitting tx](#transmitting-tx) for information about sending a signed
 tx to AMO blockchain.
@@ -272,8 +271,7 @@ The chain ID for AMO blockchain mainnet is `amo-cherryblossom-01`.
 ### Transmitting tx
 
 Send signed tx to one of AMO blockchain RPC nodes. See [AMO blockchain
-protocol](https://github.com/amolabs/docs/blob/master/protocol_v5.md#transaction)
-for more detail.
+protocol](protocol_v6.md#transaction) for more detail.
 
 ### ABCI query
 
@@ -313,10 +311,9 @@ controlled by the attacker.
 
 ### Replay Attack
 
-An attacker must subverts a [Replay
-Preventer](https://github.com/amolabs/docs/blob/master/protocol_v5.md#replay-attack)
-of AMO blockchain in order to replay any tx previously sent to the blockchain
-by a legitimate user.
+An attacker must subverts a [Replay Preventer](protocol_v6.md#replay-attack) of
+AMO blockchain in order to replay any tx previously sent to the blockchain by a
+legitimate user.
 
 ### Exposure of Account Address
 

@@ -1,6 +1,6 @@
 # AMO Blockchain Protocol Specification
 
-AMO protocol version 5.
+AMO protocol version 6 (DRAFT).
 
 ## Introduction
 
@@ -143,16 +143,6 @@ The following types are used in this document.
 - `_HEX_encoded_parcel_id_` = HEX encoding of `_parcel_id_`
 - `"_HEX_encoded_parcel_id_"` as a JSON string
 
-### UDC(User-Defined Coin) ID
-A UDC ID is a 32-bit unsigned integer. It is represented as a double-quoted
-decimal number without redundant leading zeroes when used in JSON, e.g. in
-protocol messages. However, it is represented as a 4-byte big-endian integer
-when it is used to composite another identifier.
-
-The following types are used in this document.
-- `_udc_id_` = alias of `_decimal_number_`
-- `_udc_id_` as a JSON number, e.g. `1234` not `"1234"`
-
 ### Extra info
 `register`, `request` and `grant` tx may carry extra information. It must be a
 JSON object, but its internal structure is application-specific. Internal DB of
@@ -195,6 +185,49 @@ JSON object with members.
 ```
 Each member is marked as *optional*, so an empty object(`{}`) is valid extra
 information for all of three state stores.
+
+### UDC(User-Defined Coin) ID
+
+A UDC ID is a 32-bit unsigned integer. It is represented as a double-quoted
+decimal number without redundant leading zeroes when used in JSON, e.g. in
+protocol messages. However, it is represented as a 4-byte big-endian integer
+when it is used to composite another identifier.
+
+The following types are used in this document.
+- `_udc_id_` = alias of `_decimal_number_`
+- `_udc_id_` as a JSON number, e.g. `1234` not `"1234"`
+
+### DID (Decentralized Identifier)
+
+When used in AMO mainnet, a DID is a concatenation of the string `"did:amo:"`
+and an account address represented as an uppercase hexadecimal string. When
+used in networks other than AMO mainnet, the prefix would be something like
+`"did:" + method_name + ":"`, where `method_name` is other than `"amo"`.
+
+### DID Document
+
+`did.claim` tx and `did.dismiss` tx operate on a DID document, which is used in
+[AMO DID Method](amo-did.md). A DID document is a JSON document with an
+additional top-level `@context` property, which is called a JSON-LD
+representation. While an AMO blockchain node does not care about the value of
+`@context` property, this property must exist and its value must be of a
+*string* type.
+
+### VC (Verifiable Credential) ID
+
+When used in AMO mainnet, a VC ID is a concatenation of the string
+`"amo:cred:"` and an uppercase hexadecimal string of maximum length of 64
+characters, i.e. a representation of a byte string of length 32 or less. When
+used in networks other than AMO mainnet, the prefix would be something like
+`network_name + ":cred:"`, where `network_name` is other than `"amo"`.
+
+### Verifiable Credential
+
+`did.issue` tx and `did.revoke` tx operate on a VC (Verifiable Credential), which is used in [AMO Verifiable Credential Registry](amo-vc.md). A
+VC is a JSON document with an additional top-level
+`@context` property, which is called a JSON-LD representation. While an AMO
+blockchain node does not care about the value of `@context` property, this
+property must exist and its value must be of a string type.
 
 ## Message Format
 ### Transaction
@@ -244,8 +277,10 @@ following:
     - `cancel`
     - `revoke`
 - did
-    - `claim`
-    - `dismiss`
+    - `did.claim`
+    - `did.dismiss`
+    - `did.issue`
+    - `did.revoke`
 - user-defined coin
     - `issue`
     - `burn`
@@ -444,7 +479,7 @@ A payload format for each transaction type is as the following.
   where `target` is the id of a parcel currently being revoked, `recipient` is
   the address of a buyer which is previously granted a usage on the parcel.
 
-- `claim` payload
+- `did.claim` payload
   ```json
   {
     "target": "_string_",
@@ -452,17 +487,37 @@ A payload format for each transaction type is as the following.
   }
   ```
   where `target` is a JSON string conforming to `idchar` in DID syntax.
-  `document` value will be stored as a compact representation. When `claim` tx
-  is received on a previously claimed `target`, `document` will be replaced
+  `document` value will be stored as a compact representation. When `did.claim`
+  tx is received on a previously claimed `target`, `document` will be replaced
   with a new one.
 
-- `dismiss` payload
+- `did.dismiss` payload
   ```json
   {
     "target": "_string_",
   }
   ```
   effectively removes the DID document from the DID registry.
+
+- `did.issue` payload
+  ```json
+  {
+    "target": "_string_",
+    "credential": {} // verifiable credential in the form of JSON object
+  }
+  ```
+  where `target` is a JSON string representing a VC id.
+  `credential` value will be stored as a compact representation. When
+  `did.issue` tx is received on a previously issued `target`, `credential`
+  will replace the old one.
+
+- `did.revoke` payload
+  ```json
+  {
+    "target": "_string_",
+  }
+  ```
+  effectively removes the VC from the VC registry.
 
 - `issue` payload
   ```json
@@ -1189,28 +1244,86 @@ NOTE: When the asset type is AMO coin or UDC coin, see
     1. `sender.balance` &larr; `sender.balance` - `tx.fee`
     1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
-### Claiming DID document
-Upon receiving a `claim` transaction from an account, an AMO blockchain node
-performs a validity check and add new record in `did` store.
+### Creating (Claiming) DID document
+
+*NOTE: `claim` and `dismiss` tx in protocol v5 are deprecated.*
+
+Upon receiving a `did.claim` transaction from an account, an AMO blockchain
+node performs a validity check and add a new record or update an existing
+record in `did` store.
 
 1. validity check
-    1. if `tx.target` already exists in `did` store, `did.target.owner` must be
-       the same as `tx.sender`.
+    1. if `tx.target` already exists in `did` store as `doc`, perform
+       permission and validity check:
+        1. `tx.target` must be the same as `doc.id`.
+        1. concatenation of `did:amo:` and `tx.sender` must be either `doc.id`
+           or `doc.controller`.
+        1. `tx.document` and `doc` must have the same `id`,
+           `verificationMethod` and `authentication` properties.
+           (`assertionMethod` may change.)
+    1. if `tx.target` does not exist in `did` store, perform a validity check:
+        1. `tx.target` must be the same as `tx.document.id`.
+        1. concatenation of `did:amo:` and `tx.sender` must be
+           `tx.document.id`.
+        1. `tx.document.verificationMethod[0].id` must be `tx.document.id` +
+           `#keys-1`.
+        1. `tx.document.verificationMethod[0]` must be of a `JsonWebKey2020`
+           format, and a derived address from
+           `tx.document.verificationMethod[0]` must be `tx.document.id`.
     1. `sender.balance` &ge; `tx.fee`
 1. state change
     1. add new record or replace the record with key `tx.target`
     1. `sender.balance` &larr; `sender.balance` - `tx.fee`
     1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
-Upon receiving a `dismiss` transaction from an account, an AMO blockchain node
-performs a validity check and remove record from `did` store.
+Upon receiving a `did.dismiss` transaction from an account, an AMO blockchain
+node performs a validity check and remove record from `did` store.
 
 1. validity check
-    1. `tx.target` should exist in `did` store
-    1. `did.target.owner` must be the same as `tx.sender`
+    1. `tx.target` should exist in `did` store as `doc`.
+    1. concatenation of `did:amo:` and `tx.sender` must be either `doc.id` or
+       `doc.controller`.
     1. `sender.balance` &ge; `tx.fee`
 1. state change
     1. remove record with key `tx.target` from `did` store
+    1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+    1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+
+### Creating (Issuing) VC
+
+*NOTE: In the context of verifiable credential, an **issuer** is supposed to
+create, in other word, **issue** a verifiable credential.*
+
+Upon receiving a `did.issue` transaction from an account, an AMO blockchain
+node performs a validity check and add a new record or update an existing
+record in `vc` store.
+
+1. validity check
+    1. if `tx.target` already exists in `vc` store as `cred`, perform
+       permission and validity check:
+        1. `tx.target` must be the same as `cred.id`.
+        1. concatenation of `did:amo:` and `tx.sender` must be `cred.issuer`.
+        1. `tx.credential` and `cred` must have the same `id` and `issuer`
+           properties.
+        1. `tx.credential.issued` must be more recent than `cred.issued`.
+    1. if `tx.target` does not exist in `vc` store, perform a validity check:
+        1. `tx.target` must be the same as `tx.credential.id`.
+        1. concatenation of `did:amo:` and `tx.sender` must be
+           `tx.credential.issuer`.
+    1. `sender.balance` &ge; `tx.fee`
+1. state change
+    1. add new record or replace the record with the key `tx.garget`.
+    1. `sender.balance` &larr; `sender.balance` - `tx.fee`
+    1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
+
+Upon receiving a `did.revoke` transaction from an account, an AMO blockchain node performs a validity check and remove a record from `vc` store.
+
+1. validity check
+    1. `tx.target` should exist in `vc` store as `cred.
+    1. concatenation of `did:amo:` and `tx.sender` must be `cred.issuer`.
+    1. `sender.balance` &ge; `tx.fee`
+1. state change
+    1. remove record with key `tx.target` from `vc` store
     1. `sender.balance` &larr; `sender.balance` - `tx.fee`
     1. `blk.incentive` &larr; `blk.incentive` + `tx.fee`
 
