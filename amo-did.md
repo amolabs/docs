@@ -173,7 +173,7 @@ Method](#verification-method). For example, `did:amo:addressinhex#keys-1`.
   ],
   "assertionMethod": [
     "did:amo:70EAD5B53B11DFE78EC8CF131D7960F097D48D70#keys-1"
-  ],
+  ]
 }
 ```
 
