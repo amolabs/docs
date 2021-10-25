@@ -86,7 +86,7 @@ sudo ./setup.sh -d 1.8.3 -e <ext_ip_addr> /mynode <moniker> <p2p_addr>
 
 | `chain` | `p2p_addr` |
 |-|-|
-| mainnet | `fbd1cb0741e30308bf7aae562f65e3fd54359573@172.104.88.12:26656` |
+| mainnet | `1b575612e9a5c0e1fc629e58e02070934832169a@20.194.98.25:26656` |
 | testnet | `a944a1fa8259e19a9bac2c2b41d050f04ce50e51@172.105.213.114:26656` |
 
 #### Download the latest snapshot
