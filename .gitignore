@@ -3,3 +3,4 @@ vim-markdown-preview.html
 *.bak
 # vim
 .*.sw*
+.idea
