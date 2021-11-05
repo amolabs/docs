@@ -1,13 +1,10 @@
-# AMO Blockchain Protocol Specification
+# AMO Blockchain 프로토콜 사양
 
 AMO protocol version 6 (DRAFT).
 
-## Introduction
+## 소개
 
-Although the current implementation of AMO blockchain depends ***heavily*** on
-Tendermint, AMO blockchain protocol itself is independent of Tendermint. It is
-described by several protocol messages and corresponding state transition in
-abstract internal database of each blockchain node. While the protocol messages
+현재 구현된 AMO 블록체인은 텐더민트에 크게 의존적이지만 AMO 블록체인의 프로토콜 자체는 텐더민트에 독립적입니다. 이는 각 블록체인 노드의 추상화 된 내부 데이터베이스에서 여러 프로토콜 메시지와 해당 상태 전환으로 설명이 됩니다. While the protocol messages
 are concretely defined(meaning and format), abstract internal database of a
 blockchain node is implementation-specific. But, note that every AMO blockchain
 node **MUST** incorporate a kind of database storing all kinds of data items
