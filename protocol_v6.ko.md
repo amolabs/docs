@@ -4,7 +4,7 @@ AMO protocol version 6 (DRAFT).
 
 ## 소개
 
-현재 구현된 AMO 블록체인은 텐더민트에 크게 의존적이지만 AMO 블록체인의 프로토콜 자체는 텐더민트에 독립적입니다. 이는 각 블록체인 노드의 추상화 된 내부 데이터베이스에서 여러 프로토콜 메시지와 해당 상태 전환으로 설명이 됩니다. 프로토콜 메시지는 구체적으로 정의되어 있지만(의미와 형식) 블록체인 노드의 추상 내부 데이터베이스는 구현에 따라 다릅니다. But, note that every AMO blockchain node nust incorporate a kind of database storing all kinds of data items described in [Blockchain Data](#blockchain-data) section.
+현재 구현된 AMO 블록체인은 텐더민트에 크게 의존적이지만 AMO 블록체인의 프로토콜 자체는 텐더민트에 독립적입니다. 이는 각 블록체인 노드의 추상화 된 내부 데이터베이스에서 여러 프로토콜 메시지와 해당 상태 전환으로 설명이 됩니다. 프로토콜 메시지는 구체적으로 정의되어 있지만(의미와 형식) 블록체인 노드의 추상 내부 데이터베이스는 구현에 따라 다릅니다. 그러나 모든 AMO 블록체인 노드는 [Blockchain Data](#blockchain-data) 섹션에 설명된 **모든 종류의 데이터 항목을 저장하는 데이터베이스를 포함해야 합니다.**
 
 Some notes related to Tendermint will be tagged with **TM**.
 
