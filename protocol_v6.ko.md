@@ -6,39 +6,27 @@ AMO protocol version 6 (DRAFT).
 
 현재 구현된 AMO 블록체인은 텐더민트에 크게 의존적이지만 AMO 블록체인의 프로토콜 자체는 텐더민트에 독립적입니다. 이는 각 블록체인 노드의 추상화 된 내부 데이터베이스에서 여러 프로토콜 메시지와 해당 상태 전환으로 설명이 됩니다. 프로토콜 메시지는 구체적으로 정의되어 있지만(의미와 형식) 블록체인 노드의 추상 내부 데이터베이스는 구현에 따라 다릅니다. 그러나 모든 AMO 블록체인 노드는 [Blockchain Data](#blockchain-data) 섹션에 설명된 **모든 종류의 데이터 항목을 저장하는 데이터베이스를 포함해야 합니다.**
 
-Some notes related to Tendermint will be tagged with **TM**.
+텐더민트와 관련된 일부 내용에는 **TM** 태그가 지정됩니다.
 
-## Data Format
+## 데이터 형식
 ### Account Key
-AMO blockchain uses ECDSA key pair to sign and verify various transactions and
-messages. AMO blockchain uses NIST P256 curve(aka. secp256r1) and SHA256 as its
-default ECDSA domain parameter.
+AMO 블록체인은 다양한 트랜잭션과 메시지에 대한 서명 및 검증을 위해 ECDSA 키 쌍을 사용하고, ECDSA 기본 도메인 파라미터로 NIST P256 curve(secp256r1) and SHA256을 사용합니다.
+AMO 블록체인의 키 쌍은 개인 키와 공개 키의 쌍입니다. 개인 키는 32바이트 시퀀스이고 공개 키는 65바이트의 시퀀스로 0x04 접두어로 시작하는 압축되지 않은 형식입니다. 이러한 바이트 시퀀스는 통신 채널을 통해 전송되거나 마샬링된 형식으로 저장될 때 HEX 인코딩으로 표시되지만 프로그램의 내부 메모리 공간에서 다른 형식으로 상주할 수 있습니다.
 
-A key pair in AMO blockchain is a pair of a private key and a public key. A
-private key is a sequence 32 bytes, and a public key is a sequence of 65
-bytes(uncompressed form with 0x04 prefix). These byte sequences are represented
-by HEX encoding when transmitted over a communication channel or stored as a
-marshaled form, while they may reside as other format in a program's internal
-memory space.
+**개인 키는 네트워크 통신 채널을 통해 절대 전송되지 않아야 합니다.** 공개 키는 프로토콜 메시지에 16진수로 인코딩되어 포함되어야 합니다.
 
-A private key should **NEVER** be transmitted via a network communication
-channel. A public key must be HEX-encoded in a protocol message.
-
-The following types are used in this document.
+이 문서에서는 16진수로 인코딩된 공개키를 아래와 같이 표현합니다.
 - `_HEX_encoded_public_key_bytes_`
 
-### Signature
-A signature field has the following form:
+### 서명
+서명 필드의 형식은 다음과 같습니다.
 ```json
 {
   "pubkey": "_HEX_encoded_public_key_bytes_",
   "sig_bytes": "_HEX_encoded_signature_bytes_"
 }
 ```
-`pubkey` is the signer's public key, and `sig_bytes` is HEX-encoded ECDSA
-signature bytes, which is a concatenation of `r` and `s`. `(r, s) =
-ECDSA(privkey, sb)` is output of ECDSA signature algorithm, where `privkey` is
-the signer's private key.
+`pubkey`는 서명자(서명하는 사람)의 공개키이고 `sig_bytes`는 `r`과 `s`로 연결된 16진수로 인코딩된 ECDSA 방식의 서명 바이트입니다. (r, s) = ECDSA(privkey, sig_bytes)는 ECDSA 서명 알고리즘의 출력이며, 여기서 `privkey`는 서명자의 개인 키입니다.
 
 ### Validator Key
 A validator key pair is a ed25519 key pair and handled by Tendermint, but
