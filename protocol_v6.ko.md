@@ -28,83 +28,50 @@ AMO 블록체인의 키 쌍은 개인 키와 공개 키의 쌍입니다. 개인 
 ```
 `pubkey`는 서명자(서명하는 사람)의 공개키이고 `sig_bytes`는 `r`과 `s`로 연결된 16진수로 인코딩된 ECDSA 방식의 서명 바이트입니다. (r, s) = ECDSA(privkey, sig_bytes)는 ECDSA 서명 알고리즘의 출력이며, 여기서 `privkey`는 서명자의 개인 키입니다.
 
-### Validator Key
-A validator key pair is a ed25519 key pair and handled by Tendermint, but
-validator's public key is carried in a AMO blockchain protocol message when
-staking AMO coin to acquire stakes. In this case, a validator's public key must
-be HEX-encoded.
+### 검증자 키
+검증자의 키 쌍은 ed25519 키 쌍으로 텐더민트에서 처리하지만, 검증자의 공개키는 AMO 코인을 스테이킹하여 지분을 획득할 때 AMO 블록체인 프로토콜 메시지로 전달됩니다. 이 경우 검증자의 공개키는 16진수로 인코딩되어야 합니다.
 
-The following types are used in this document.
+검증자 키 쌍의 형식은 다음과 같습니다.
 - `_HEX_encoded_ed25519_pubkey_`
 
-### Key custody
-A key custody is a special form of key transfer medium. It is recommended to be
-a public-key encryption of a data encryption key `PKEnc(PK, DEK)`, where
-`PKEnc` is a sort of a hybrid encryption (combination of public key encryption
-and symmetric key encryption).  For `PKEnc`, we use a combination of ECDH
-ephemeral mode and AES-256. For ECDH ephemeral key generation, we reuse ECDSA
-key generation algorithm. `PK` is a public key of a recipient and `DEK` is a
-data encryption key of an encrypted *data parcel*.
+### 키 커스터디
+키 커스터디는 특별한 형태의 키 전송 매체입니다. 데이터 암호화 키는 공개 키 암호화를 권장합니다. PKEnc(PK, DEK), 여기서 PKEnc는 일종의 하이브리드 암호화(공개 키 암호화와 대칭 키 암호화의 조합)입니다. PKEnc의 경우 ECDH 임시 모드와 AES-256의 조합을 사용합니다. ECDH 임시 키 생성을 위해 ECDSA 키 생성 알고리즘을 재사용합니다. PK는 수신자의 공개 키이고 DEK는 암호화된 *데이터 패키지*를 암호화 하기 위한 키입니다.
 
-The following types are used in this document.
+키 커스터디의 형식은 다음과 같습니다.
 - `_HEX_encoded_key_custody_`
 
-### Account address
-An address is a human-readable character string which is a hex-encoding of a
-byte sequence with the length of 20 bytes (=160-bit). Hence, the opaque form of
-an address is a 40-byte character string which consists of `[0-9]` and `[A-F]`
-only.
+### 계정 주소
+주소는 길이가 20바이트(=160비트)인 바이트 시퀀스의 16진수로 인코딩된 human-readable한 문자열입니다. 따라서 주소의 형태는 [0-9]와 [A-F]로만 구성된 40바이트 문자열입니다.
 
-An account address is derived from the public key of an account. First, take 32
-bytes by applying SHA256 on the public key bytes. Next, take 20 bytes by
-truncating the first 20 bytes from the 32-byte SHA256 output: `addr_bin =
-trunc_20(SHA256(PK))`. For the last step, convert this `addr_bin` by
-HEX-encoding. An AMO-compliant program may utilize this `addr_bin` for its
-internal purpose, but it should apply hex-encoding before sending to other
-protocol party or storing to other medium outside the program.
+계정 주소는 계정의 공개 키에서 유도됩니다. 먼저 공개 키 바이트에 SHA256을 적용하여 32바이트를 가져옵니다. 다음으로 32바이트 SHA256 출력에서 처음 20바이트를 잘라 20바이트를 가져옵니다: addr_bin = trunc_20(SHA256(PK)). 마지막 단계에서 이 addr_bin을 16진수 인코딩 문자열로 변환합니다. AMO 호환 프로그램은 내부 목적으로 이 addr_bin을 사용할 수 있지만 다른 프로토콜 당사자에게 전송하거나 프로그램 외부의 다른 매체에 저장하기 전에 16진수 인코딩을 적용해야 합니다.
 
-**NOTE:** In Bitcoin, they use `addr_bin = RIPEMD160(SHA256(PK))`, but we
-cannot use RIPEMD160. See [Notes on Cryptography](crypto.md) for more details
-and reasons.
+**주의사항:** 비트코인에서는 addr_bin = RIPEMD160(SHA256(PK))를 사용하지만 RIPEMD160은 사용할 수 없습니다. 자세한 내용은 [Notes on Cryptography](crypto.md)을 참조하십시오.
 
-The following types are used in this document.
+계정 주소의 형식은 다음과 같습니다.
 - `_account_address_` = `addr_bin`
 - `_HEX_encoded_account_address_` = HEX encoding of `_account_address_`
 - `"_HEX_encoded_account_address_"` as a JSON string
 
-### Currency
-As in other popular blockchain systems, AMO coin amount is expressed as an
-integer value, which is a multiple of the smallest transferable unit. In AMO
-blockchain the unit is called a *mote*. And *one AMO* is 10<sup>18</sup>
-*motes*, where the number 18 is often called a *decimals* in the cryptocurrency
-community. In all protocol messages, AMO coin amount is expressed in mote unit.
+### 통화
+다른 대중적인 블록체인 시스템과 마찬가지로 AMO 코인은 전송 가능한 최소 단위의 배수인 정수 값으로 표시됩니다. AMO 블록체인에서는 단위를 *모트(mote)*라고 합니다. 그리고 *1 AMO*는 10<sup>18</sup>입니다. 모든 프로토콜 메시지에서 AMO 코인 금액은 *mote(모트)* 단위로 표시됩니다.
 
-Amount of AMO coin or user-defined coin must be expressed as a decimal number
-enclosed in double-quotes when included in a JSON-format message, i.e. all
-protocol messages. However it may be expressed in other formats in blockchain
-node's *internal* memory.
+AMO 코인 또는 사용자 정의 코인의 금액은 JSON 형식의 메시지, 즉 모든 프로토콜 메시지에 포함될 때 큰따옴표로 묶인 십진수로 표현되어야 합니다.그러나 블록체인 노드의 *내부 메모리*에는 다른 형식으로 표현될 수 있습니다.
 
-The following types are used in this document.
+통화의 형식은 다음과 같습니다.
 - `_currency_`
 - `"_currency_"` as a JSON string
 
 ### Draft ID
-A draft ID is a 32-bit unsigned integer. It is represented as a double-quoted
-decimal number without redundant leading zeroes when used in JSON, e.g. in
-protocol messages. However, it is represented as a 4-byte big-endian integer
-including leading zeroes when it is used to composite another identifier.
+Draft ID는 32비트 부호 없는 정수입니다. Draft ID는 JSON(e.g. 프로토콜 메시지)에서 사용될 때 숫자 앞에 0이 없는 큰따옴표로 묶인 십진수로 표시됩니다. 그러나 다른 식별자를 합성하는 데 사용되는 경우 숫자 앞에 0을 포함하는 4바이트 빅엔디안 정수로 표시됩니다.
 
-The following types are used in this document.
+Draft ID의 형식은 다음과 같습니다.
 - `_draft_id_` = alias of `_decimal_number_`
 - `_draft_id_` as a JSON number, e.g. `1234` not `"1234"`
 
 ### Storage ID
-A storage ID is a 32-bit unsigned integer. It is represented as a double-quoted
-decimal number without redundant leading zeroes when used in JSON, e.g. in
-protocol messages. However, it is represented as a 4-byte big-endian integer
-when it is used to composite another identifier.
+storage ID는 32비트 부호 없는 정수입니다. Draft ID는 JSON(e.g. 프로토콜 메시지)에서 사용될 때 숫자 앞에 0이 없는 큰따옴표로 묶인 십진수로 표시됩니다. 그러나 다른 식별자를 합성하는 데 사용되는 경우 4바이트 빅엔디안 정수로 표시됩니다.
 
-The following types are used in this document.
+Storage ID의 형식은 다음과 같습니다.
 - `_storage_id_` = alias of `_decimal_number_`
 - `_storage_id_` as a JSON number, e.g. `1234` not `"1234"`
 
