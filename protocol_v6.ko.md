@@ -15,15 +15,15 @@ AMO 블록체인의 키 쌍은 개인 키와 공개 키의 쌍입니다. 개인 
 
 **개인 키는 네트워크 통신 채널을 통해 절대 전송되지 않아야 합니다.** 공개 키는 프로토콜 메시지에 16진수로 인코딩되어 포함되어야 합니다.
 
-이 문서에서는 16진수로 인코딩된 공개키를 아래와 같이 표현합니다.
-- `_HEX_encoded_public_key_bytes_`
+이 문서에서는 Account Key와 관련된 형식을 다음과 같이 표현합니다.
+- `_HEX_encoded_public_key_bytes_(16진수로 인코딩 된 공개키 바이트)`
 
 ### 서명
-서명 필드의 형식은 다음과 같습니다.
+이 문서에서는 서명과 관련된 형식을 다음과 같이 사용합니다.
 ```json
 {
-  "pubkey": "_HEX_encoded_public_key_bytes_",
-  "sig_bytes": "_HEX_encoded_signature_bytes_"
+  "pubkey": "_HEX_encoded_public_key_bytes_(16진수로 인코딩된 공개키 바이트)",
+  "sig_bytes": "_HEX_encoded_signature_bytes_(16진수로 인코딩된 서명 바이트)"
 }
 ```
 `pubkey`는 서명자(서명하는 사람)의 공개키이고 `sig_bytes`는 `r`과 `s`로 연결된 16진수로 인코딩된 ECDSA 방식의 서명 바이트입니다. (r, s) = ECDSA(privkey, sig_bytes)는 ECDSA 서명 알고리즘의 출력이며, 여기서 `privkey`는 서명자의 개인 키입니다.
@@ -31,14 +31,14 @@ AMO 블록체인의 키 쌍은 개인 키와 공개 키의 쌍입니다. 개인 
 ### 검증자 키
 검증자의 키 쌍은 ed25519 키 쌍으로 텐더민트에서 처리하지만, 검증자의 공개키는 AMO 코인을 스테이킹하여 지분을 획득할 때 AMO 블록체인 프로토콜 메시지로 전달됩니다. 이 경우 검증자의 공개키는 16진수로 인코딩되어야 합니다.
 
-검증자 키 쌍의 형식은 다음과 같습니다.
+이 문서에서는 검증자 키와 관련된 형식을 다음과 같이 사용합니다.
 - `_HEX_encoded_ed25519_pubkey_`
 
 ### 키 커스터디
 키 커스터디는 특별한 형태의 키 전송 매체입니다. 데이터 암호화 키는 공개 키 암호화를 권장합니다. PKEnc(PK, DEK), 여기서 PKEnc는 일종의 하이브리드 암호화(공개 키 암호화와 대칭 키 암호화의 조합)입니다. PKEnc의 경우 ECDH 임시 모드와 AES-256의 조합을 사용합니다. ECDH 임시 키 생성을 위해 ECDSA 키 생성 알고리즘을 재사용합니다. PK는 수신자의 공개 키이고 DEK는 암호화된 *데이터 패키지*를 암호화 하기 위한 키입니다.
 
-키 커스터디의 형식은 다음과 같습니다.
-- `_HEX_encoded_key_custody_`
+ 이 문서에서는 키 커스터디와 관련된 형식을 다음과 같이 사용합니다.
+- `_HEX_encoded_key_custody_(16진수로 인코딩된 키 커스터디)`
 
 ### 계정 주소
 주소는 길이가 20바이트(=160비트)인 바이트 시퀀스의 16진수로 인코딩된 human-readable한 문자열입니다. 따라서 주소의 형태는 [0-9]와 [A-F]로만 구성된 40바이트 문자열입니다.
@@ -47,49 +47,41 @@ AMO 블록체인의 키 쌍은 개인 키와 공개 키의 쌍입니다. 개인 
 
 **주의사항:** 비트코인에서는 addr_bin = RIPEMD160(SHA256(PK))를 사용하지만 RIPEMD160은 사용할 수 없습니다. 자세한 내용은 [Notes on Cryptography](crypto.md)을 참조하십시오.
 
-계정 주소의 형식은 다음과 같습니다.
-- `_account_address_` = `addr_bin`
-- `_HEX_encoded_account_address_` = HEX encoding of `_account_address_`
-- `"_HEX_encoded_account_address_"` as a JSON string
+이 문서에서는 계정 주소와 관련된 형식을 다음과 같이 사용합니다.
+- `_account_address_` = `addr_bin`(계정 주소)
+- `_HEX_encoded_account_address_` = HEX encoding of `_account_address_`(16진수로 인코딩된 계정 주소)
+- `"_HEX_encoded_account_address_"` as a JSON string(JSON 문자열로 사용시)
 
 ### 통화
 다른 대중적인 블록체인 시스템과 마찬가지로 AMO 코인은 전송 가능한 최소 단위의 배수인 정수 값으로 표시됩니다. AMO 블록체인에서는 단위를 *모트(mote)*라고 합니다. 그리고 *1 AMO*는 10<sup>18</sup>입니다. 모든 프로토콜 메시지에서 AMO 코인 금액은 *mote(모트)* 단위로 표시됩니다.
 
 AMO 코인 또는 사용자 정의 코인의 금액은 JSON 형식의 메시지, 즉 모든 프로토콜 메시지에 포함될 때 큰따옴표로 묶인 십진수로 표현되어야 합니다.그러나 블록체인 노드의 *내부 메모리*에는 다른 형식으로 표현될 수 있습니다.
 
-통화의 형식은 다음과 같습니다.
-- `_currency_`
-- `"_currency_"` as a JSON string
+이 문서에서는 통화와 관련된 형식을 다음과 같이 사용합니다.
+- `_currency_(통화)`
+- `"_currency_"` as a JSON string(JSON 문자열로 사용시)
 
 ### Draft ID
 Draft ID는 32비트 부호 없는 정수입니다. Draft ID는 JSON(e.g. 프로토콜 메시지)에서 사용될 때 숫자 앞에 0이 없는 큰따옴표로 묶인 십진수로 표시됩니다. 그러나 다른 식별자를 합성하는 데 사용되는 경우 숫자 앞에 0을 포함하는 4바이트 빅엔디안 정수로 표시됩니다.
 
-Draft ID의 형식은 다음과 같습니다.
-- `_draft_id_` = alias of `_decimal_number_`
-- `_draft_id_` as a JSON number, e.g. `1234` not `"1234"`
+이 문서에서는 Draft ID와 관련된 형식을 다음과 같이 사용합니다.
+- `_draft_id_` = alias of `_decimal_number_`(10진수)
+- `_draft_id_` as a JSON number, e.g. `1234` not `"1234"`("1234"가 아닌 1234)
 
 ### Storage ID
 storage ID는 32비트 부호 없는 정수입니다. Draft ID는 JSON(e.g. 프로토콜 메시지)에서 사용될 때 숫자 앞에 0이 없는 큰따옴표로 묶인 십진수로 표시됩니다. 그러나 다른 식별자를 합성하는 데 사용되는 경우 4바이트 빅엔디안 정수로 표시됩니다.
 
-Storage ID의 형식은 다음과 같습니다.
-- `_storage_id_` = alias of `_decimal_number_`
-- `_storage_id_` as a JSON number, e.g. `1234` not `"1234"`
+이 문서에서는 Storage ID와 관련된 형식을 다음과 같이 사용합니다.
+- `_storage_id_` = alias of `_decimal_number_`(10진수)
+- `_storage_id_` as a JSON number, e.g. `1234` not `"1234"`("1234"가 아닌 1234)
 
 ### Parcel ID
-A parcel ID is a concatenation of a storage ID and in-storage ID. In-storage ID
-is a 32-byte(256-bit) binary sequence. See [AMO Storage
-Specification](storage.md) for more detail. Be aware that a storage ID itself
-is a 32-bit unsigned integer. But when forming a parcel ID, this storage ID is
-converted as a four-byte binary sequence (big-endian integer). For example,
-suppose a parcel in a storage with the id of `123456789` has the in-storage id
-of `12ABEF23...`. This parcel has a parcel id `075BCD1512ABEF23...` in a HEX
-encoding, where `075BCD15` is a HEX encoding of the integer `123456789` using
-big-endian byte order.
+Parcel ID는 storage ID와 in-storage ID를 연결한 것입니다. In-storage ID는 32 바이트(256 비트) 바이너리 시퀀스입니다. 자세한 내용은 [AMO Storage Specification](storage.md)를 참고하시기 바랍니다. 저장소 ID 자체는 32비트 부호 없는 정수입니다. 그러나 parcel ID를 구성할 때 storage ID는 4바이트 바이너리 시퀀스(빅엔디안 정수)로 변환되어 parcel ID에 포함되어야 합니다. 예를 들어, storage ID가 `123456789`이고, in-storage ID가 `12ABEF23...`이라고 가정 했을 때 이 Parcel은 16진수로 인코딩 될 경우 `075BCD1512ABEF23...`을 갖습니다. 여기서 `075BCD15`는 정수인 storage ID `123456789`의 16진수 인코딩(빅엔디안 바이트 순서를 사용)입니다.
 
-The following types are used in this document.
-- `_parcel_id_`
-- `_HEX_encoded_parcel_id_` = HEX encoding of `_parcel_id_`
-- `"_HEX_encoded_parcel_id_"` as a JSON string
+이 문서에서는 Parcel ID와 관련된 형식을 다음과 같이 사용합니다.
+- `_parcel_id_`(parcel ID)
+- `_HEX_encoded_parcel_id_` = HEX encoding of `_parcel_id_`(16진수로 인코딩된 parcel ID)
+- `"_HEX_encoded_parcel_id_"` as a JSON string(JSON 문자열로 사용 시)
 
 ### Extra info
 `register`, `request` and `grant` tx may carry extra information. It must be a
