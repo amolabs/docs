@@ -84,12 +84,7 @@ Parcel ID는 storage ID와 in-storage ID를 연결한 것입니다. In-storage I
 - `"_HEX_encoded_parcel_id_"` as a JSON string(JSON 문자열로 사용 시)
 
 ### Extra info
-`register`, `request` and `grant` tx may carry extra information. It must be a
-JSON object, but its internal structure is application-specific. Internal DB of
-a blockchain node must store extra information from the previous steps also,
-i.e. `parcel` stores extra from register tx, `request` stores extra from
-register tx and request tx, `usage` stores extra from register tx, request tx
-and grant tx.
+`register`, `request`, `grant` tx는 추가 정보를 전달할 수 있습니다. 이러한 추가 정보는 JSON 객체여야하지만 JSON 객체의 내부 구조는 애플리케이션에 따라 다릅니다. 블록체인 노드의 내부 DB는 이전 단계의 추가 정보도 저장해야합니다. 즉,  `parcel`은 register tx에 추가 저장하고, `request`는 register tx와 request tx 추가 정보를 저장, `usage`는 register tx, request tx 및 grant tx 추가 정보를 저장합니다.
 
 extra in `parcel` store
 ```json
@@ -112,10 +107,7 @@ extra in `usage` store
   "grant": {} // application-specific JSON object, optional
 }
 ```
-Since a JSON object must be enclosed by braces(`{` and `}`), it cannot be a
-single JSON value. Each extra info must be an empty object(`{}`) or a proper
-JSON object with members.
-
+JSON 객체는 중괄호({ 및 })로 묶어야 하므로 단일 JSON 값이 될 수 없습니다. 각 추가 정보는 빈 객체({})이거나 프로퍼티가 있는 적절한 JSON 객체여야 합니다.
 ```json
 {
   "register": "boo", // wrong
@@ -123,8 +115,7 @@ JSON object with members.
   "grant": {} // ok
 }
 ```
-Each member is marked as *optional*, so an empty object(`{}`) is valid extra
-information for all of three state stores.
+각 프로퍼티는 선택 사항으로 표시되므로 빈 객체({})는 세 가지 상태 저장소 모두에 유효한 추가 정보입니다.
 
 ### UDC(User-Defined Coin) ID
 
