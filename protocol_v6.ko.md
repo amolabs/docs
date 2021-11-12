@@ -119,30 +119,19 @@ JSON 객체는 중괄호({ 및 })로 묶어야 하므로 단일 JSON 값이 될 
 
 ### UDC(User-Defined Coin) ID
 
-A UDC ID is a 32-bit unsigned integer. It is represented as a double-quoted
-decimal number without redundant leading zeroes when used in JSON, e.g. in
-protocol messages. However, it is represented as a 4-byte big-endian integer
-when it is used to composite another identifier.
+UDC ID는 32비트 부호 없는 정수이며 JSON에서 사용될 때 숫자 앞에 0이 없는 10진수로써 큰따옴표로 표시됩니다(예: 프로토콜 메시지). 그러나 다른 식별자를 합성 하는데 사용되는 경우에는 4바이트 빅엔디안 정수로 표현한다.
 
-The following types are used in this document.
+이 문서에서는 UDC ID와 관련된 형식을 다음과 같이 사용합니다.
 - `_udc_id_` = alias of `_decimal_number_`
 - `_udc_id_` as a JSON number, e.g. `1234` not `"1234"`
 
 ### DID (Decentralized Identifier)
 
-When used in AMO mainnet, a DID is a concatenation of the string `"did:amo:"`
-and an account address represented as an uppercase hexadecimal string. When
-used in networks other than AMO mainnet, the prefix would be something like
-`"did:" + method_name + ":"`, where `method_name` is other than `"amo"`.
+AMO 메인넷에서 사용할 때 DID는 "did:amo:" 문자열과 계정 주소를 대문자 16진수 문자열로 연결한 것입니다. AMO 메인넷이 아닌 다른 네트워크에서 사용되는 경우 접두사는 `"did:" + 메서드 이름 +  ":"`과 같으며 여기서 `메서드 이름`은 "amo"가 아닙니다.
 
 ### DID Document
 
-`did.claim` tx and `did.dismiss` tx operate on a DID document, which is used in
-[AMO DID Method](amo-did.md). A DID document is a JSON document with an
-additional top-level `@context` property, which is called a JSON-LD
-representation. While an AMO blockchain node does not care about the value of
-`@context` property, this property must exist and its value must be of a
-*string* type.
+`did.claim` tx와 `did.dismiss` tx는 [AMO DID Method](amo-did.md)에서 사용하는 DID document에서 동작합니다. DID document는 JSON-LD 표현이라고 하는 추가적으로 최상위 `@context` 프로퍼티가 있는 JSON document입니다. AMO 블록체인 노드는 `@context` 프로퍼티 값을 신경 쓰지 않지만 이 프로퍼티는 반드시 존재해야 하며 그 값은 *문자열* 타입이어야 합니다.
 
 ### VC (Verifiable Credential) ID
 
