@@ -135,19 +135,11 @@ AMO 메인넷에서 사용할 때 DID는 "did:amo:" 문자열과 계정 주소�
 
 ### VC (Verifiable Credential) ID
 
-When used in AMO mainnet, a VC ID is a concatenation of the string
-`"amo:cred:"` and an uppercase hexadecimal string of maximum length of 64
-characters, i.e. a representation of a byte string of length 32 or less. When
-used in networks other than AMO mainnet, the prefix would be something like
-`network_name + ":cred:"`, where `network_name` is other than `"amo"`.
+AMO 메인넷에서 사용될 때 VC ID는 문자열 `"amo:cred:"`와 최대 길이가 64자인 대문자 16진수 문자열을 연결한 것입니다. 즉, 길이가 32 이하인 바이트 문자열의 표현입니다. AMO 메인넷이 아닌 다른 네트워크에서 사용되는 경우 접두사는 `network_name + ":cred:"`와 같으며 여기서 `network_name`은 `"amo"`가 아닙니다.
 
 ### Verifiable Credential
 
-`did.issue` tx and `did.revoke` tx operate on a VC (Verifiable Credential), which is used in [AMO Verifiable Credential Registry](amo-vc.md). A
-VC is a JSON document with an additional top-level
-`@context` property, which is called a JSON-LD representation. While an AMO
-blockchain node does not care about the value of `@context` property, this
-property must exist and its value must be of a string type.
+`did.issue` tx 및 `did.revoke` tx는 AMO Verifiable Credential Registry에서 사용되는 VC(Verifiable Credential)에서 동작합니다[AMO Verifiable Credential Registry](amo-vc.md). VC는 JSON-LD 표현이라고 하는 추가 최상위 `@context` 속성이 있는 JSON  document입니다. AMO 블록체인 노드는 `@context` 속성 값을 신경 쓰지 않지만 이 속성은 반드시 존재해야 하며 그 값은 문자열 타입이어야 합니다.
 
 ## Message Format
 ### Transaction
