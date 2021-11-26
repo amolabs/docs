@@ -72,14 +72,14 @@ curl 172.104.88.12:26657/genesis | jq '.result.genesis' > genesis.json
 #### `amolabs/amod` 이미지 가져오기
 `amod` 이미지를 가져온다:
 ```bash
-sudo docker pull amolabs/amod:1.8.3
+sudo docker pull amolabs/amod:1.8.4
 ```
 
 #### 설정 스크립트 실행
 현재 서버의 외부 ip 주소(`<ext_ip_addr>`)와 seed 노드의 `p2p_addr`를 파악한다.
 `moniker`(실행할 노드의 이름)을 결정한다. 다음을 실행한다: 
 ```bash
-sudo ./setup.sh -d 1.8.3 -e <ext_ip_addr> <data_root> <moniker> <p2p_addr>
+sudo ./setup.sh -d 1.8.4 -e <ext_ip_addr> <data_root> <moniker> <p2p_addr>
 ```
 
 | `chain` | `p2p_addr` |
@@ -124,7 +124,7 @@ sudo mv data/ /mynode/amo/
 #### 컨테이너 실행
 노드를 생성하고 실행한다:
 ```bash
-./run.sh -d 1.8.3 -p -s /mynode
+./run.sh -d 1.8.4 -p -s /mynode
 ```
 
 Docker 컨테이너의 상태를 확인한다:
