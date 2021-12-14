@@ -69,7 +69,7 @@ Draft ID는 32비트 부호 없는 정수입니다. Draft ID는 JSON(e.g. 프로
 - `_draft_id_` as a JSON number, e.g. `1234` not `"1234"`("1234"가 아닌 1234)
 
 ### Storage ID
-storage ID는 32비트 부호 없는 정수입니다. Draft ID는 JSON(e.g. 프로토콜 메시지)에서 사용될 때 숫자 앞에 0이 없는 큰따옴표로 묶인 십진수로 표시됩니다. 그러나 다른 식별자를 합성하는 데 사용되는 경우 4바이트 빅엔디안 정수로 표시됩니다.
+storage ID는 32비트 부호 없는 정수입니다. Storage ID는 JSON(e.g. 프로토콜 메시지)에서 사용될 때 숫자 앞에 0이 없는 큰따옴표로 묶인 십진수로 표시됩니다. 그러나 다른 식별자를 합성하는 데 사용되는 경우 4바이트 빅엔디안 정수로 표시됩니다.
 
 이 문서에서는 Storage ID와 관련된 형식을 다음과 같이 사용합니다.
 - `_storage_id_` = alias of `_decimal_number_`(10진수)
