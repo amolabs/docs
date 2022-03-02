@@ -64,7 +64,7 @@ curl <rpc_addr>/genesis | jq '.result.genesis' > genesis.json
 명령을 실행한다:
 ```bash
 cd testnet
-curl 172.104.88.12:26657/genesis | jq '.result.genesis' > genesis.json
+curl 20.194.0.193:26657/genesis | jq '.result.genesis' > genesis.json
 ```
 
 ## Docker를 이용하여 실행
